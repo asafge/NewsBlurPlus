@@ -14,7 +14,7 @@
 		
 	<application android:label="@string/app_name" android:icon="@drawable/icon" android:allowBackup="true" android:debuggable="true">
 
-		<service android:name=".CnnExtension"
+		<service android:name=".NewsBlurPlus"
 		    android:label="@string/extention_name"
             android:permission="com.noinnion.android.reader.permission.READ_EXTENSION_DATA"
             android:exported="true">
