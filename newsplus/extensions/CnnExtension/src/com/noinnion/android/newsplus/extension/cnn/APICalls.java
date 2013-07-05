@@ -43,7 +43,7 @@ public class APICalls {
 	
 	public static String API_URL_BASE = "http://www.newsblur.com/";
 	public static String API_URL_LOGIN = API_URL_BASE + "api/login";
-	public static String API_URL_FOLDERS_AND_FEEDS = API_URL_BASE + "feeds?flat=true";
+	public static String API_URL_FOLDERS_AND_FEEDS = API_URL_BASE + "reader/feeds?flat=true";
 	public static String API_URL_FEED_SINGLE = API_URL_BASE + "reader/feed/";
 	public static String API_URL_MARK_STORY_AS_READ = API_URL_BASE + "reader/mark_story_as_read?";
 	public static String API_URL_MARK_STORY_AS_UNREAD = API_URL_BASE + "reader/mark_story_as_unread?";
