@@ -104,6 +104,8 @@ public class NewsBlurPlus extends ReaderExtension {
 				else if (tag.uid.startsWith("CAT")) tag.type = ITag.TYPE_FOLDER;
 				tags.add(tag);
 			}
+			if (tags.size() > 0)
+				tagHandler.tags(tags);
 			for (String[] feed : FEEDS) {
 				ISubscription sub = new ISubscription();
 				sub.uid = feed[0];
@@ -113,8 +115,8 @@ public class NewsBlurPlus extends ReaderExtension {
 					sub.addCategory(feed[3]);
 				feeds.add(sub);
 			}
-			tagHandler.tags(tags);
-			subHandler.subscriptions(feeds);
+			if (feeds.size() > 0)
+				subHandler.subscriptions(feeds);
 		}
 		catch (RemoteException e) {
 			throw new ReaderException("remote connection error", e);			
@@ -183,14 +185,18 @@ public class NewsBlurPlus extends ReaderExtension {
 							item.author = story.getString("story_authors");
 							item.publishedTime = story.getLong("story_timestamp");
 							item.read = (story.getInt("read_status") == 1);
-							if (story.getString("starred") == "true") {
-								item.starred = true;
-								item.addCategory("Starred items");
+							try {
+								if (story.getString("starred") == "true") {
+									item.starred = true;
+									item.addCategory("Starred items");
+								}
+							} catch (JSONException e) {
+								item.starred = false;
 							}
 							item.addCategory(cat);
 							items.add(item);
 							
-							// For TransactionTooLargeException handling, base on Noin's recommendation
+							// For TransactionTooLargeException handling, based on Noin's recommendation
 							length += item.getLength();
 							if (items.size() % 200 == 0 || length > 300000) {
 								handler.items(items);
