@@ -93,10 +93,9 @@ public class LoginActivity extends Activity implements OnClickListener {
 	public void onClick(View v) {
 		switch (v.getId()) {
 			case R.id.ok_button:
-				//EditText user = (EditText)findViewById(R.id.username_text);
-				//EditText pass = (EditText)findViewById(R.id.password_text);
-				//login(user.getText().toString(), pass.getText().toString());
-				login("asafge", "lCD%Ftk73Nda");
+				EditText user = (EditText)findViewById(R.id.username_text);
+				EditText pass = (EditText)findViewById(R.id.password_text);
+				login(user.getText().toString(), pass.getText().toString());
 				break;
 		}
 	}
