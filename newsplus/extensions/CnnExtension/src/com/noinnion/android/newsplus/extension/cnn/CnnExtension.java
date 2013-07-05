@@ -220,33 +220,32 @@ public class CnnExtension extends ReaderExtension {
 	@Override
 	public boolean markAsRead(String[]  itemUids, String[]  subUIds) throws IOException, ReaderException {
 		final AQuery aq = new AQuery(this);
+		final Context c = getApplicationContext();
+
 		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
 			@Override
 			public void callback(String url, JSONObject json, AjaxStatus status) {
 				if (APICalls.isJSONResponseValid(json, status)) {
 					try {
-						result = json.getJSONObject("result");
+						if (json.getString("result") != "ok")
+							throw new ReaderException("Failed marking as read"); 
 					}
-					catch (JSONException e) {
+					catch (Exception e) {
 						AQUtility.report(e);
 					}
 				}
 			}
 		};
-		final Context c = getApplicationContext();
-		try {
-			APICalls.wrapCallback(c, cb);
+		APICalls.wrapCallback(c, cb);
+		for (int i=0; i<itemUids.length; i++) {
 			String url = APICalls.API_URL_MARK_STORY_AS_READ;
-			for (String item : itemUids)
-				url += ("story_id=" + item + "&");
-			url += "feed_id=" + APICalls.getFeedIdFromFeedUrl(subUIds[0]);
+			url += "story_id=" + itemUids[i] + "&feed_id=" + APICalls.getFeedIdFromFeedUrl(subUIds[i]);
 			aq.ajax(url, JSONObject.class, cb);
 			cb.block();
-			return (cb.getResult().getString("result") == "ok");
 		}
-		catch (JSONException e) {
-			return false;
-		}
+		// TODO: Return some real feedback
+		cb.getStatus().getCode();
+		return true;
 	}
 	 
 	@Override
