@@ -1,4 +1,4 @@
-package com.noinnion.android.newsplus.extension.cnn;
+package com.noinnion.android.newsplus.extension.newsblurplus;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +19,7 @@ import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.AQUtility;
+import com.noinnion.android.newsplus.extension.newsblurplus.R;
 import com.noinnion.android.reader.api.ReaderExtension;
 
 public class LoginActivity extends Activity implements OnClickListener {

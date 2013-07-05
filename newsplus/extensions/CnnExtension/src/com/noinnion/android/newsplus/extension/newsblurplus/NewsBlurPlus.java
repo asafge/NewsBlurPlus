@@ -1,4 +1,4 @@
-package com.noinnion.android.newsplus.extension.cnn;
+package com.noinnion.android.newsplus.extension.newsblurplus;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,7 +34,7 @@ import com.noinnion.android.reader.api.provider.IItem;
 import com.noinnion.android.reader.api.provider.ISubscription;
 import com.noinnion.android.reader.api.provider.ITag;
 
-public class CnnExtension extends ReaderExtension {
+public class NewsBlurPlus extends ReaderExtension {
 	// Globally used context and AQuery objects
 	final private Context c = getApplicationContext();
 	final AQuery aq = new AQuery(this);
