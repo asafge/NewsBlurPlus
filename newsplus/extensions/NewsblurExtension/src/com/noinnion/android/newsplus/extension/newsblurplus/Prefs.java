@@ -1,4 +1,4 @@
-package com.noinnion.android.newsplus.extension.cnn;
+package com.noinnion.android.newsplus.extension.newsblurplus;
 
 import android.content.Context;
 
