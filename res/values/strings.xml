@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+    
+    <string name="app_name">News+ Newsblur</string>
+    
+    
+    
+    <!-- Extension -->
+    <string name="extention_name">Newsblur</string>
+    <string name="extension_description">This is an extension for Newsblur</string>
+    <string name="extension_settings_title">Settings</string>
+    <string name="extension_login_title">Login</string>
+    
+    <string name="msg_login_running">Login…</string>
+    <string name="msg_login_fail">Login failure</string>
+    
+	<string name="login_welcome">Please login to Newsblur to continue.</string>
+    
+    <!-- err -->
+    <string name="err_io">Network error</string>
+    
+</resources>
+    
