@@ -171,6 +171,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				List<IItem> items = new ArrayList<IItem>();
 				try {
 					if (APICalls.isJSONResponseValid(json, status)) {
+						int length = 0;
 						JSONArray arr = json.getJSONArray("stories");
 						for (int i=0; i<arr.length(); i++) {
 							JSONObject story = arr.getJSONObject(i);
@@ -182,14 +183,25 @@ public class NewsBlurPlus extends ReaderExtension {
 							item.author = story.getString("story_authors");
 							item.publishedTime = story.getLong("story_timestamp");
 							item.read = (story.getInt("read_status") == 1);
+							if (story.getString("starred") == "true") {
+								item.starred = true;
+								item.addCategory("Starred items");
+							}
 							item.addCategory(cat);
 							items.add(item);
+							
+							// For TransactionTooLargeException handling, base on Noin's recommendation
+							length += item.getLength();
+							if (items.size() % 200 == 0 || length > 300000) {
+								handler.items(items);
+								items.clear();
+								length = 0;
+							}
 						}
 						handler.items(items);
 					}
 				}
 				catch (TransactionTooLargeException e) {
-					// TODO: Prevent this from happening
 					AQUtility.report(e);
 				}
 				catch (Exception e) {
