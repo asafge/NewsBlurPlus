@@ -227,7 +227,7 @@ public class CnnExtension extends ReaderExtension {
 			public void callback(String url, JSONObject json, AjaxStatus status) {
 				if (APICalls.isJSONResponseValid(json, status)) {
 					try {
-						if (json.getString("result") != "ok")
+						if (!json.getString("result").startsWith("ok"))
 							throw new ReaderException("Failed marking as read"); 
 					}
 					catch (Exception e) {
