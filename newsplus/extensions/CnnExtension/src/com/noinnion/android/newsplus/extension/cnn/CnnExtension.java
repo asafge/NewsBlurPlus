@@ -1,4 +1,4 @@
-package com.noinnion.android.newsplus.extension.newsblurplus;
+package com.noinnion.android.newsplus.extension.cnn;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,15 +34,13 @@ import com.noinnion.android.reader.api.provider.IItem;
 import com.noinnion.android.reader.api.provider.ISubscription;
 import com.noinnion.android.reader.api.provider.ITag;
 
-public class NewsBlurPlus extends ReaderExtension {
-	// Globally used context and AQuery objects
-	final private Context c = getApplicationContext();
-	final AQuery aq = new AQuery(this);
+public class CnnExtension extends ReaderExtension {
+	// TODO: Use one AQuery and context for the entire class?
 	
-	// Categories structure - {"CAT:Politics", "Politics"}
+	// {"CAT:Politics", "Politics"}
 	public ArrayList<String[]> CATEGORIES = new ArrayList<String[]>();
 		
-	// Feeds structure -{"FEED:http://www.newsblur.com/reader/feed/1818:id", "Coding horror", "http://www.codinghorror.com/blog/", "Politics"}
+	// {"FEED:http://www.newsblur.com/reader/feed/1818:id", "Coding horror", "http://www.codinghorror.com/blog/", "Politics"}
 	public ArrayList<String[]> FEEDS = new ArrayList<String[]>();
 	
 	/*
@@ -52,6 +50,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	 * Result: folders/0/Math/[ID] (ID = 1818)
 	 */
 	private void getCategoriesAndFeeds() {
+		final AQuery aq = new AQuery(this);
 		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
 			@Override
 			public void callback(String url, JSONObject json, AjaxStatus status) {
@@ -89,6 +88,7 @@ public class NewsBlurPlus extends ReaderExtension {
 					}
 			}
 		};
+		final Context c = getApplicationContext();
 		APICalls.wrapCallback(c, cb);
 		aq.ajax(APICalls.API_URL_FOLDERS_AND_FEEDS, JSONObject.class, cb);
 		cb.block();
@@ -99,9 +99,11 @@ public class NewsBlurPlus extends ReaderExtension {
 	 */
 	@Override
 	public void handleReaderList(ITagListHandler tagHandler, ISubscriptionListHandler subHandler, long syncTime) throws IOException, ReaderException {
+		List<ITag> tags = new ArrayList<ITag>();
+		List<ISubscription> feeds = new ArrayList<ISubscription>();
+		
 		try {
 			getCategoriesAndFeeds();
-			List<ITag> tags = new ArrayList<ITag>();
 			for (String[] cat : CATEGORIES) {
 				ITag tag = new ITag();
 				tag.uid = cat[0];
@@ -110,7 +112,6 @@ public class NewsBlurPlus extends ReaderExtension {
 				else if (tag.uid.startsWith("CAT")) tag.type = ITag.TYPE_FOLDER;
 				tags.add(tag);
 			}
-			List<ISubscription> feeds = new ArrayList<ISubscription>();
 			for (String[] feed : FEEDS) {
 				ISubscription sub = new ISubscription();
 				sub.uid = feed[0];
@@ -172,6 +173,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	 *   feeds/[ID]/feed_link (http://www.codinghorror.com/blog/ - site's link)
 	 */
 	public void parseItemList(String url, final IItemListHandler handler, final String cat) throws IOException, ReaderException {
+		final AQuery aq = new AQuery(this);
 		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
 			@Override
 			public void callback(String url, JSONObject json, AjaxStatus status) {
@@ -204,6 +206,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				}
 			}
 		};
+		final Context c = getApplicationContext();
 		APICalls.wrapCallback(c, cb);
 		aq.ajax(url, JSONObject.class, cb);
 		cb.block();
@@ -211,13 +214,14 @@ public class NewsBlurPlus extends ReaderExtension {
 	
 	@Override
 	public void handleItemIdList(IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
-		return;
+		// TODO Auto-generated method stub
 	}
 	
-	/*
-	 * Main function for marking stories (and their feeds) as read.
-	 */
 	private boolean markAs(boolean read, String[]  itemUids, String[]  subUIds) throws IOException, ReaderException	{
+		final AQuery aq = new AQuery(this);
+		final Context c = getApplicationContext();
+		String baseURL = read ? APICalls.API_URL_MARK_STORY_AS_READ : APICalls.API_URL_MARK_STORY_AS_UNREAD;
+
 		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
 			@Override
 			public void callback(String url, JSONObject json, AjaxStatus status) {
@@ -233,7 +237,6 @@ public class NewsBlurPlus extends ReaderExtension {
 			}
 		};
 		APICalls.wrapCallback(c, cb);
-		String baseURL = read ? APICalls.API_URL_MARK_STORY_AS_READ : APICalls.API_URL_MARK_STORY_AS_UNREAD;
 		for (int i=0; i<itemUids.length; i++) {
 			String url = baseURL;
 			String feedIDStripped = itemUids[i].replaceFirst("#.*", "");
@@ -262,11 +265,11 @@ public class NewsBlurPlus extends ReaderExtension {
 		return this.markAs(false, itemUids, subUids);
 	}
 
-	/*
-	 * Mark all stories as read
-	 */
 	@Override
 	public boolean markAllAsRead(String s, String t, long syncTime) throws IOException, ReaderException {
+		final AQuery aq = new AQuery(this);
+		final Context c = getApplicationContext();
+
 		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
 			@Override
 			public void callback(String url, JSONObject json, AjaxStatus status) {

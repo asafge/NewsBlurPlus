@@ -1,4 +1,4 @@
-package com.noinnion.android.newsplus.extension.newsblurplus;
+package com.noinnion.android.newsplus.extension.cnn;
 
 import org.json.JSONException;
 import org.json.JSONObject;
