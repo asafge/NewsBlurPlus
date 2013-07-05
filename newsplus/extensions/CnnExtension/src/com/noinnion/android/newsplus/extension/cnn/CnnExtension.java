@@ -216,11 +216,11 @@ public class CnnExtension extends ReaderExtension {
 	public void handleItemIdList(IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
 		// TODO Auto-generated method stub
 	}
-
-	@Override
-	public boolean markAsRead(String[]  itemUids, String[]  subUIds) throws IOException, ReaderException {
+	
+	private boolean markAs(boolean read, String[]  itemUids, String[]  subUIds) throws IOException, ReaderException	{
 		final AQuery aq = new AQuery(this);
 		final Context c = getApplicationContext();
+		String baseURL = read ? APICalls.API_URL_MARK_STORY_AS_READ : APICalls.API_URL_MARK_STORY_AS_UNREAD;
 
 		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
 			@Override
@@ -238,7 +238,7 @@ public class CnnExtension extends ReaderExtension {
 		};
 		APICalls.wrapCallback(c, cb);
 		for (int i=0; i<itemUids.length; i++) {
-			String url = APICalls.API_URL_MARK_STORY_AS_READ;
+			String url = baseURL;
 			String feedIDStripped = itemUids[i].replaceFirst("#.*", "");
 			url += "story_id=" + feedIDStripped + "&feed_id=" + APICalls.getFeedIdFromFeedUrl(subUIds[i]);
 			aq.ajax(url, JSONObject.class, cb);
@@ -248,10 +248,15 @@ public class CnnExtension extends ReaderExtension {
 		cb.getStatus().getCode();
 		return true;
 	}
+
+	@Override
+	public boolean markAsRead(String[]  itemUids, String[]  subUIds) throws IOException, ReaderException {
+		return this.markAs(true, itemUids, subUIds);
+	}
 	 
 	@Override
 	public boolean markAsUnread(String[]  itemUids, String[]  subUids, boolean keepUnread) throws IOException, ReaderException {
-		return false;
+		return this.markAs(false, itemUids, subUids);
 	}
 
 	@Override
