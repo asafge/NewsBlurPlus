@@ -249,11 +249,17 @@ public class CnnExtension extends ReaderExtension {
 		return true;
 	}
 
+	/* 
+	 * Mark a list of stories (and their feeds) as read
+	 */
 	@Override
 	public boolean markAsRead(String[]  itemUids, String[]  subUIds) throws IOException, ReaderException {
 		return this.markAs(true, itemUids, subUIds);
 	}
-	 
+
+	/* 
+	 * Mark a list of stories (and their feeds) as unread
+	 */
 	@Override
 	public boolean markAsUnread(String[]  itemUids, String[]  subUids, boolean keepUnread) throws IOException, ReaderException {
 		return this.markAs(false, itemUids, subUids);
@@ -261,7 +267,28 @@ public class CnnExtension extends ReaderExtension {
 
 	@Override
 	public boolean markAllAsRead(String s, String t, long syncTime) throws IOException, ReaderException {
-		return false;
+		final AQuery aq = new AQuery(this);
+		final Context c = getApplicationContext();
+
+		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
+			@Override
+			public void callback(String url, JSONObject json, AjaxStatus status) {
+				if (APICalls.isJSONResponseValid(json, status)) {
+					try {
+						if (!json.getString("result").startsWith("ok"))
+							throw new ReaderException("Failed marking all as read"); 
+					}
+					catch (Exception e) {
+						AQUtility.report(e);
+					}
+				}
+			}
+		};
+		APICalls.wrapCallback(c, cb);
+		aq.ajax(APICalls.API_URL_MARK_ALL_AS_READ, JSONObject.class, cb);
+		cb.block();
+		// TODO: Return some real feedback
+		return true;
 	}
 
 	@Override
