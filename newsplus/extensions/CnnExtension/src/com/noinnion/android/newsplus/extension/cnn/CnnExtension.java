@@ -239,7 +239,8 @@ public class CnnExtension extends ReaderExtension {
 		APICalls.wrapCallback(c, cb);
 		for (int i=0; i<itemUids.length; i++) {
 			String url = APICalls.API_URL_MARK_STORY_AS_READ;
-			url += "story_id=" + itemUids[i] + "&feed_id=" + APICalls.getFeedIdFromFeedUrl(subUIds[i]);
+			String feedIDStripped = itemUids[i].replaceFirst("#.*", "");
+			url += "story_id=" + feedIDStripped + "&feed_id=" + APICalls.getFeedIdFromFeedUrl(subUIds[i]);
 			aq.ajax(url, JSONObject.class, cb);
 			cb.block();
 		}
