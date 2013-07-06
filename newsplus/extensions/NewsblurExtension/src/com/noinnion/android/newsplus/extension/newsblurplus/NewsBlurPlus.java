@@ -1,8 +1,8 @@
 package com.noinnion.android.newsplus.extension.newsblurplus;
 
 import java.io.IOException;
-import java.sql.Time;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -15,7 +15,6 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.os.RemoteException;
 import android.text.TextUtils;
-import android.text.method.DateTimeKeyListener;
 
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
@@ -63,7 +62,6 @@ public class NewsBlurPlus extends ReaderExtension {
 						try {
 							JSONObject json_feeds = json.getJSONObject("feeds");
 							JSONObject json_folders = json.getJSONObject("flat_folders");
-								
 							Iterator<?> keys = json_folders.keys();
 							while (keys.hasNext()) {
 								String catName = ((String)keys.next());
@@ -82,7 +80,9 @@ public class NewsBlurPlus extends ReaderExtension {
 									ISubscription sub = new ISubscription();
 									String feedID = feedsPerFolder.getString(i);
 									JSONObject f = json_feeds.getJSONObject(feedID);
-										
+									Calendar updateTime = Calendar.getInstance();
+									updateTime.add(Calendar.SECOND, f.getInt("updated_seconds_ago"));
+									sub.newestItemTime = updateTime.getTimeInMillis();
 									sub.uid = "FEED:" + APICalls.getFeedUrlFromFeedId(feedID);
 									sub.title = f.getString("feed_title");
 									sub.htmlUrl = f.getString("feed_link");
@@ -111,6 +111,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		final Context c = getApplicationContext();
 		APICalls.wrapCallback(c, cb);
 		aq.ajax(APICalls.API_URL_FOLDERS_AND_FEEDS, JSONObject.class, cb);
+		cb.block();
 	}
 	
 	/*
