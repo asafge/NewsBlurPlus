@@ -81,7 +81,7 @@ public class NewsBlurPlus extends ReaderExtension {
 									String feedID = feedsPerFolder.getString(i);
 									JSONObject f = json_feeds.getJSONObject(feedID);
 									Calendar updateTime = Calendar.getInstance();
-									updateTime.add(Calendar.SECOND, f.getInt("updated_seconds_ago"));
+									updateTime.add(Calendar.SECOND, (-1) * f.getInt("updated_seconds_ago"));
 									sub.newestItemTime = updateTime.getTimeInMillis();
 									sub.uid = "FEED:" + APICalls.getFeedUrlFromFeedId(feedID);
 									sub.title = f.getString("feed_title");
