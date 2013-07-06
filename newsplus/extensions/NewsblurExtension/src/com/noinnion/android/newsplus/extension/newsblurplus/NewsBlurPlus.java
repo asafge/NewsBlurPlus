@@ -225,11 +225,11 @@ public class NewsBlurPlus extends ReaderExtension {
 	}	
 	
 	/* 
-	 * TODO: Not sure what this is
+	 * TODO: Get a list of IDs for unread stories (Should speed up sync process). 
 	 */
 	@Override
 	public void handleItemIdList(IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
-		// TODO Auto-generated method stub
+		return;
 	}
 	
 	/*
