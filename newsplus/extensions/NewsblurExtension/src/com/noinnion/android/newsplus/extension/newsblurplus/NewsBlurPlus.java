@@ -12,6 +12,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.TransactionTooLargeException;
 import android.text.TextUtils;
@@ -37,6 +38,8 @@ public class NewsBlurPlus extends ReaderExtension {
 		
 	// {"FEED:http://www.newsblur.com/reader/feed/1818:id", "Coding horror", "http://www.codinghorror.com/blog/", "Politics"}
 	public ArrayList<String[]> FEEDS = new ArrayList<String[]>();
+
+	private ITag starredTag;
 	
 	/*
 	 * Get the categories (folders) and their feeds
@@ -90,6 +93,18 @@ public class NewsBlurPlus extends ReaderExtension {
 	}
 	
 	/*
+	 * Initialize the constant starred items tag.
+	 */
+	private void initStarredTag() {
+		if (this.starredTag == null) {
+			starredTag = new ITag();
+			starredTag .uid = "CAT:Starred items";
+			starredTag .label = "Starred items";
+			starredTag.type = ITag.TYPE_TAG_STARRED;
+		}
+	}
+	
+	/*
 	 * Sync feeds/folders + handle the entire read list
 	 */
 	@Override
@@ -97,6 +112,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		List<ITag> tags = new ArrayList<ITag>();
 		List<ISubscription> feeds = new ArrayList<ISubscription>();
 		try {
+			initStarredTag();
 			getCategoriesAndFeeds();
 			for (String[] cat : CATEGORIES) {
 				ITag tag = new ITag();
@@ -106,8 +122,10 @@ public class NewsBlurPlus extends ReaderExtension {
 				else if (tag.uid.startsWith("CAT")) tag.type = ITag.TYPE_FOLDER;
 				tags.add(tag);
 			}
-			if (tags.size() > 0)
+			if (tags.size() > 0) {
+				tags.add(starredTag);
 				tagHandler.tags(tags);
+			}
 			for (String[] feed : FEEDS) {
 				ISubscription sub = new ISubscription();
 				sub.uid = feed[0];
@@ -190,7 +208,7 @@ public class NewsBlurPlus extends ReaderExtension {
 							try {
 								if (story.getString("starred") == "true") {
 									item.starred = true;
-									item.addCategory("Starred items");
+									item.addCategory(starredTag.label);
 								}
 							} catch (JSONException e) {
 								item.starred = false;
