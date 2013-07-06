@@ -35,12 +35,8 @@ public class NewsBlurPlus extends ReaderExtension {
 	public void onCreate() {
 		super.onCreate();	
 		tags = new ArrayList<ITag>();
-		feeds = new ArrayList<ISubscription>();	
-		// Create the special starred tag
-		starredTag = new ITag();
-		starredTag.uid = "STAR:Starred items";
-		starredTag.label = "Starred items";
-		starredTag.type = ITag.TYPE_TAG_STARRED;
+		feeds = new ArrayList<ISubscription>();
+		starredTag = APICalls.createTag("Starred items", true);		
 	}
 	
 	private List<ITag> tags;
@@ -54,7 +50,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	 * Result: folders/0/Math/[ID] (ID = 1818)
 	 */
 	@Override
-	public void handleReaderList(final ITagListHandler tagHandler, final ISubscriptionListHandler subHandler, long syncTime) throws IOException, ReaderException {
+	public void handleReaderList(ITagListHandler tagHandler, ISubscriptionListHandler subHandler, long syncTime) throws IOException, ReaderException {
 		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
 			@Override
 			public void callback(String url, JSONObject json, AjaxStatus status) {
@@ -67,14 +63,9 @@ public class NewsBlurPlus extends ReaderExtension {
 								String catName = ((String)keys.next());
 								JSONArray feedsPerFolder = json_folders.getJSONArray(catName);
 								catName = catName.trim();
-								if (!TextUtils.isEmpty(catName)) {
-									// Create the category
-									ITag tag = new ITag();
-									tag.label = catName;
-									tag.uid = catName = ("FOL:" + catName);
-									tag.type = ITag.TYPE_FOLDER;
-									tags.add(tag);
-								}
+								if (!TextUtils.isEmpty(catName))
+									tags.add(APICalls.createTag(catName, false));
+								
 								// Add all feeds in this category
 								for (int i=0; i<feedsPerFolder.length(); i++) {
 									ISubscription sub = new ISubscription();
@@ -92,18 +83,10 @@ public class NewsBlurPlus extends ReaderExtension {
 									feeds.add(sub);
 								}
 							}
-							if (feeds.size() > 0) {
-								tags.add(starredTag);
-								tagHandler.tags(tags);
-								subHandler.subscriptions(feeds);
-							}
 						}
 						catch (JSONException e) {
 							AQUtility.report(e);
 						}
-						catch (RemoteException e) {
-							AQUtility.report(e);			
-						}	
 					}
 				}
 			};
@@ -112,6 +95,16 @@ public class NewsBlurPlus extends ReaderExtension {
 		APICalls.wrapCallback(c, cb);
 		aq.ajax(APICalls.API_URL_FOLDERS_AND_FEEDS, JSONObject.class, cb);
 		cb.block();
+		try {
+			if (feeds.size() > 0) {
+				tags.add(starredTag);
+				tagHandler.tags(tags);
+				subHandler.subscriptions(feeds);
+			}
+		}
+		catch (RemoteException e) {
+			AQUtility.report(e);			
+		}
 	}
 	
 	/*

@@ -4,9 +4,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
+import com.noinnion.android.reader.api.provider.ITag;
 
 public class APICalls {
 	
@@ -38,6 +40,15 @@ public class APICalls {
 		String feedID = feedURL.replace("FEED:", "");
 		feedID = feedID.replace(API_URL_FEED_SINGLE, "");
 		return feedID;
+	}
+	
+	public static ITag createTag(String name, Boolean isStar) {
+		ITag tag = new ITag();
+		tag.label = name;
+		String prefix = isStar ? "STAR" : "FOL";
+		tag.uid = name = (prefix + ":" + name);
+		tag.type = isStar ? ITag.TYPE_TAG_STARRED : ITag.TYPE_FOLDER;
+		return tag;
 	}
 	
 	public static String API_URL_BASE = "http://www.newsblur.com/";
