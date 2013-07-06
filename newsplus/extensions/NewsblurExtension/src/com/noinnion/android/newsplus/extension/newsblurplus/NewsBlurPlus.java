@@ -1,6 +1,7 @@
 package com.noinnion.android.newsplus.extension.newsblurplus;
 
 import java.io.IOException;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -14,6 +15,7 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.os.RemoteException;
 import android.text.TextUtils;
+import android.text.method.DateTimeKeyListener;
 
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
@@ -178,6 +180,7 @@ public class NewsBlurPlus extends ReaderExtension {
 							item.link = story.getString("story_permalink");
 							item.uid = story.getString("id");
 							item.author = story.getString("story_authors");
+							item.updatedTime = story.getLong("story_timestamp");
 							item.publishedTime = story.getLong("story_timestamp");
 							item.read = (story.getInt("read_status") == 1);
 							if (story.has("starred") && story.getString("starred") == "true") {
