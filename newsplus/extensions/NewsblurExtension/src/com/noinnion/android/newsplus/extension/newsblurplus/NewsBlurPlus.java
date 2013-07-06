@@ -50,12 +50,13 @@ public class NewsBlurPlus extends ReaderExtension {
 	private ITag starredTag;
 	
 	/*
-	 * Get the categories (folders) and their feeds
+	 * Get the categories (folders) and their feeds + handle reader list
 	 * 
 	 * API call: http://www.newsblur.com/reader/feeds
 	 * Result: folders/0/Math/[ID] (ID = 1818)
 	 */
-	private void getCategoriesAndFeeds() {
+	@Override
+	public void handleReaderList(ITagListHandler tagHandler, ISubscriptionListHandler subHandler, long syncTime) throws IOException, ReaderException {
 		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
 			@Override
 			public void callback(String url, JSONObject json, AjaxStatus status) {
@@ -63,7 +64,7 @@ public class NewsBlurPlus extends ReaderExtension {
 						try {
 							JSONObject json_feeds = json.getJSONObject("feeds");
 							JSONObject json_folders = json.getJSONObject("flat_folders");
-							
+								
 							Iterator<?> keys = json_folders.keys();
 							while (keys.hasNext()) {
 								String catName = ((String)keys.next());
@@ -82,7 +83,7 @@ public class NewsBlurPlus extends ReaderExtension {
 									ISubscription sub = new ISubscription();
 									String feedID = feedsPerFolder.getString(i);
 									JSONObject f = json_feeds.getJSONObject(feedID);
-									
+										
 									sub.uid = "FEED:" + APICalls.getFeedUrlFromFeedId(feedID);
 									sub.title = f.getString("feed_title");
 									sub.htmlUrl = f.getString("feed_link");
@@ -96,33 +97,25 @@ public class NewsBlurPlus extends ReaderExtension {
 							AQUtility.report(e);
 						}
 					}
+				}
+			};
+			try {
+				final AQuery aq = new AQuery(this);
+				final Context c = getApplicationContext();
+				APICalls.wrapCallback(c, cb);
+				aq.ajax(APICalls.API_URL_FOLDERS_AND_FEEDS, JSONObject.class, cb);
+				cb.block();
+				
+				if (feeds.size() > 0) {
+					tags.add(starredTag);
+					tagHandler.tags(tags);
+					subHandler.subscriptions(feeds);
+				}
 			}
-		};
-		final AQuery aq = new AQuery(this);
-		final Context c = getApplicationContext();
-		APICalls.wrapCallback(c, cb);
-		aq.ajax(APICalls.API_URL_FOLDERS_AND_FEEDS, JSONObject.class, cb);
-		cb.block();
-	}
-	
-	/*
-	 * Sync feeds/folders + handle the entire read list
-	 */
-	@Override
-	public void handleReaderList(ITagListHandler tagHandler, ISubscriptionListHandler subHandler, long syncTime) throws IOException, ReaderException {
-		try {
-			getCategoriesAndFeeds();
-			if (tags.size() > 0) {
-				tags.add(starredTag);
-				tagHandler.tags(tags);
-			}
-			if (feeds.size() > 0)
-				subHandler.subscriptions(feeds);
+			catch (RemoteException e) {
+				throw new ReaderException("remote connection error", e);			
+			}	
 		}
-		catch (RemoteException e) {
-			throw new ReaderException("remote connection error", e);			
-		}
-	}
 	
 	/*
 	 * Handle a single item list (a feed or a folder).
@@ -155,8 +148,8 @@ public class NewsBlurPlus extends ReaderExtension {
 				parseItemList(url, handler, handler.stream());
 			}
 		}
-		catch (RemoteException e1) {
-			e1.printStackTrace();
+		catch (RemoteException e) {
+			e.printStackTrace();
 		}
 	}
 
