@@ -177,8 +177,7 @@ public class NewsBlurPlus extends ReaderExtension {
 							item.subUid = "FEED:" + url;
 							item.title = story.getString("story_title");
 							item.link = story.getString("story_permalink");
-							item.uid = story.getString("story_hash");
-							//item.uid = story.getString("id");
+							item.uid = story.getString("id");
 							item.author = story.getString("story_authors");
 							item.publishedTime = story.getLong("story_timestamp");
 							item.read = (story.getInt("read_status") == 1);
