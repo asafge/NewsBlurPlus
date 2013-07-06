@@ -153,12 +153,11 @@ public class NewsBlurPlus extends ReaderExtension {
 				try {
 					if (APICalls.isJSONResponseValid(json, status)) {
 						List<IItem> items = new ArrayList<IItem>();
-						IItem item = null;
 						JSONArray arr = json.getJSONArray("stories");
 						int length = 0;
 						for (int i=0; i<arr.length(); i++) {
 							JSONObject story = arr.getJSONObject(i);
-							item = new IItem();
+							IItem item = new IItem();
 							item.subUid = "FEED:" + url;
 							item.title = story.getString("story_title");
 							item.link = story.getString("story_permalink");
@@ -181,7 +180,6 @@ public class NewsBlurPlus extends ReaderExtension {
 								items.clear();
 								length = 0;
 							}
-							item = null;
 						}
 						handler.items(items);
 					}
