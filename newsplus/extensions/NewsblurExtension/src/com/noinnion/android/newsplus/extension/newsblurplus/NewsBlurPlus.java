@@ -54,42 +54,42 @@ public class NewsBlurPlus extends ReaderExtension {
 		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
 			@Override
 			public void callback(String url, JSONObject json, AjaxStatus status) {
-					if (APICalls.isJSONResponseValid(json, status)) {
-						try {
-							JSONObject json_feeds = json.getJSONObject("feeds");
-							JSONObject json_folders = json.getJSONObject("flat_folders");
-							Iterator<?> keys = json_folders.keys();
-							while (keys.hasNext()) {
-								String catName = ((String)keys.next());
-								JSONArray feedsPerFolder = json_folders.getJSONArray(catName);
-								catName = catName.trim();
+				if (APICalls.isJSONResponseValid(json, status)) {
+					try {
+						JSONObject json_feeds = json.getJSONObject("feeds");
+						JSONObject json_folders = json.getJSONObject("flat_folders");
+						Iterator<?> keys = json_folders.keys();
+						while (keys.hasNext()) {
+							String catName = ((String)keys.next());
+							JSONArray feedsPerFolder = json_folders.getJSONArray(catName);
+							catName = catName.trim();
+							if (!TextUtils.isEmpty(catName))
+								tags.add(APICalls.createTag(catName, false));
+							
+							// Add all feeds in this category
+							for (int i=0; i<feedsPerFolder.length(); i++) {
+								ISubscription sub = new ISubscription();
+								String feedID = feedsPerFolder.getString(i);
+								JSONObject f = json_feeds.getJSONObject(feedID);
+								Calendar updateTime = Calendar.getInstance();
+								updateTime.add(Calendar.SECOND, (-1) * f.getInt("updated_seconds_ago"));
+								sub.newestItemTime = updateTime.getTimeInMillis();
+								sub.uid = "FEED:" + APICalls.getFeedUrlFromFeedId(feedID);
+								sub.title = f.getString("feed_title");
+								sub.htmlUrl = f.getString("feed_link");
+								sub.unreadCount = f.getInt("nt");
 								if (!TextUtils.isEmpty(catName))
-									tags.add(APICalls.createTag(catName, false));
-								
-								// Add all feeds in this category
-								for (int i=0; i<feedsPerFolder.length(); i++) {
-									ISubscription sub = new ISubscription();
-									String feedID = feedsPerFolder.getString(i);
-									JSONObject f = json_feeds.getJSONObject(feedID);
-									Calendar updateTime = Calendar.getInstance();
-									updateTime.add(Calendar.SECOND, (-1) * f.getInt("updated_seconds_ago"));
-									sub.newestItemTime = updateTime.getTimeInMillis();
-									sub.uid = "FEED:" + APICalls.getFeedUrlFromFeedId(feedID);
-									sub.title = f.getString("feed_title");
-									sub.htmlUrl = f.getString("feed_link");
-									sub.unreadCount = f.getInt("nt");
-									if (!TextUtils.isEmpty(catName))
-										sub.addCategory(catName);
-									feeds.add(sub);
-								}
+									sub.addCategory(catName);
+								feeds.add(sub);
 							}
 						}
-						catch (JSONException e) {
-							AQUtility.report(e);
-						}
+					}
+					catch (JSONException e) {
+						AQUtility.report(e);
 					}
 				}
-			};
+			}
+		};
 		final AQuery aq = new AQuery(this);
 		final Context c = getApplicationContext();
 		APICalls.wrapCallback(c, cb);
@@ -153,7 +153,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				try {
 					if (APICalls.isJSONResponseValid(json, status)) {
 						List<IItem> items = new ArrayList<IItem>();
-						IItem item =null;
+						IItem item = null;
 						JSONArray arr = json.getJSONArray("stories");
 						int length = 0;
 						for (int i=0; i<arr.length(); i++) {
