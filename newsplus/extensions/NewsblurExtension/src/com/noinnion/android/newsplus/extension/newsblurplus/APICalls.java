@@ -48,5 +48,6 @@ public class APICalls {
 	public static String API_URL_MARK_STORY_AS_READ = API_URL_BASE + "reader/mark_story_as_read/";
 	public static String API_URL_MARK_STORY_AS_UNREAD = API_URL_BASE + "reader/mark_story_as_unread/";
 	public static String API_URL_MARK_ALL_AS_READ = API_URL_BASE + "reader/mark_all_as_read/";
+	public static String API_URL_STARRED_ITEMS = API_URL_BASE + "reader/starred_stories/";
 	
 }

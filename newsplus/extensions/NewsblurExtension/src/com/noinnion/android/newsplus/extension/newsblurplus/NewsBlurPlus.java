@@ -33,12 +33,20 @@ import com.noinnion.android.reader.api.provider.ISubscription;
 import com.noinnion.android.reader.api.provider.ITag;
 
 public class NewsBlurPlus extends ReaderExtension {
-	// {"CAT:Politics", "Politics"}
-	public ArrayList<String[]> CATEGORIES = new ArrayList<String[]>();
-		
-	// {"FEED:http://www.newsblur.com/reader/feed/1818:id", "Coding horror", "http://www.codinghorror.com/blog/", "Politics"}
-	public ArrayList<String[]> FEEDS = new ArrayList<String[]>();
-
+	@Override
+	public void onCreate() {
+		super.onCreate();	
+		tags = new ArrayList<ITag>();
+		feeds = new ArrayList<ISubscription>();	
+		// Create the special starred tag
+		starredTag = new ITag();
+		starredTag.uid = "STAR:Starred items";
+		starredTag.label = "Starred items";
+		starredTag.type = ITag.TYPE_TAG_STARRED;
+	}
+	
+	private List<ITag> tags;
+	private List<ISubscription> feeds;
 	private ITag starredTag;
 	
 	/*
@@ -53,29 +61,34 @@ public class NewsBlurPlus extends ReaderExtension {
 			public void callback(String url, JSONObject json, AjaxStatus status) {
 					if (APICalls.isJSONResponseValid(json, status)) {
 						try {
-							JSONObject feeds = json.getJSONObject("feeds");
-							JSONObject folders = json.getJSONObject("flat_folders");
+							JSONObject json_feeds = json.getJSONObject("feeds");
+							JSONObject json_folders = json.getJSONObject("flat_folders");
 							
-							Iterator<?> keys = folders.keys();
+							Iterator<?> keys = json_folders.keys();
 							while (keys.hasNext()) {
 								String catName = ((String)keys.next());
-								JSONArray feedsPerFolder = folders.getJSONArray(catName);
+								JSONArray feedsPerFolder = json_folders.getJSONArray(catName);
 								catName = catName.trim();
 								if (!TextUtils.isEmpty(catName)) {
 									// Create the category
-									String[] categoryItem = { "CAT:" + catName, catName };
-									CATEGORIES.add(categoryItem);
-									catName = "CAT:" + catName;
+									ITag tag = new ITag();
+									tag.label = catName;
+									tag.uid = catName = ("FOL:" + catName);
+									tag.type = ITag.TYPE_FOLDER;
+									tags.add(tag);
 								}
 								// Add all feeds in this category
 								for (int i=0; i<feedsPerFolder.length(); i++) {
+									ISubscription sub = new ISubscription();
 									String feedID = feedsPerFolder.getString(i);
-									JSONObject f = feeds.getJSONObject(feedID);
-									String feedUID = "FEED:" + APICalls.getFeedUrlFromFeedId(feedID);
-									String feedTitle = f.getString("feed_title");
-									String feedHtmlUrl = f.getString("feed_link");
-									String[] fi = { feedUID, feedTitle, feedHtmlUrl, catName };
-									FEEDS.add(fi);
+									JSONObject f = json_feeds.getJSONObject(feedID);
+									
+									sub.uid = "FEED:" + APICalls.getFeedUrlFromFeedId(feedID);
+									sub.title = f.getString("feed_title");
+									sub.htmlUrl = f.getString("feed_link");
+									if (!TextUtils.isEmpty(catName))
+										sub.addCategory(catName);
+									feeds.add(sub);
 								}
 							}
 						}
@@ -93,47 +106,15 @@ public class NewsBlurPlus extends ReaderExtension {
 	}
 	
 	/*
-	 * Initialize the constant starred items tag.
-	 */
-	private void initStarredTag() {
-		if (this.starredTag == null) {
-			starredTag = new ITag();
-			starredTag .uid = "CAT:Starred items";
-			starredTag .label = "Starred items";
-			starredTag.type = ITag.TYPE_TAG_STARRED;
-		}
-	}
-	
-	/*
 	 * Sync feeds/folders + handle the entire read list
 	 */
 	@Override
 	public void handleReaderList(ITagListHandler tagHandler, ISubscriptionListHandler subHandler, long syncTime) throws IOException, ReaderException {
-		List<ITag> tags = new ArrayList<ITag>();
-		List<ISubscription> feeds = new ArrayList<ISubscription>();
 		try {
-			initStarredTag();
 			getCategoriesAndFeeds();
-			for (String[] cat : CATEGORIES) {
-				ITag tag = new ITag();
-				tag.uid = cat[0];
-				tag.label = cat[1];
-				if (tag.uid.startsWith("LABEL")) tag.type = ITag.TYPE_TAG_LABEL;
-				else if (tag.uid.startsWith("CAT")) tag.type = ITag.TYPE_FOLDER;
-				tags.add(tag);
-			}
 			if (tags.size() > 0) {
 				tags.add(starredTag);
 				tagHandler.tags(tags);
-			}
-			for (String[] feed : FEEDS) {
-				ISubscription sub = new ISubscription();
-				sub.uid = feed[0];
-				sub.title = feed[1];
-				sub.htmlUrl = feed[2];
-				if (!TextUtils.isEmpty(feed[3]))
-					sub.addCategory(feed[3]);
-				feeds.add(sub);
 			}
 			if (feeds.size() > 0)
 				subHandler.subscriptions(feeds);
@@ -144,23 +125,24 @@ public class NewsBlurPlus extends ReaderExtension {
 	}
 	
 	/*
-	 * Handle a single item list (a feed or a folder)
+	 * Handle a single item list (a feed or a folder).
+	 * This functions calls the parseItemList function.
 	 */
 	@Override
 	public void handleItemList(final IItemListHandler handler, long syncTime) throws IOException, ReaderException {
 		try {
 			String uid = handler.stream(); 
 			if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
-				for (String[] f : FEEDS) {
-					String url = f[0].replace("FEED:", "");
-					parseItemList(url, handler, f[0]);
+				for (ISubscription sub : feeds) {
+					String url = sub.uid.replace("FEED:", "");
+					parseItemList(url, handler, sub.uid);
 				}
 			}
-			else if (uid.startsWith("CAT:")) {
-				for (String[] f : FEEDS) {
-					if (f[2].equals(uid)) {
-						String url = f[0].replace("FEED:", "");
-						parseItemList(url, handler, f[0]);						
+			else if (uid.startsWith("FOL:")) {
+				for (ISubscription sub : feeds) {
+					if (sub.getCategories().contains(uid)) {
+						String url = sub.uid.replace("FEED:", "");
+						parseItemList(url, handler, sub.uid);						
 					}
 				}
 			}
@@ -168,8 +150,9 @@ public class NewsBlurPlus extends ReaderExtension {
 				String url = handler.stream().replace("FEED:", "");
 				parseItemList(url, handler, handler.stream());
 			}
-			else if (uid.startsWith("LABEL:")) {
-				Log.e("Test", "No url for label");
+			else if (uid.startsWith("STAR:")) {
+				String url = APICalls.API_URL_STARRED_ITEMS;
+				parseItemList(url, handler, handler.stream());
 			}
 		}
 		catch (RemoteException e1) {
@@ -201,7 +184,8 @@ public class NewsBlurPlus extends ReaderExtension {
 							item.subUid = "FEED:" + url;
 							item.title = story.getString("story_title");
 							item.link = story.getString("story_permalink");
-							item.uid = story.getString("id");
+							item.uid = story.getString("story_hash");
+							//item.uid = story.getString("id");
 							item.author = story.getString("story_authors");
 							item.publishedTime = story.getLong("story_timestamp");
 							item.read = (story.getInt("read_status") == 1);
@@ -210,7 +194,8 @@ public class NewsBlurPlus extends ReaderExtension {
 									item.starred = true;
 									item.addCategory(starredTag.label);
 								}
-							} catch (JSONException e) {
+							}
+							catch (JSONException e) {
 								item.starred = false;
 							}
 							item.addCategory(cat);
