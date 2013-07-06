@@ -123,30 +123,20 @@ public class NewsBlurPlus extends ReaderExtension {
 		try {
 			String uid = handler.stream(); 
 			if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
-				for (ISubscription sub : feeds) {
-					if (sub.unreadCount > 0) {
-						String url = sub.uid.replace("FEED:", "");
-						parseItemList(url, handler, sub.uid);
-					}
-				}
+				for (ISubscription sub : feeds)
+					if (sub.unreadCount > 0)
+						parseItemList(sub.uid.replace("FEED:", ""), handler, sub.uid);
 			}
 			else if (uid.startsWith("FOL:")) {
-				for (ISubscription sub : feeds) {
-					if (sub.getCategories().contains(uid)) {
-						if (sub.unreadCount > 0) {
-							String url = sub.uid.replace("FEED:", "");
-							parseItemList(url, handler, sub.uid);
-						}
-					}
-				}
+				for (ISubscription sub : feeds)
+					if ((sub.getCategories().contains(uid)) && (sub.unreadCount > 0))
+						parseItemList(sub.uid.replace("FEED:", ""), handler, sub.uid);
 			}
 			else if (uid.startsWith("FEED:")) {
-				String url = handler.stream().replace("FEED:", "");
-				parseItemList(url, handler, handler.stream());
+				parseItemList(handler.stream().replace("FEED:", ""), handler, handler.stream());
 			}
 			else if (uid.startsWith("STAR:")) {
-				String url = APICalls.API_URL_STARRED_ITEMS;
-				parseItemList(url, handler, handler.stream());
+				parseItemList(APICalls.API_URL_STARRED_ITEMS, handler, handler.stream());
 			}
 		}
 		catch (RemoteException e) {
