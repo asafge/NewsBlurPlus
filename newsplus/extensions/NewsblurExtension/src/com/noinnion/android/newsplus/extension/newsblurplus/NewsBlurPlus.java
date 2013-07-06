@@ -2,8 +2,10 @@ package com.noinnion.android.newsplus.extension.newsblurplus;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -251,17 +253,16 @@ public class NewsBlurPlus extends ReaderExtension {
 		final AQuery aq = new AQuery(this);
 		final Context c = getApplicationContext();
 		APICalls.wrapCallback(c, cb);
-		String baseURL = read ? APICalls.API_URL_MARK_STORY_AS_READ : APICalls.API_URL_MARK_STORY_AS_UNREAD;
-		for (int i=0; i<itemUids.length; i++) {
-			String url = baseURL;
-			String feedIDStripped = itemUids[i].replaceFirst("#.*", "");
-			url += "story_id=" + feedIDStripped + "&feed_id=" + APICalls.getFeedIdFromFeedUrl(subUIds[i]);
-			aq.ajax(url, JSONObject.class, cb);
-			cb.block();
+		String baseURL = read ? APICalls.API_URL_MARK_STORY_AS_READ : APICalls.API_URL_MARK_STORY_AS_UNREAD;	
+
+		Map<String, Object> params = new HashMap<String, Object>();
+		for (int i=0; i<itemUids.length; i++) {	
+			params.put("story_id", itemUids[i]);
+			params.put("feed_id", APICalls.getFeedIdFromFeedUrl(subUIds[i]));
 		}
-		// TODO: Return some real feedback
-		cb.getStatus().getCode();
-		return true;
+		aq.ajax(baseURL, params, JSONObject.class, cb);
+		cb.block();
+		return true;		// TODO: Return some real feedback
 	}
 
 	/* 
