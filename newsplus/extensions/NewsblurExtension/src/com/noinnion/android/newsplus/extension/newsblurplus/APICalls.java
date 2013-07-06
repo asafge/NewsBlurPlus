@@ -41,6 +41,15 @@ public class APICalls {
 		return feedID;
 	}
 	
+	public static Long getFeedHashFromString(String hash) {
+		try {
+			return Long.decode(hash.split(":")[0]);
+		}
+		catch (Exception e) {
+			return Long.MIN_VALUE;
+		}
+	}
+	
 	public static String API_URL_BASE = "http://www.newsblur.com/";
 	public static String API_URL_LOGIN = API_URL_BASE + "api/login/";
 	public static String API_URL_FOLDERS_AND_FEEDS = API_URL_BASE + "reader/feeds?flat=true";
@@ -49,5 +58,6 @@ public class APICalls {
 	public static String API_URL_MARK_STORY_AS_UNREAD = API_URL_BASE + "reader/mark_story_as_unread/";
 	public static String API_URL_MARK_ALL_AS_READ = API_URL_BASE + "reader/mark_all_as_read/";
 	public static String API_URL_STARRED_ITEMS = API_URL_BASE + "reader/starred_stories/";
+	public static String API_URL_UNREAD_HASHES = API_URL_BASE + "reader/unread_story_hashes/";
 	
 }

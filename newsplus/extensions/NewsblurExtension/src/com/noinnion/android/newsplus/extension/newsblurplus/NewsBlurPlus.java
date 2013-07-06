@@ -181,15 +181,11 @@ public class NewsBlurPlus extends ReaderExtension {
 							item.author = story.getString("story_authors");
 							item.publishedTime = story.getLong("story_timestamp");
 							item.read = (story.getInt("read_status") == 1);
-							try {
-								if (story.getString("starred") == "true") {
-									item.starred = true;
-									item.addCategory(starredTag.label);
-								}
+							if (story.has("starred") && story.getString("starred") == "true") {
+								item.starred = true;
+								item.addCategory(starredTag.label);
 							}
-							catch (JSONException e) {
-								item.starred = false;
-							}
+							item.id = APICalls.getFeedHashFromString(story.getString("story_hash"));
 							item.addCategory(cat);
 							items.add(item);
 							
@@ -216,7 +212,6 @@ public class NewsBlurPlus extends ReaderExtension {
 		final Context c = getApplicationContext();
 		APICalls.wrapCallback(c, cb);
 		aq.ajax(url, JSONObject.class, cb);
-		cb.block();
 	}	
 	
 	/* 
