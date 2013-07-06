@@ -43,7 +43,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	 * Result: folders/0/Math/[ID] (ID = 1818)
 	 */
 	@Override
-	public void handleReaderList(ITagListHandler tagHandler, ISubscriptionListHandler subHandler, long syncTime) throws IOException, ReaderException {
+	public void handleReaderList(final ITagListHandler tagHandler, final ISubscriptionListHandler subHandler, long syncTime) throws IOException, ReaderException {
 		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
 			@Override
 			public void callback(String url, JSONObject json, AjaxStatus status) {
