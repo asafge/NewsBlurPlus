@@ -31,23 +31,13 @@ public class APICalls {
 	}
 	
 	public static String getFeedUrlFromFeedId(String feedID) {
-		return API_URL_FEED_SINGLE + feedID + ":id";
+		return API_URL_FEED_SINGLE + feedID;
 	}
 	
 	public static String getFeedIdFromFeedUrl(String feedURL) {
 		String feedID = feedURL.replace("FEED:", "");
 		feedID = feedID.replace(API_URL_FEED_SINGLE, "");
-		feedID = feedID.replace(":id", "");
 		return feedID;
-	}
-	
-	public static Long getFeedHashFromString(String hash) {
-		try {
-			return Long.decode(hash.split(":")[0]);
-		}
-		catch (Exception e) {
-			return Long.MIN_VALUE;
-		}
 	}
 	
 	public static String API_URL_BASE = "http://www.newsblur.com/";

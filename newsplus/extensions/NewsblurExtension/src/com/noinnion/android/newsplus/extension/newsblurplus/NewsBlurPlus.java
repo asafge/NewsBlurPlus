@@ -1,5 +1,6 @@
 package com.noinnion.android.newsplus.extension.newsblurplus;
 
+import java.io.Console;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.DeadObjectException;
 import android.os.RemoteException;
 import android.os.TransactionTooLargeException;
 import android.text.TextUtils;
@@ -87,6 +89,7 @@ public class NewsBlurPlus extends ReaderExtension {
 									sub.uid = "FEED:" + APICalls.getFeedUrlFromFeedId(feedID);
 									sub.title = f.getString("feed_title");
 									sub.htmlUrl = f.getString("feed_link");
+									sub.unreadCount = f.getInt("nt");
 									if (!TextUtils.isEmpty(catName))
 										sub.addCategory(catName);
 									feeds.add(sub);
@@ -99,23 +102,23 @@ public class NewsBlurPlus extends ReaderExtension {
 					}
 				}
 			};
-			try {
-				final AQuery aq = new AQuery(this);
-				final Context c = getApplicationContext();
-				APICalls.wrapCallback(c, cb);
-				aq.ajax(APICalls.API_URL_FOLDERS_AND_FEEDS, JSONObject.class, cb);
-				cb.block();
-				
-				if (feeds.size() > 0) {
-					tags.add(starredTag);
-					tagHandler.tags(tags);
-					subHandler.subscriptions(feeds);
-				}
+		final AQuery aq = new AQuery(this);
+		final Context c = getApplicationContext();
+		APICalls.wrapCallback(c, cb);
+		aq.ajax(APICalls.API_URL_FOLDERS_AND_FEEDS, JSONObject.class, cb);
+		cb.block();
+			
+		try {			
+			if (feeds.size() > 0) {
+				tags.add(starredTag);
+				tagHandler.tags(tags);
+				subHandler.subscriptions(feeds);
 			}
-			catch (RemoteException e) {
-				throw new ReaderException("remote connection error", e);			
-			}	
 		}
+		catch (RemoteException e) {
+			throw new ReaderException("remote connection error", e);			
+		}	
+	}
 	
 	/*
 	 * Handle a single item list (a feed or a folder).
@@ -127,15 +130,19 @@ public class NewsBlurPlus extends ReaderExtension {
 			String uid = handler.stream(); 
 			if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
 				for (ISubscription sub : feeds) {
-					String url = sub.uid.replace("FEED:", "");
-					parseItemList(url, handler, sub.uid);
+					if (sub.unreadCount > 0) {
+						String url = sub.uid.replace("FEED:", "");
+						parseItemList(url, handler, sub.uid);
+					}
 				}
 			}
 			else if (uid.startsWith("FOL:")) {
 				for (ISubscription sub : feeds) {
 					if (sub.getCategories().contains(uid)) {
-						String url = sub.uid.replace("FEED:", "");
-						parseItemList(url, handler, sub.uid);						
+						if (sub.unreadCount > 0) {
+							String url = sub.uid.replace("FEED:", "");
+							parseItemList(url, handler, sub.uid);
+						}
 					}
 				}
 			}
@@ -166,14 +173,15 @@ public class NewsBlurPlus extends ReaderExtension {
 		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
 			@Override
 			public void callback(String url, JSONObject json, AjaxStatus status) {
-				List<IItem> items = new ArrayList<IItem>();
 				try {
 					if (APICalls.isJSONResponseValid(json, status)) {
-						int length = 0;
+						List<IItem> items = new ArrayList<IItem>();
+						IItem item =null;
 						JSONArray arr = json.getJSONArray("stories");
+						int length = 0;
 						for (int i=0; i<arr.length(); i++) {
 							JSONObject story = arr.getJSONObject(i);
-							IItem item = new IItem();
+							item = new IItem();
 							item.subUid = "FEED:" + url;
 							item.title = story.getString("story_title");
 							item.link = story.getString("story_permalink");
@@ -185,7 +193,6 @@ public class NewsBlurPlus extends ReaderExtension {
 								item.starred = true;
 								item.addCategory(starredTag.label);
 							}
-							item.id = APICalls.getFeedHashFromString(story.getString("story_hash"));
 							item.addCategory(cat);
 							items.add(item);
 							
@@ -196,6 +203,7 @@ public class NewsBlurPlus extends ReaderExtension {
 								items.clear();
 								length = 0;
 							}
+							item = null;
 						}
 						handler.items(items);
 					}
@@ -203,22 +211,29 @@ public class NewsBlurPlus extends ReaderExtension {
 				catch (TransactionTooLargeException e) {
 					AQUtility.report(e);
 				}
+				catch (DeadObjectException e) {
+					e.printStackTrace();
+				}
 				catch (Exception e) {
-					AQUtility.report(e);
+					e.printStackTrace();
 				}
 			}
 		};
 		final AQuery aq = new AQuery(this);
 		final Context c = getApplicationContext();
 		APICalls.wrapCallback(c, cb);
-		aq.ajax(url, JSONObject.class, cb);
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("include_story_content", "false");
+		aq.ajax(url, params, JSONObject.class, cb);
 	}	
 	
 	/* 
-	 * TODO: Get a list of IDs for unread stories (Should speed up sync process). 
+	 * Note:
+	 *   This function can be used for getting a list of unread stories, thus speeding up the sync.
+	 *   Instead, speed-up is implemented differently here - always fetch only subscriptions that has unread_count > 0.  
 	 */
 	@Override
-	public void handleItemIdList(IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
+	public void handleItemIdList(final IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
 		return;
 	}
 	
@@ -243,14 +258,19 @@ public class NewsBlurPlus extends ReaderExtension {
 		final AQuery aq = new AQuery(this);
 		final Context c = getApplicationContext();
 		APICalls.wrapCallback(c, cb);
-		String baseURL = read ? APICalls.API_URL_MARK_STORY_AS_READ : APICalls.API_URL_MARK_STORY_AS_UNREAD;	
-
-		Map<String, Object> params = new HashMap<String, Object>();
-		for (int i=0; i<itemUids.length; i++) {	
-			params.put("story_id", itemUids[i]);
-			params.put("feed_id", APICalls.getFeedIdFromFeedUrl(subUIds[i]));
+		
+		if (itemUids == null || subUIds == null) {
+			aq.ajax(APICalls.API_URL_MARK_ALL_AS_READ, JSONObject.class, cb);
 		}
-		aq.ajax(baseURL, params, JSONObject.class, cb);
+		else {
+			String url = read ? APICalls.API_URL_MARK_STORY_AS_READ : APICalls.API_URL_MARK_STORY_AS_UNREAD;	
+			Map<String, Object> params = new HashMap<String, Object>();
+			for (int i=0; i<itemUids.length; i++) {	
+				params.put("story_id", itemUids[i]);
+				params.put("feed_id", APICalls.getFeedIdFromFeedUrl(subUIds[i]));
+			}
+			aq.ajax(url, params, JSONObject.class, cb);
+		}
 		cb.block();
 		return true;		// TODO: Return some real feedback
 	}
@@ -276,27 +296,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	 */
 	@Override
 	public boolean markAllAsRead(String s, String t, long syncTime) throws IOException, ReaderException {
-		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
-			@Override
-			public void callback(String url, JSONObject json, AjaxStatus status) {
-				if (APICalls.isJSONResponseValid(json, status)) {
-					try {
-						if (!json.getString("result").startsWith("ok"))
-							throw new ReaderException("Failed marking all as read"); 
-					}
-					catch (Exception e) {
-						AQUtility.report(e);
-					}
-				}
-			}
-		};
-		final AQuery aq = new AQuery(this);
-		final Context c = getApplicationContext();
-		APICalls.wrapCallback(c, cb);
-		aq.ajax(APICalls.API_URL_MARK_ALL_AS_READ, JSONObject.class, cb);
-		cb.block();
-		// TODO: Return some real feedback
-		return true;
+		return this.markAs(true, null, null);
 	}
 
 	
