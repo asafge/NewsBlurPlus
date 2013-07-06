@@ -2,6 +2,7 @@ package com.noinnion.android.newsplus.extension.newsblurplus;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,14 +32,6 @@ import com.noinnion.android.reader.api.provider.ISubscription;
 import com.noinnion.android.reader.api.provider.ITag;
 
 public class NewsBlurPlus extends ReaderExtension {
-	@Override
-	public void onCreate() {
-		super.onCreate();	
-		tags = new ArrayList<ITag>();
-		feeds = new ArrayList<ISubscription>();
-		starredTag = APICalls.createTag("Starred items", true);		
-	}
-	
 	private List<ITag> tags;
 	private List<ISubscription> feeds;
 	private ITag starredTag;
@@ -90,6 +83,10 @@ public class NewsBlurPlus extends ReaderExtension {
 				}
 			}
 		};
+		tags = new ArrayList<ITag>();
+		feeds = new ArrayList<ISubscription>();
+		starredTag = APICalls.createTag("Starred items", true);		
+		
 		final AQuery aq = new AQuery(this);
 		final Context c = getApplicationContext();
 		APICalls.wrapCallback(c, cb);
@@ -118,18 +115,18 @@ public class NewsBlurPlus extends ReaderExtension {
 			if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
 				for (ISubscription sub : feeds)
 					if (sub.unreadCount > 0)
-						parseItemList(sub.uid.replace("FEED:", ""), handler, sub.uid);
+						parseItemList(sub.uid.replace("FEED:", ""), handler, sub.getCategories());
 			}
 			else if (uid.startsWith("FOL:")) {
 				for (ISubscription sub : feeds)
 					if ((sub.getCategories().contains(uid)) && (sub.unreadCount > 0))
-						parseItemList(sub.uid.replace("FEED:", ""), handler, sub.uid);
+						parseItemList(sub.uid.replace("FEED:", ""), handler, sub.getCategories());
 			}
 			else if (uid.startsWith("FEED:")) {
-				parseItemList(handler.stream().replace("FEED:", ""), handler, handler.stream());
+				parseItemList(handler.stream().replace("FEED:", ""), handler, Arrays.asList(""));
 			}
 			else if (uid.startsWith("STAR:")) {
-				parseItemList(APICalls.API_URL_STARRED_ITEMS, handler, handler.stream());
+				parseItemList(APICalls.API_URL_STARRED_ITEMS, handler, Arrays.asList(starredTag.label));
 			}
 		}
 		catch (RemoteException e) {
@@ -146,7 +143,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	 *   feeds/[ID]/feed_title ("Coding Horror")
 	 *   feeds/[ID]/feed_link (http://www.codinghorror.com/blog/ - site's link)
 	 */
-	public void parseItemList(String url, final IItemListHandler handler, final String cat) throws IOException, ReaderException {
+	public void parseItemList(String url, final IItemListHandler handler, final List<String> categories) throws IOException, ReaderException {
 		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
 			@Override
 			public void callback(String url, JSONObject json, AjaxStatus status) {
@@ -166,11 +163,9 @@ public class NewsBlurPlus extends ReaderExtension {
 							item.updatedTime = story.getLong("story_timestamp");
 							item.publishedTime = story.getLong("story_timestamp");
 							item.read = (story.getInt("read_status") == 1);
-							if (story.has("starred") && story.getString("starred") == "true") {
-								item.starred = true;
-								item.addCategory(starredTag.label);
-							}
-							item.addCategory(cat);
+							item.starred = (story.has("starred") && story.getString("starred") == "true"); 
+							for (String cat : categories)
+								item.addCategory(cat);
 							items.add(item);
 							
 							// Handle TransactionTooLargeException, based on Noin's recommendation
