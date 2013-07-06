@@ -1,6 +1,5 @@
 package com.noinnion.android.newsplus.extension.newsblurplus;
 
-import java.io.Console;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,12 +12,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.os.Bundle;
-import android.os.DeadObjectException;
 import android.os.RemoteException;
-import android.os.TransactionTooLargeException;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
@@ -58,7 +53,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	 * Result: folders/0/Math/[ID] (ID = 1818)
 	 */
 	@Override
-	public void handleReaderList(ITagListHandler tagHandler, ISubscriptionListHandler subHandler, long syncTime) throws IOException, ReaderException {
+	public void handleReaderList(final ITagListHandler tagHandler, final ISubscriptionListHandler subHandler, long syncTime) throws IOException, ReaderException {
 		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
 			@Override
 			public void callback(String url, JSONObject json, AjaxStatus status) {
@@ -95,10 +90,18 @@ public class NewsBlurPlus extends ReaderExtension {
 									feeds.add(sub);
 								}
 							}
+							if (feeds.size() > 0) {
+								tags.add(starredTag);
+								tagHandler.tags(tags);
+								subHandler.subscriptions(feeds);
+							}
 						}
 						catch (JSONException e) {
 							AQUtility.report(e);
 						}
+						catch (RemoteException e) {
+							AQUtility.report(e);			
+						}	
 					}
 				}
 			};
@@ -106,18 +109,6 @@ public class NewsBlurPlus extends ReaderExtension {
 		final Context c = getApplicationContext();
 		APICalls.wrapCallback(c, cb);
 		aq.ajax(APICalls.API_URL_FOLDERS_AND_FEEDS, JSONObject.class, cb);
-		cb.block();
-			
-		try {			
-			if (feeds.size() > 0) {
-				tags.add(starredTag);
-				tagHandler.tags(tags);
-				subHandler.subscriptions(feeds);
-			}
-		}
-		catch (RemoteException e) {
-			throw new ReaderException("remote connection error", e);			
-		}	
 	}
 	
 	/*
@@ -156,7 +147,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			}
 		}
 		catch (RemoteException e) {
-			e.printStackTrace();
+			AQUtility.report(e);
 		}
 	}
 
@@ -196,7 +187,7 @@ public class NewsBlurPlus extends ReaderExtension {
 							item.addCategory(cat);
 							items.add(item);
 							
-							// For TransactionTooLargeException handling, based on Noin's recommendation
+							// Handle TransactionTooLargeException, based on Noin's recommendation
 							length += item.getLength();
 							if (items.size() % 200 == 0 || length > 300000) {
 								handler.items(items);
@@ -208,14 +199,8 @@ public class NewsBlurPlus extends ReaderExtension {
 						handler.items(items);
 					}
 				}
-				catch (TransactionTooLargeException e) {
-					AQUtility.report(e);
-				}
-				catch (DeadObjectException e) {
-					e.printStackTrace();
-				}
 				catch (Exception e) {
-					e.printStackTrace();
+					AQUtility.report(e);
 				}
 			}
 		};
@@ -225,16 +210,6 @@ public class NewsBlurPlus extends ReaderExtension {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("include_story_content", "false");
 		aq.ajax(url, params, JSONObject.class, cb);
-	}	
-	
-	/* 
-	 * Note:
-	 *   This function can be used for getting a list of unread stories, thus speeding up the sync.
-	 *   Instead, speed-up is implemented differently here - always fetch only subscriptions that has unread_count > 0.  
-	 */
-	@Override
-	public void handleItemIdList(final IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
-		return;
 	}
 	
 	/*
@@ -319,5 +294,15 @@ public class NewsBlurPlus extends ReaderExtension {
 	@Override
 	public boolean disableTag(String tagUid, String label) throws IOException, ReaderException {
 		return false;
+	}
+	
+	
+	/* 
+	 * Not implemented: This function can be used for getting a list of unread stories, thus speeding up the sync.
+	 * Instead, speed-up is implemented differently here - always fetch only subscriptions that has unread_count > 0.  
+	 */
+	@Override
+	public void handleItemIdList(final IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
+		return;
 	}
 }
