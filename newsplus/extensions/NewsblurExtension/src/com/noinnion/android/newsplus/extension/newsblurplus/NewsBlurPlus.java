@@ -51,7 +51,14 @@ public class NewsBlurPlus extends ReaderExtension {
 					try {
 						JSONObject json_feeds = json.getJSONObject("feeds");
 						JSONObject json_folders = json.getJSONObject("flat_folders");
+
 						Iterator<?> keys = json_folders.keys();
+						if (keys.hasNext()) {
+							tags = new ArrayList<ITag>();
+							feeds = new ArrayList<ISubscription>();
+							starredTag = APICalls.createTag("Starred items", true);
+							tags.add(starredTag);
+						}
 						while (keys.hasNext()) {
 							String catName = ((String)keys.next());
 							JSONArray feedsPerFolder = json_folders.getJSONArray(catName);
@@ -84,24 +91,19 @@ public class NewsBlurPlus extends ReaderExtension {
 				}
 			}
 		};
-		tags = new ArrayList<ITag>();
-		feeds = new ArrayList<ISubscription>();
-		starredTag = APICalls.createTag("Starred items", true);		
-		
 		final AQuery aq = new AQuery(this);
 		final Context c = getApplicationContext();
 		APICalls.wrapCallback(c, cb);
 		aq.ajax(APICalls.API_URL_FOLDERS_AND_FEEDS, JSONObject.class, cb);
 		cb.block();
+		if ((APICalls.isErrorCode(cb.getStatus().getCode())) || feeds.size() == 0)
+			throw new ReaderException("Network error");
 		try {
-			if (feeds.size() > 0) {
-				tags.add(starredTag);
-				tagHandler.tags(tags);
-				subHandler.subscriptions(feeds);
-			}
+			tagHandler.tags(tags);
+			subHandler.subscriptions(feeds);
 		}
 		catch (RemoteException e) {
-			AQUtility.report(e);			
+			throw new ReaderException(e);			
 		}
 	}
 	
@@ -112,27 +114,29 @@ public class NewsBlurPlus extends ReaderExtension {
 	@Override
 	public void handleItemList(final IItemListHandler handler, long syncTime) throws IOException, ReaderException {
 		try {
-			String uid = handler.stream(); 
-			if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
-				for (ISubscription sub : feeds)
-					if (sub.unreadCount > 0)
-						parseItemList(sub.uid.replace("FEED:", ""), handler, sub.getCategories());
-				parseItemList(APICalls.API_URL_STARRED_ITEMS, handler, Arrays.asList(starredTag.label));
-			}
-			else if (uid.startsWith("FOL:")) {
-				for (ISubscription sub : feeds)
-					if ((sub.getCategories().contains(uid)) && (sub.unreadCount > 0))
-						parseItemList(sub.uid.replace("FEED:", ""), handler, sub.getCategories());
-			}
-			else if (uid.startsWith("FEED:")) {
-				parseItemList(handler.stream().replace("FEED:", ""), handler, Arrays.asList(""));
-			}
-			else if (uid.startsWith("STAR:")) {
-				parseItemList(APICalls.API_URL_STARRED_ITEMS, handler, Arrays.asList(starredTag.label));
+			if ((tags != null) && (feeds != null)) {
+				String uid = handler.stream(); 
+				if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
+					for (ISubscription sub : feeds)
+						if (sub.unreadCount > 0)
+							parseItemList(sub.uid.replace("FEED:", ""), handler, sub.getCategories());
+					parseItemList(APICalls.API_URL_STARRED_ITEMS, handler, Arrays.asList(starredTag.label));
+				}
+				else if (uid.startsWith("FOL:")) {
+					for (ISubscription sub : feeds)
+						if ((sub.getCategories().contains(uid)) && (sub.unreadCount > 0))
+							parseItemList(sub.uid.replace("FEED:", ""), handler, sub.getCategories());
+				}
+				else if (uid.startsWith("FEED:")) {
+					parseItemList(handler.stream().replace("FEED:", ""), handler, Arrays.asList(""));
+				}
+				else if (uid.startsWith(ReaderExtension.STATE_STARRED)) {
+					parseItemList(APICalls.API_URL_STARRED_ITEMS, handler, Arrays.asList(starredTag.label));
+				}
 			}
 		}
 		catch (RemoteException e) {
-			AQUtility.report(e);
+			throw new ReaderException(e);
 		}
 	}
 

@@ -19,6 +19,15 @@ public class APICalls {
 		return cb;
 	}
 	
+	// Get the HTTP response code and look for errors
+	public static Boolean isErrorCode(int code) {
+		int[] errorCodes = { -101, 401, 402, 403, 404, 500};
+		for (int i=0; i < errorCodes.length; i++)
+			if (errorCodes[i] == code)
+				return true;
+		return false;
+	}
+	
 	// Check that the json object is not null and that the user is authenticated
 	public static Boolean isJSONResponseValid(JSONObject json, AjaxStatus status)
 	{
