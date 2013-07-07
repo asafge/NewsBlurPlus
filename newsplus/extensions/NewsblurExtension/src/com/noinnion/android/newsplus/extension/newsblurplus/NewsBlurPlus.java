@@ -96,7 +96,6 @@ public class NewsBlurPlus extends ReaderExtension {
 		final Context c = getApplicationContext();
 		APICalls.wrapCallback(c, cb);
 		aq.ajax(APICalls.API_URL_FOLDERS_AND_FEEDS, JSONObject.class, cb);
-		cb.block();
 		if ((APICalls.isErrorCode(cb.getStatus().getCode())) || feeds.size() == 0)
 			throw new ReaderException("Network error");
 		try {
@@ -105,6 +104,43 @@ public class NewsBlurPlus extends ReaderExtension {
 		}
 		catch (RemoteException e) {
 			throw new ReaderException(e);			
+		}
+	}
+
+	/* 
+	 * Get a list of unread stories, UI will mark all other as read.
+	 * This really speeds up the sync process. 
+	 */
+	@Override
+	public void handleItemIdList(final IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
+		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
+			@Override
+			public void callback(String url, JSONObject json, AjaxStatus status) {
+				try {
+					if (APICalls.isJSONResponseValid(json, status)) {
+						List<String> unread = new ArrayList<String>();
+						JSONArray arr = json.getJSONArray("stories");
+						for (int i=0; i<arr.length(); i++) {
+							JSONObject story = arr.getJSONObject(i);
+							unread.add(story.getString("id"));
+						}
+						handler.items(unread);
+					}
+				}
+				catch (Exception e) {
+					AQUtility.report(e);
+				}
+			}
+		};
+		if (feeds != null) {
+			final AQuery aq = new AQuery(this);
+			final Context c = getApplicationContext();
+			APICalls.wrapCallback(c, cb);
+			Map<String, Object> params = new HashMap<String, Object>();
+			params.put("include_story_content", "false");
+			for (ISubscription sub : feeds)
+				if (sub.unreadCount > 0)
+						aq.ajax(sub.uid.replace("FEED:", ""), params, JSONObject.class, cb);
 		}
 	}
 	
@@ -308,29 +344,5 @@ public class NewsBlurPlus extends ReaderExtension {
 	@Override
 	public boolean disableTag(String tagUid, String label) throws IOException, ReaderException {
 		return false;
-	}
-	
-	
-	/* 
-	 * Not implemented: This function can be used for getting a list of unread stories, thus speeding up the sync.
-	 * Instead, speed-up is implemented differently here - always fetch only subscriptions that has unread_count > 0.  
-	 */
-	@Override
-	public void handleItemIdList(IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
-		// TODO: Return all ITEMS that are unread, everything else is marked as read!
-		//       Need to figure out a way to identify item ids.
-		if (feeds != null) {
-			List<String> subUIDs = new ArrayList<String>();
-			for (ISubscription sub : feeds)
-				if (sub.unreadCount == 0)
-					// Change to all unread UIDs
-					subUIDs.add(Long.toString(sub.id));
-			try {
-				handler.items(subUIDs);
-			}
-			catch (RemoteException e) {
-				throw new ReaderException(e);
-			}
-		}
 	}
 }
