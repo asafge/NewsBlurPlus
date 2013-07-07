@@ -76,6 +76,7 @@ public class NewsBlurPlus extends ReaderExtension {
 								updateTime.add(Calendar.SECOND, (-1) * f.getInt("updated_seconds_ago"));
 								sub.newestItemTime = updateTime.getTimeInMillis();
 								sub.uid = "FEED:" + APICalls.getFeedUrlFromFeedId(feedID);
+								sub.id = Long.valueOf(feedID).longValue();
 								sub.title = f.getString("feed_title");
 								sub.htmlUrl = f.getString("feed_link");
 								sub.unreadCount = f.getInt("nt");
@@ -112,10 +113,10 @@ public class NewsBlurPlus extends ReaderExtension {
 	 * This functions calls the parseItemList function.
 	 */
 	@Override
-	public void handleItemList(final IItemListHandler handler, long syncTime) throws IOException, ReaderException {
+	public void handleItemList(IItemListHandler handler, long syncTime) throws IOException, ReaderException {
 		try {
 			if ((tags != null) && (feeds != null)) {
-				String uid = handler.stream(); 
+				String uid = handler.stream();
 				if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
 					for (ISubscription sub : feeds)
 						if (sub.unreadCount > 0)
@@ -315,7 +316,21 @@ public class NewsBlurPlus extends ReaderExtension {
 	 * Instead, speed-up is implemented differently here - always fetch only subscriptions that has unread_count > 0.  
 	 */
 	@Override
-	public void handleItemIdList(final IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
-		return;
+	public void handleItemIdList(IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
+		// TODO: Return all ITEMS that are unread, everything else is marked as read!
+		//       Need to figure out a way to identify item ids.
+		if (feeds != null) {
+			List<String> subUIDs = new ArrayList<String>();
+			for (ISubscription sub : feeds)
+				if (sub.unreadCount == 0)
+					// Change to all unread UIDs
+					subUIDs.add(Long.toString(sub.id));
+			try {
+				handler.items(subUIDs);
+			}
+			catch (RemoteException e) {
+				throw new ReaderException(e);
+			}
+		}
 	}
 }
