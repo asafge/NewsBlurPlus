@@ -220,19 +220,28 @@ public class NewsBlurPlus extends ReaderExtension {
 		final Context c = getApplicationContext();
 		APICalls.wrapCallback(c, cb);
 		
-		if (itemUids == null || subUIds == null) {
+		if (itemUids == null && subUIds == null) {
 			aq.ajax(APICalls.API_URL_MARK_ALL_AS_READ, JSONObject.class, cb);
+			cb.block();
 		}
 		else {
-			String url = read ? APICalls.API_URL_MARK_STORY_AS_READ : APICalls.API_URL_MARK_STORY_AS_UNREAD;	
-			Map<String, Object> params = new HashMap<String, Object>();
-			for (int i=0; i<itemUids.length; i++) {	
-				params.put("story_id", itemUids[i]);
-				params.put("feed_id", APICalls.getFeedIdFromFeedUrl(subUIds[i]));
+			if (itemUids == null) {
+				Map<String, Object> params = new HashMap<String, Object>();
+				params.put("feed_id", APICalls.getFeedIdFromFeedUrl(subUIds[0]));
+				aq.ajax(APICalls.API_URL_MARK_FEED_AS_READ, params, JSONObject.class, cb);
+				cb.block();
 			}
-			aq.ajax(url, params, JSONObject.class, cb);
+			else {
+				String url = read ? APICalls.API_URL_MARK_STORY_AS_READ : APICalls.API_URL_MARK_STORY_AS_UNREAD;	
+				Map<String, Object> params = new HashMap<String, Object>();
+				for (int i=0; i<itemUids.length; i++) {	
+					params.put("story_id", itemUids[i]);
+					params.put("feed_id", APICalls.getFeedIdFromFeedUrl(subUIds[i]));
+				}
+				aq.ajax(url, params, JSONObject.class, cb);
+				cb.block();
+			}
 		}
-		cb.block();
 		return true;		// TODO: Return some real feedback
 	}
 
@@ -258,11 +267,11 @@ public class NewsBlurPlus extends ReaderExtension {
 	 */
 	@Override
 	public boolean markAllAsRead(String s, String t, long syncTime) throws IOException, ReaderException {
-		if (s == null && t == null) 
+		if (s == null && t == null)
 			return this.markAs(true, null, null);
-		else if (t == null) {
-			String[] feed = { s };
-			return this.markAs(true, feed, null);
+		else if (s.startsWith("FEED:")) {
+			String[] feed = { s.replace("FEED:", "") };
+			return this.markAs(true, null, feed);
 		}
 		else
 			return false;	// Can't mark a folder/tag as read
