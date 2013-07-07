@@ -257,7 +257,10 @@ public class NewsBlurPlus extends ReaderExtension {
 	 */
 	@Override
 	public boolean markAllAsRead(String s, String t, long syncTime) throws IOException, ReaderException {
-		return this.markAs(true, null, null);
+		if (s == null && t == null) 
+			return this.markAs(true, null, null);
+		else
+			return false;			// TODO: s = subscription, t = tag.
 	}
 
 	
