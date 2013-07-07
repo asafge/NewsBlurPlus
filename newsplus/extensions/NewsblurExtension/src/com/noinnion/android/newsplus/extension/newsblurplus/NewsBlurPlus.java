@@ -254,13 +254,18 @@ public class NewsBlurPlus extends ReaderExtension {
 
 	/*
 	 * Mark all stories on all feeds as read.
+	 * Note: S = subscription (feed), t = tag
 	 */
 	@Override
 	public boolean markAllAsRead(String s, String t, long syncTime) throws IOException, ReaderException {
 		if (s == null && t == null) 
 			return this.markAs(true, null, null);
+		else if (t == null) {
+			String[] feed = { s };
+			return this.markAs(true, feed, null);
+		}
 		else
-			return false;			// TODO: s = subscription, t = tag.
+			return false;	// Can't mark a folder/tag as read
 	}
 
 	
