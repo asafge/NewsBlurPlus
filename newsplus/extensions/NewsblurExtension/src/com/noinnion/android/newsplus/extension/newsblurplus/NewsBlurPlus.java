@@ -43,7 +43,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	 * Result: folders/0/Math/[ID] (ID = 1818)
 	 */
 	@Override
-	public void handleReaderList(final ITagListHandler tagHandler, final ISubscriptionListHandler subHandler, long syncTime) throws IOException, ReaderException {
+	public void handleReaderList(ITagListHandler tagHandler, ISubscriptionListHandler subHandler, long syncTime) throws IOException, ReaderException {
 		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
 			@Override
 			public void callback(String url, JSONObject json, AjaxStatus status) {
@@ -56,8 +56,9 @@ public class NewsBlurPlus extends ReaderExtension {
 							String catName = ((String)keys.next());
 							JSONArray feedsPerFolder = json_folders.getJSONArray(catName);
 							catName = catName.trim();
+							ITag cat = APICalls.createTag(catName, false);
 							if (!TextUtils.isEmpty(catName))
-								tags.add(APICalls.createTag(catName, false));
+								tags.add(cat);
 							
 							// Add all feeds in this category
 							for (int i=0; i<feedsPerFolder.length(); i++) {
@@ -72,7 +73,7 @@ public class NewsBlurPlus extends ReaderExtension {
 								sub.htmlUrl = f.getString("feed_link");
 								sub.unreadCount = f.getInt("nt");
 								if (!TextUtils.isEmpty(catName))
-									sub.addCategory(catName);
+									sub.addCategory(cat.uid);
 								feeds.add(sub);
 							}
 						}
