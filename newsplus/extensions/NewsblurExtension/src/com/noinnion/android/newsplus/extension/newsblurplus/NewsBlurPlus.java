@@ -227,7 +227,8 @@ public class NewsBlurPlus extends ReaderExtension {
 		else {
 			if (itemUids == null) {
 				Map<String, Object> params = new HashMap<String, Object>();
-				params.put("feed_id", APICalls.getFeedIdFromFeedUrl(subUIds[0]));
+				for (String sub : subUIds)
+					params.put("feed_id", APICalls.getFeedIdFromFeedUrl(sub));
 				aq.ajax(APICalls.API_URL_MARK_FEED_AS_READ, params, JSONObject.class, cb);
 				cb.block();
 			}
@@ -272,6 +273,15 @@ public class NewsBlurPlus extends ReaderExtension {
 		else if (s.startsWith("FEED:")) {
 			String[] feed = { s.replace("FEED:", "") };
 			return this.markAs(true, null, feed);
+		}
+		else if (s.startsWith("FOL:")) {
+			List<String> subUIDs = new ArrayList<String>();
+			for (ISubscription sub : feeds)
+				if (sub.getCategories().contains(s))
+					subUIDs.add(sub.uid);
+			if (subUIDs.size() > 0)
+				return this.markAs(true, null, (String[])subUIDs.toArray());
+			return true;
 		}
 		else
 			return false;	// Can't mark a folder/tag as read
