@@ -117,6 +117,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				for (ISubscription sub : feeds)
 					if (sub.unreadCount > 0)
 						parseItemList(sub.uid.replace("FEED:", ""), handler, sub.getCategories());
+				parseItemList(APICalls.API_URL_STARRED_ITEMS, handler, Arrays.asList(starredTag.label));
 			}
 			else if (uid.startsWith("FOL:")) {
 				for (ISubscription sub : feeds)
@@ -164,7 +165,7 @@ public class NewsBlurPlus extends ReaderExtension {
 							item.updatedTime = story.getLong("story_timestamp");
 							item.publishedTime = story.getLong("story_timestamp");
 							item.read = (story.getInt("read_status") == 1);
-							item.starred = (story.has("starred") && story.getString("starred") == "true"); 
+							item.starred = (story.has("starred") && story.getString("starred") == "true");
 							for (String cat : categories)
 								item.addCategory(cat);
 							items.add(item);
