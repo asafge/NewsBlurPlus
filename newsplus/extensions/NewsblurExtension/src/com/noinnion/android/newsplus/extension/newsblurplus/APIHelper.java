@@ -1,9 +1,5 @@
 package com.noinnion.android.newsplus.extension.newsblurplus;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,7 +9,6 @@ import android.content.Context;
 
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
-import com.noinnion.android.reader.api.provider.ISubscription;
 import com.noinnion.android.reader.api.provider.ITag;
 
 @SuppressLint("DefaultLocale")
@@ -46,28 +41,6 @@ public class APIHelper {
 		catch (JSONException e) {
 			return false;
 		}
-	}
-	
-	// Sort a list of tags
-	@SuppressLint("DefaultLocale")
-	public static void sortTags(List<ITag> tags) {
-		Collections.sort(tags, new Comparator<ITag>() {
-			@Override
-			public int compare(ITag lhs, ITag rhs) {
-				return lhs.uid.toLowerCase().compareTo(rhs.uid.toLowerCase());
-			}
-		});
-	}
-	
-	// Sort a list of subscriptions
-	@SuppressLint("DefaultLocale")
-	public static void sortSubscriptions(List<ISubscription> subs) {
-		Collections.sort(subs, new Comparator<ISubscription>() {
-			@Override
-			public int compare(ISubscription lhs, ISubscription rhs) {
-				return lhs.title.toLowerCase().compareTo(rhs.title.toLowerCase());
-			}
-		});
 	}
 	
 	// Construct a single feed's URL from it's integer ID
