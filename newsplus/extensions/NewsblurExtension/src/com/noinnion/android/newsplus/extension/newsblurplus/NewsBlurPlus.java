@@ -66,7 +66,7 @@ public class NewsBlurPlus extends ReaderExtension {
 							String catName = ((String)keys.next());
 							JSONArray feedsPerFolder = json_folders.getJSONArray(catName);
 							catName = catName.trim();
-							ITag cat = APIHelper.createTag(catName, false);
+							ITag cat = APIHelper.createTag(catName, false);		// TODO: Don't create when empty?
 							if (!TextUtils.isEmpty(catName))
 								tags.add(cat);
 							
@@ -81,7 +81,7 @@ public class NewsBlurPlus extends ReaderExtension {
 								sub.uid = "FEED:" + APIHelper.getFeedUrlFromFeedId(feedID);
 								sub.title = f.getString("feed_title");
 								sub.htmlUrl = f.getString("feed_link");
-								sub.unreadCount = f.getInt("nt");
+								sub.unreadCount = f.getInt("nt") + f.getInt("ps");
 								if (!TextUtils.isEmpty(catName))
 									sub.addCategory(cat.uid);
 								feeds.add(sub);
@@ -138,7 +138,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		final AQuery aq = new AQuery(this);
 		final Context c = getApplicationContext();
 		APIHelper.wrapCallback(c, cb);
-		String url = APIHelper.API_URL_HASH_RIVER;
+		String url = APIHelper.API_URL_RIVER;
 		for (String h : unread_hashes)
 			url += "h=" + h + "&";
 		aq.ajax(url + "read_filter=unread", JSONObject.class, cb);

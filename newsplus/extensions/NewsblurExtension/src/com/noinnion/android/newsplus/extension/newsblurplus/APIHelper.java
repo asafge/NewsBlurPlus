@@ -43,14 +43,14 @@ public class APIHelper {
 	
 	// Construct a single feed's URL from it's integer ID
 	public static String getFeedUrlFromFeedId(String feedID) {
-		return API_URL_FEED_RIVER + feedID + API_PARAM_NO_CONTENT;
+		return API_URL_RIVER + "feeds=" + feedID;
 	}
 	
 	// Get the feed ID from a given URL
 	public static String getFeedIdFromFeedUrl(String feedURL) {
 		String feedID = feedURL.replace("FEED:", "");
-		feedID = feedID.replace(API_URL_FEED_RIVER, "");
-		feedID = feedID.replace(API_PARAM_NO_CONTENT, "");
+		feedID = feedID.replace(API_URL_RIVER, "");
+		feedID = feedID.replace("feeds=", "");
 		return feedID;
 	}
 	
@@ -79,15 +79,12 @@ public class APIHelper {
 	public static String API_URL_BASE = "http://www.newsblur.com/";
 	public static String API_URL_BASE_SECURE = "https://www.newsblur.com/";
 	public static String API_URL_LOGIN = API_URL_BASE_SECURE + "api/login/";
-	public static String API_URL_FOLDERS_AND_FEEDS = API_URL_BASE + "reader/feeds?flat=true";
-	public static String API_URL_FEED_RIVER = API_URL_BASE + "reader/river_stories/feed_id=";
-	public static String API_URL_HASH_RIVER = API_URL_BASE + "reader/river_stories?";
+	public static String API_URL_FOLDERS_AND_FEEDS = API_URL_BASE + "reader/feeds?flat=true&update_counts=true";
+	public static String API_URL_RIVER = API_URL_BASE + "reader/river_stories?";
 	public static String API_URL_MARK_STORY_AS_READ = API_URL_BASE + "reader/mark_story_as_read/";
 	public static String API_URL_MARK_STORY_AS_UNREAD = API_URL_BASE + "reader/mark_story_as_unread/";
 	public static String API_URL_MARK_FEED_AS_READ = API_URL_BASE + "reader/mark_feed_as_read/";
 	public static String API_URL_MARK_ALL_AS_READ = API_URL_BASE + "reader/mark_all_as_read/";
 	public static String API_URL_STARRED_ITEMS = API_URL_BASE + "reader/starred_stories/";
 	public static String API_URL_UNREAD_HASHES = API_URL_BASE + "reader/unread_story_hashes/";
-	
-	public static String API_PARAM_NO_CONTENT = "?include_story_content=false";
 }
