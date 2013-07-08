@@ -259,9 +259,8 @@ public class NewsBlurPlus extends ReaderExtension {
 		final AQuery aq = new AQuery(this);
 		final Context c = getApplicationContext();
 		APICalls.wrapCallback(c, cb);
-		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("include_story_content", "false");
-		aq.ajax(url, params, JSONObject.class, cb);
+		url += "?include_story_content=false";
+		aq.ajax(url, JSONObject.class, cb);
 	}
 	
 	/*
