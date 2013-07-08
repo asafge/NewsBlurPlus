@@ -8,6 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 
 import com.androidquery.callback.AjaxCallback;
@@ -47,21 +48,23 @@ public class APIHelper {
 	}
 	
 	// Sort a list of tags
+	@SuppressLint("DefaultLocale")
 	public static void sortTags(List<ITag> tags) {
 		Collections.sort(tags, new Comparator<ITag>() {
 			@Override
 			public int compare(ITag lhs, ITag rhs) {
-				return lhs.uid.compareTo(rhs.uid);
+				return lhs.uid.toLowerCase().compareTo(rhs.uid.toLowerCase());
 			}
 		});
 	}
 	
 	// Sort a list of subscriptions
+	@SuppressLint("DefaultLocale")
 	public static void sortSubscriptions(List<ISubscription> subs) {
 		Collections.sort(subs, new Comparator<ISubscription>() {
 			@Override
 			public int compare(ISubscription lhs, ISubscription rhs) {
-				return lhs.title.compareTo(rhs.title);
+				return lhs.title.toLowerCase().compareTo(rhs.title.toLowerCase());
 			}
 		});
 	}
