@@ -16,6 +16,7 @@ import com.androidquery.callback.AjaxStatus;
 import com.noinnion.android.reader.api.provider.ISubscription;
 import com.noinnion.android.reader.api.provider.ITag;
 
+@SuppressLint("DefaultLocale")
 public class APIHelper {
 	
 	//Add needed params to the API callback (User-agent, cookie)
