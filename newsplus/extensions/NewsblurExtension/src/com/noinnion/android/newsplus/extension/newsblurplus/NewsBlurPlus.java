@@ -35,7 +35,6 @@ public class NewsBlurPlus extends ReaderExtension {
 	private List<ITag> tags;
 	private List<ISubscription> feeds;
 	private List<String> unread_hashes;
-	private Map<String, Integer> feeds_unread_counts;
 	private ITag starredTag;
 	
 	/*
@@ -152,31 +151,30 @@ public class NewsBlurPlus extends ReaderExtension {
 	 * Get all the unread story hashes at once
 	 */
 	private void getUnreadHashes() {
-		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
-			@Override
-			public void callback(String url, JSONObject json, AjaxStatus status) {
-				if (APIHelper.isJSONResponseValid(json, status)) {
-					try {
-						JSONObject json_folders = json.getJSONObject("unread_feed_story_hashes");
-						Iterator<?> keys = json_folders.keys();
-						while (keys.hasNext()) {
-							JSONArray items = json_folders.getJSONArray((String)keys.next());
-							for (int i=0; i<items.length(); i++)
-								unread_hashes.add(items.getString(i));
-						}
-					} 
-					catch (Exception e) {
-						AQUtility.report(e);
-					}
-				}
-			}
-		};
+		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
 		final AQuery aq = new AQuery(this);
 		final Context c = getApplicationContext();
 		APIHelper.wrapCallback(c, cb);
 		unread_hashes = new ArrayList<String>();
-		aq.ajax(APIHelper.API_URL_UNREAD_HASHES, JSONObject.class, cb);
-		cb.block();
+		cb.url(APIHelper.API_URL_UNREAD_HASHES).type(JSONObject.class);
+		aq.sync(cb);		
+
+		JSONObject json = cb.getResult();
+		AjaxStatus status = cb.getStatus();
+		if (APIHelper.isJSONResponseValid(json, status)) {
+			try {
+				JSONObject json_folders = json.getJSONObject("unread_feed_story_hashes");
+				Iterator<?> keys = json_folders.keys();
+				while (keys.hasNext()) {
+					JSONArray items = json_folders.getJSONArray((String)keys.next());
+					for (int i=0; i<items.length(); i++)
+						unread_hashes.add(items.getString(i));
+				}
+			} 
+			catch (Exception e) {
+				AQUtility.report(e);
+			}
+		}
 	}
 	
 	/*
@@ -186,7 +184,6 @@ public class NewsBlurPlus extends ReaderExtension {
 		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
 		final AQuery aq = new AQuery(this);
 		final Context c = getApplicationContext();
-		feeds_unread_counts = new HashMap<String, Integer>();
 		APIHelper.wrapCallback(c, cb);
 		cb.url(APIHelper.API_URL_REFRESH_FEEDS).type(JSONObject.class);
 		aq.sync(cb);
