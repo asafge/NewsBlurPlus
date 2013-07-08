@@ -107,6 +107,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		updateFeedCounts();
 		try {
 			APIHelper.sortTags(tags);
+			APIHelper.sortSubscriptions(feeds);
 			tagHandler.tags(tags);
 			subHandler.subscriptions(feeds);
 		}

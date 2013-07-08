@@ -12,6 +12,7 @@ import android.content.Context;
 
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
+import com.noinnion.android.reader.api.provider.ISubscription;
 import com.noinnion.android.reader.api.provider.ITag;
 
 public class APIHelper {
@@ -51,6 +52,16 @@ public class APIHelper {
 			@Override
 			public int compare(ITag lhs, ITag rhs) {
 				return lhs.uid.compareTo(rhs.uid);
+			}
+		});
+	}
+	
+	// Sort a list of subscriptions
+	public static void sortSubscriptions(List<ISubscription> subs) {
+		Collections.sort(subs, new Comparator<ISubscription>() {
+			@Override
+			public int compare(ISubscription lhs, ISubscription rhs) {
+				return lhs.title.compareTo(rhs.title);
 			}
 		});
 	}
