@@ -262,7 +262,6 @@ public class NewsBlurPlus extends ReaderExtension {
 		final AQuery aq = new AQuery(this);
 		final Context c = getApplicationContext();
 		APIHelper.wrapCallback(c, cb);
-		// TODO: Change url to "http://www.newsblur.com/reader/river_stories/feed_id=576138" and get all stories instead of just 6
 		aq.ajax(url + APIHelper.API_PARAM_NO_CONTENT, JSONObject.class, cb);
 	}
 	
