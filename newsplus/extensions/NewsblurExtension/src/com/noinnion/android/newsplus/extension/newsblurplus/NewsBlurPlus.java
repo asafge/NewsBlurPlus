@@ -35,13 +35,14 @@ public class NewsBlurPlus extends ReaderExtension {
 	private List<ITag> tags;
 	private List<ISubscription> feeds;
 	private List<String> unread_hashes;
+	private Map<String, Integer> feeds_unread_counts;
 	private ITag starredTag;
 	
 	/*
-	 * Get the categories (folders) and their feeds + handle reader list
-	 * 
-	 * API call: http://www.newsblur.com/reader/feeds
-	 * Result: folders/0/Math/[ID] (ID = 1818)
+	 * Main sync function to get folders, feeds, and counts.
+	 * 1. Get the folders (tags) and their feeds.
+	 * 2. Ask NewsBlur to Refresh feed counts + save to feeds.
+	 * 3. Send handler the tags and feeds.
 	 */
 	@Override
 	public void handleReaderList(ITagListHandler tagHandler, ISubscriptionListHandler subHandler, long syncTime) throws IOException, ReaderException {
@@ -100,6 +101,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		aq.ajax(APIHelper.API_URL_FOLDERS_AND_FEEDS, JSONObject.class, cb);
 		if ((APIHelper.isErrorCode(cb.getStatus().getCode())) || feeds.size() == 0)
 			throw new ReaderException("Network error");
+		getCurrentFeedCounts();
 		try {
 			tagHandler.tags(tags);
 			subHandler.subscriptions(feeds);
@@ -176,6 +178,43 @@ public class NewsBlurPlus extends ReaderExtension {
 	}
 	
 	/*
+	 * Call for an update on all feeds' unread counters, and store the result
+	 */
+	private void getCurrentFeedCounts()
+	{
+		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
+			@Override
+			public void callback(String url, JSONObject json, AjaxStatus status) {
+				if (APIHelper.isJSONResponseValid(json, status)) {
+					try {
+						JSONObject feeds = json.getJSONObject("feeds");
+						Iterator<?> keys = feeds.keys();
+						while (keys.hasNext()) {
+							JSONObject f = (JSONObject)keys.next();
+							String feed_id = f.getString("id");
+							int feed_count = f.getInt("ps") + f.getInt("nt");
+							feeds_unread_counts.put(feed_id, feed_count);
+						}
+					}
+					catch (Exception e) {
+						AQUtility.report(e);
+					}
+				}
+			}
+		};
+		final AQuery aq = new AQuery(this);
+		final Context c = getApplicationContext();
+		APIHelper.wrapCallback(c, cb);
+		feeds_unread_counts = new HashMap<String, Integer>();
+		aq.ajax(APIHelper.API_URL_REFRESH_FEEDS, JSONObject.class, cb);
+		cb.block();
+
+		// Make sure to refresh the subscriptions about their counts
+		for (ISubscription sub : feeds)
+			sub.unreadCount = feeds_unread_counts.get(APIHelper.getFeedIdFromFeedUrl(sub.uid));
+	}
+	
+	/*
 	 * Handle a single item list (a feed or a folder).
 	 * This functions calls the parseItemList function.
 	 */
@@ -207,6 +246,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			throw new ReaderException(e);
 		}
 	}
+	
 
 	/*
 	 * Get the content of a single feed 
@@ -265,6 +305,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		aq.ajax(url, JSONObject.class, cb);
 	}
 	
+	
 	/*
 	 * Main function for marking stories (and their feeds) as read/unread.
 	 */
@@ -313,6 +354,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		return true;		// TODO: Return some real feedback
 	}
 
+	
 	/* 
 	 * Mark a list of stories (and their feeds) as read
 	 */
@@ -321,6 +363,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		return this.markAs(true, itemUids, subUIds);
 	}
 
+	
 	/* 
 	 * Mark a list of stories (and their feeds) as unread
 	 */
@@ -329,6 +372,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		return this.markAs(false, itemUids, subUids);
 	}
 
+	
 	/*
 	 * Mark all stories on all feeds as read.
 	 * Note: S = subscription (feed), t = tag
