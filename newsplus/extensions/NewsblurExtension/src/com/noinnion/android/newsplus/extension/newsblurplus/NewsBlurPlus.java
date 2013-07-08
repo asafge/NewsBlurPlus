@@ -138,7 +138,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		final AQuery aq = new AQuery(this);
 		final Context c = getApplicationContext();
 		APIHelper.wrapCallback(c, cb);
-		String url = APIHelper.API_URL_FEED_RIVER;
+		String url = APIHelper.API_URL_HASH_RIVER;
 		for (String h : unread_hashes)
 			url += "h=" + h + "&";
 		aq.ajax(url + "read_filter=unread", JSONObject.class, cb);
@@ -229,7 +229,7 @@ public class NewsBlurPlus extends ReaderExtension {
 						for (int i=0; i<arr.length(); i++) {
 							JSONObject story = arr.getJSONObject(i);
 							IItem item = new IItem();
-							item.subUid = "FEED:" + url.replace(APIHelper.API_PARAM_NO_CONTENT, "");
+							item.subUid = "FEED:" + url;
 							item.title = story.getString("story_title");
 							item.link = story.getString("story_permalink");
 							item.uid = story.getString("id");
@@ -237,7 +237,7 @@ public class NewsBlurPlus extends ReaderExtension {
 							item.updatedTime = story.getLong("story_timestamp");
 							item.publishedTime = story.getLong("story_timestamp");
 							item.read = (story.getInt("read_status") == 1);
-							item.content = APIHelper.getImageTagFromUrls(story);
+							item.content = story.getString("story_content");
 							item.starred = (story.has("starred") && story.getString("starred") == "true");
 							for (String cat : categories)
 								item.addCategory(cat);
@@ -262,7 +262,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		final AQuery aq = new AQuery(this);
 		final Context c = getApplicationContext();
 		APIHelper.wrapCallback(c, cb);
-		aq.ajax(url + APIHelper.API_PARAM_NO_CONTENT, JSONObject.class, cb);
+		aq.ajax(url, JSONObject.class, cb);
 	}
 	
 	/*
@@ -338,7 +338,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		if (s == null && t == null)
 			return this.markAs(true, null, null);
 		else if (s.startsWith("FEED:")) {
-			String[] feed = { s.replace("FEED:", "") };
+			String[] feed = { APIHelper.getFeedIdFromFeedUrl(s) };
 			return this.markAs(true, null, feed);
 		}
 		else if (s.startsWith("FOL:")) {
