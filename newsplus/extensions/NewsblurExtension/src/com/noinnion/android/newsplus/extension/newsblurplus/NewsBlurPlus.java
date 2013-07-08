@@ -188,7 +188,7 @@ public class NewsBlurPlus extends ReaderExtension {
 					for (ISubscription sub : feeds)
 						if (sub.unreadCount > 0)
 							parseItemList(sub.uid.replace("FEED:", ""), handler, sub.getCategories());
-					//parseItemList(APICalls.API_URL_STARRED_ITEMS, handler, Arrays.asList(starredTag.label));
+					//parseItemList(APIHelper.API_URL_STARRED_ITEMS, handler, Arrays.asList(starredTag.label));
 				}
 				else if (uid.startsWith("FOL:")) {
 					for (ISubscription sub : feeds)
