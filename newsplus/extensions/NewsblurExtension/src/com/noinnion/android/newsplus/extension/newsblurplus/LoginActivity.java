@@ -86,7 +86,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 		params.put("username", user);
 		params.put("password", pass);
 		cb.header("User-Agent", Prefs.USER_AGENT);
-		aq.ajax(APICalls.API_URL_LOGIN, params, JSONObject.class, cb);
+		aq.ajax(APIHelper.API_URL_LOGIN, params, JSONObject.class, cb);
 	}
 	
 	@Override

@@ -48,7 +48,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
 			@Override
 			public void callback(String url, JSONObject json, AjaxStatus status) {
-				if (APICalls.isJSONResponseValid(json, status)) {
+				if (APIHelper.isJSONResponseValid(json, status)) {
 					try {
 						JSONObject json_feeds = json.getJSONObject("feeds");
 						JSONObject json_folders = json.getJSONObject("flat_folders");
@@ -58,7 +58,7 @@ public class NewsBlurPlus extends ReaderExtension {
 							tags = new ArrayList<ITag>();
 							feeds = new ArrayList<ISubscription>();
 							if (starredTag == null) {
-								starredTag = APICalls.createTag("Starred items", true);
+								starredTag = APIHelper.createTag("Starred items", true);
 								tags.add(starredTag);
 							}
 						}
@@ -66,7 +66,7 @@ public class NewsBlurPlus extends ReaderExtension {
 							String catName = ((String)keys.next());
 							JSONArray feedsPerFolder = json_folders.getJSONArray(catName);
 							catName = catName.trim();
-							ITag cat = APICalls.createTag(catName, false);
+							ITag cat = APIHelper.createTag(catName, false);
 							if (!TextUtils.isEmpty(catName))
 								tags.add(cat);
 							
@@ -78,7 +78,7 @@ public class NewsBlurPlus extends ReaderExtension {
 								Calendar updateTime = Calendar.getInstance();
 								updateTime.add(Calendar.SECOND, (-1) * f.getInt("updated_seconds_ago"));
 								sub.newestItemTime = updateTime.getTimeInMillis();
-								sub.uid = "FEED:" + APICalls.getFeedUrlFromFeedId(feedID);
+								sub.uid = "FEED:" + APIHelper.getFeedUrlFromFeedId(feedID);
 								sub.title = f.getString("feed_title");
 								sub.htmlUrl = f.getString("feed_link");
 								sub.unreadCount = f.getInt("nt");
@@ -96,9 +96,9 @@ public class NewsBlurPlus extends ReaderExtension {
 		};
 		final AQuery aq = new AQuery(this);
 		final Context c = getApplicationContext();
-		APICalls.wrapCallback(c, cb);
-		aq.ajax(APICalls.API_URL_FOLDERS_AND_FEEDS, JSONObject.class, cb);
-		if ((APICalls.isErrorCode(cb.getStatus().getCode())) || feeds.size() == 0)
+		APIHelper.wrapCallback(c, cb);
+		aq.ajax(APIHelper.API_URL_FOLDERS_AND_FEEDS, JSONObject.class, cb);
+		if ((APIHelper.isErrorCode(cb.getStatus().getCode())) || feeds.size() == 0)
 			throw new ReaderException("Network error");
 		try {
 			tagHandler.tags(tags);
@@ -119,7 +119,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			@Override
 			public void callback(String url, JSONObject json, AjaxStatus status) {
 				try {
-					if (APICalls.isJSONResponseValid(json, status)) {
+					if (APIHelper.isJSONResponseValid(json, status)) {
 						List<String> unread = new ArrayList<String>();
 						JSONArray arr = json.getJSONArray("stories");
 						for (int i=0; i<arr.length(); i++) {
@@ -137,8 +137,8 @@ public class NewsBlurPlus extends ReaderExtension {
 		getUnreadHashes();
 		final AQuery aq = new AQuery(this);
 		final Context c = getApplicationContext();
-		APICalls.wrapCallback(c, cb);
-		String url = APICalls.API_URL_FEED_RIVER;
+		APIHelper.wrapCallback(c, cb);
+		String url = APIHelper.API_URL_FEED_RIVER;
 		for (String h : unread_hashes)
 			url += "h=" + h + "&";
 		aq.ajax(url + "read_filter=unread", JSONObject.class, cb);
@@ -151,7 +151,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
 			@Override
 			public void callback(String url, JSONObject json, AjaxStatus status) {
-				if (APICalls.isJSONResponseValid(json, status)) {
+				if (APIHelper.isJSONResponseValid(json, status)) {
 					try {
 						JSONObject json_folders = json.getJSONObject("unread_feed_story_hashes");
 						Iterator<?> keys = json_folders.keys();
@@ -169,9 +169,9 @@ public class NewsBlurPlus extends ReaderExtension {
 		};
 		final AQuery aq = new AQuery(this);
 		final Context c = getApplicationContext();
-		APICalls.wrapCallback(c, cb);
+		APIHelper.wrapCallback(c, cb);
 		unread_hashes = new ArrayList<String>();
-		aq.ajax(APICalls.API_URL_UNREAD_HASHES, JSONObject.class, cb);
+		aq.ajax(APIHelper.API_URL_UNREAD_HASHES, JSONObject.class, cb);
 		cb.block();
 	}
 	
@@ -199,7 +199,7 @@ public class NewsBlurPlus extends ReaderExtension {
 					parseItemList(handler.stream().replace("FEED:", ""), handler, Arrays.asList(""));
 				}
 				else if (uid.startsWith(ReaderExtension.STATE_STARRED)) {
-					parseItemList(APICalls.API_URL_STARRED_ITEMS, handler, Arrays.asList(starredTag.label));
+					parseItemList(APIHelper.API_URL_STARRED_ITEMS, handler, Arrays.asList(starredTag.label));
 				}
 			}
 		}
@@ -222,7 +222,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			@Override
 			public void callback(String url, JSONObject json, AjaxStatus status) {
 				try {
-					if (APICalls.isJSONResponseValid(json, status)) {
+					if (APIHelper.isJSONResponseValid(json, status)) {
 						List<IItem> items = new ArrayList<IItem>();
 						JSONArray arr = json.getJSONArray("stories");
 						int length = 0;
@@ -261,7 +261,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		};
 		final AQuery aq = new AQuery(this);
 		final Context c = getApplicationContext();
-		APICalls.wrapCallback(c, cb);
+		APIHelper.wrapCallback(c, cb);
 		aq.ajax(url, JSONObject.class, cb);
 	}
 	
@@ -272,7 +272,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
 			@Override
 			public void callback(String url, JSONObject json, AjaxStatus status) {
-				if (APICalls.isJSONResponseValid(json, status)) {
+				if (APIHelper.isJSONResponseValid(json, status)) {
 					try {
 						if (!json.getString("result").startsWith("ok"))
 							throw new ReaderException("Failed marking as read"); 
@@ -285,26 +285,26 @@ public class NewsBlurPlus extends ReaderExtension {
 		};
 		final AQuery aq = new AQuery(this);
 		final Context c = getApplicationContext();
-		APICalls.wrapCallback(c, cb);
+		APIHelper.wrapCallback(c, cb);
 		
 		if (itemUids == null && subUIds == null) {
-			aq.ajax(APICalls.API_URL_MARK_ALL_AS_READ, JSONObject.class, cb);
+			aq.ajax(APIHelper.API_URL_MARK_ALL_AS_READ, JSONObject.class, cb);
 			cb.block();
 		}
 		else {
 			if (itemUids == null) {
 				Map<String, Object> params = new HashMap<String, Object>();
 				for (String sub : subUIds)
-					params.put("feed_id", APICalls.getFeedIdFromFeedUrl(sub));
-				aq.ajax(APICalls.API_URL_MARK_FEED_AS_READ, params, JSONObject.class, cb);
+					params.put("feed_id", APIHelper.getFeedIdFromFeedUrl(sub));
+				aq.ajax(APIHelper.API_URL_MARK_FEED_AS_READ, params, JSONObject.class, cb);
 				cb.block();
 			}
 			else {
-				String url = read ? APICalls.API_URL_MARK_STORY_AS_READ : APICalls.API_URL_MARK_STORY_AS_UNREAD;	
+				String url = read ? APIHelper.API_URL_MARK_STORY_AS_READ : APIHelper.API_URL_MARK_STORY_AS_UNREAD;	
 				Map<String, Object> params = new HashMap<String, Object>();
 				for (int i=0; i<itemUids.length; i++) {	
 					params.put("story_id", itemUids[i]);
-					params.put("feed_id", APICalls.getFeedIdFromFeedUrl(subUIds[i]));
+					params.put("feed_id", APIHelper.getFeedIdFromFeedUrl(subUIds[i]));
 				}
 				aq.ajax(url, params, JSONObject.class, cb);
 				cb.block();
