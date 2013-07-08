@@ -182,38 +182,29 @@ public class NewsBlurPlus extends ReaderExtension {
 	/*
 	 * Call for an update on all feeds' unread counters, and store the result
 	 */
-	private void updateFeedCounts()
-	{
-		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
-			@Override
-			public void callback(String url, JSONObject json, AjaxStatus status) {
-				if (APIHelper.isJSONResponseValid(json, status)) {
-					try {
-						JSONObject feeds = json.getJSONObject("feeds");
-						Iterator<?> keys = feeds.keys();
-						while (keys.hasNext()) {
-							String feed_id = (String)keys.next();
-							JSONObject f = feeds.getJSONObject(feed_id);
-							int feed_count = f.getInt("ps") + f.getInt("nt");
-							feeds_unread_counts.put(feed_id, feed_count);
-						}
-					}
-					catch (Exception e) {
-						AQUtility.report(e);
-					}
-				}
-			}
-		};
+	private void updateFeedCounts() {
+		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
 		final AQuery aq = new AQuery(this);
 		final Context c = getApplicationContext();
-		APIHelper.wrapCallback(c, cb);
 		feeds_unread_counts = new HashMap<String, Integer>();
-		aq.ajax(APIHelper.API_URL_REFRESH_FEEDS, JSONObject.class, cb);
-		cb.block();
-
-		// Make sure to refresh the subscriptions about their counts
-		for (ISubscription sub : feeds)
-			sub.unreadCount = feeds_unread_counts.get(APIHelper.getFeedIdFromFeedUrl(sub.uid));
+		APIHelper.wrapCallback(c, cb);
+		cb.url(APIHelper.API_URL_REFRESH_FEEDS).type(JSONObject.class);
+		aq.sync(cb);
+		
+		JSONObject json = cb.getResult();
+		AjaxStatus status = cb.getStatus();
+		if (APIHelper.isJSONResponseValid(json, status)) {
+			try {
+				JSONObject json_feeds = json.getJSONObject("feeds");
+				for (ISubscription sub : feeds) {
+					JSONObject f = json_feeds.getJSONObject(APIHelper.getFeedIdFromFeedUrl(sub.uid));
+					sub.unreadCount = f.getInt("ps") + f.getInt("nt");
+				}
+			}
+			catch (Exception e) {
+				AQUtility.report(e);
+			}
+		}
 	}
 	
 	/*
