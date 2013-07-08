@@ -57,8 +57,10 @@ public class NewsBlurPlus extends ReaderExtension {
 						if (keys.hasNext()) {
 							tags = new ArrayList<ITag>();
 							feeds = new ArrayList<ISubscription>();
-							starredTag = APICalls.createTag("Starred items", true);
-							tags.add(starredTag);
+							if (starredTag == null) {
+								starredTag = APICalls.createTag("Starred items", true);
+								tags.add(starredTag);
+							}
 						}
 						while (keys.hasNext()) {
 							String catName = ((String)keys.next());
@@ -108,7 +110,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	}
 
 	/* 
-	 * Get a list of unread stories, UI will mark all other as read.
+	 * Get a list of unread story IDS (URLs), UI will mark all other as read.
 	 * This really speeds up the sync process. 
 	 */
 	@Override
