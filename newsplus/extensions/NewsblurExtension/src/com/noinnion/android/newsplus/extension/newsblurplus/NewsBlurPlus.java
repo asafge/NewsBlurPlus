@@ -34,6 +34,7 @@ import com.noinnion.android.reader.api.provider.ITag;
 public class NewsBlurPlus extends ReaderExtension {
 	private List<ITag> tags;
 	private List<ISubscription> feeds;
+	private List<String> unread_hashes;
 	private ITag starredTag;
 	
 	/*
@@ -76,7 +77,6 @@ public class NewsBlurPlus extends ReaderExtension {
 								updateTime.add(Calendar.SECOND, (-1) * f.getInt("updated_seconds_ago"));
 								sub.newestItemTime = updateTime.getTimeInMillis();
 								sub.uid = "FEED:" + APICalls.getFeedUrlFromFeedId(feedID);
-								sub.id = Long.valueOf(feedID).longValue();
 								sub.title = f.getString("feed_title");
 								sub.htmlUrl = f.getString("feed_link");
 								sub.unreadCount = f.getInt("nt");
@@ -132,17 +132,45 @@ public class NewsBlurPlus extends ReaderExtension {
 				}
 			}
 		};
-		if (feeds != null) {
-			final AQuery aq = new AQuery(this);
-			final Context c = getApplicationContext();
-			APICalls.wrapCallback(c, cb);
-			Map<String, Object> params = new HashMap<String, Object>();
-			params.put("include_story_content", "false");
-			params.put("read_filter", "unread");
-			for (ISubscription sub : feeds)
-				if (sub.unreadCount > 0)
-						aq.ajax(sub.uid.replace("FEED:", ""), params, JSONObject.class, cb);
-		}
+		getUnreadHashes();
+		final AQuery aq = new AQuery(this);
+		final Context c = getApplicationContext();
+		APICalls.wrapCallback(c, cb);
+		String url = APICalls.API_URL_FEED_RIVER;
+		for (String h : unread_hashes)
+			url += "h=" + h + "&";
+		aq.ajax(url + "read_filter=unread", JSONObject.class, cb);
+	}
+	
+	/*
+	 * Get all the unread story hashes at once
+	 */
+	private void getUnreadHashes() {
+		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
+			@Override
+			public void callback(String url, JSONObject json, AjaxStatus status) {
+				if (APICalls.isJSONResponseValid(json, status)) {
+					try {
+						JSONObject json_folders = json.getJSONObject("unread_feed_story_hashes");
+						Iterator<?> keys = json_folders.keys();
+						while (keys.hasNext()) {
+							JSONArray items = json_folders.getJSONArray((String)keys.next());
+							for (int i=0; i<items.length(); i++)
+								unread_hashes.add(items.getString(i));
+						}
+					} 
+					catch (Exception e) {
+						AQUtility.report(e);
+					}
+				}
+			}
+		};
+		final AQuery aq = new AQuery(this);
+		final Context c = getApplicationContext();
+		APICalls.wrapCallback(c, cb);
+		unread_hashes = new ArrayList<String>();
+		aq.ajax(APICalls.API_URL_UNREAD_HASHES, JSONObject.class, cb);
+		cb.block();
 	}
 	
 	/*

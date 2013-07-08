@@ -64,6 +64,7 @@ public class APICalls {
 	public static String API_URL_LOGIN = API_URL_BASE_SECURE + "api/login/";
 	public static String API_URL_FOLDERS_AND_FEEDS = API_URL_BASE + "reader/feeds?flat=true";
 	public static String API_URL_FEED_SINGLE = API_URL_BASE + "reader/feed/";
+	public static String API_URL_FEED_RIVER = API_URL_BASE + "reader/river_stories?";
 	public static String API_URL_MARK_STORY_AS_READ = API_URL_BASE + "reader/mark_story_as_read/";
 	public static String API_URL_MARK_STORY_AS_UNREAD = API_URL_BASE + "reader/mark_story_as_unread/";
 	public static String API_URL_MARK_FEED_AS_READ = API_URL_BASE + "reader/mark_feed_as_read/";
