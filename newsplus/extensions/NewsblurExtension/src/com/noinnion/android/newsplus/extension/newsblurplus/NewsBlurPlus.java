@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -103,6 +106,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			throw new ReaderException("Network error");
 		updateFeedCounts();
 		try {
+			APIHelper.sortTags(tags);
 			tagHandler.tags(tags);
 			subHandler.subscriptions(feeds);
 		}

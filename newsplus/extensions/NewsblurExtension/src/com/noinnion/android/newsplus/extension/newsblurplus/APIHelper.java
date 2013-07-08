@@ -1,5 +1,9 @@
 package com.noinnion.android.newsplus.extension.newsblurplus;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -39,6 +43,16 @@ public class APIHelper {
 		catch (JSONException e) {
 			return false;
 		}
+	}
+	
+	// Sort a list of tags
+	public static void sortTags(List<ITag> tags) {
+		Collections.sort(tags, new Comparator<ITag>() {
+			@Override
+			public int compare(ITag lhs, ITag rhs) {
+				return lhs.uid.compareTo(rhs.uid);
+			}
+		});
 	}
 	
 	// Construct a single feed's URL from it's integer ID
