@@ -229,7 +229,7 @@ public class NewsBlurPlus extends ReaderExtension {
 						for (int i=0; i<arr.length(); i++) {
 							JSONObject story = arr.getJSONObject(i);
 							IItem item = new IItem();
-							item.subUid = "FEED:" + url;
+							item.subUid = "FEED:" + url.replace(APIHelper.API_PARAM_NO_CONTENT, "");
 							item.title = story.getString("story_title");
 							item.link = story.getString("story_permalink");
 							item.uid = story.getString("id");
@@ -237,7 +237,7 @@ public class NewsBlurPlus extends ReaderExtension {
 							item.updatedTime = story.getLong("story_timestamp");
 							item.publishedTime = story.getLong("story_timestamp");
 							item.read = (story.getInt("read_status") == 1);
-							item.content = story.getString("story_content");
+							item.content = APIHelper.getImageTagFromUrls(story);
 							item.starred = (story.has("starred") && story.getString("starred") == "true");
 							for (String cat : categories)
 								item.addCategory(cat);
@@ -262,7 +262,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		final AQuery aq = new AQuery(this);
 		final Context c = getApplicationContext();
 		APIHelper.wrapCallback(c, cb);
-		aq.ajax(url, JSONObject.class, cb);
+		aq.ajax(url + APIHelper.API_PARAM_NO_CONTENT, JSONObject.class, cb);
 	}
 	
 	/*
