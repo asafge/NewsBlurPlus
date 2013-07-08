@@ -101,7 +101,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		aq.ajax(APIHelper.API_URL_FOLDERS_AND_FEEDS, JSONObject.class, cb);
 		if ((APIHelper.isErrorCode(cb.getStatus().getCode())) || feeds.size() == 0)
 			throw new ReaderException("Network error");
-		getCurrentFeedCounts();
+		updateFeedCounts();
 		try {
 			tagHandler.tags(tags);
 			subHandler.subscriptions(feeds);
@@ -180,7 +180,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	/*
 	 * Call for an update on all feeds' unread counters, and store the result
 	 */
-	private void getCurrentFeedCounts()
+	private void updateFeedCounts()
 	{
 		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
 			@Override
@@ -190,8 +190,8 @@ public class NewsBlurPlus extends ReaderExtension {
 						JSONObject feeds = json.getJSONObject("feeds");
 						Iterator<?> keys = feeds.keys();
 						while (keys.hasNext()) {
-							JSONObject f = (JSONObject)keys.next();
-							String feed_id = f.getString("id");
+							String feed_id = (String)keys.next();
+							JSONObject f = feeds.getJSONObject(feed_id);
 							int feed_count = f.getInt("ps") + f.getInt("nt");
 							feeds_unread_counts.put(feed_id, feed_count);
 						}
