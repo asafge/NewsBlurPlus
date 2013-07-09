@@ -215,16 +215,17 @@ public class NewsBlurPlus extends ReaderExtension {
 				String uid = handler.stream();
 				if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
 					for (ISubscription sub : feeds)
-						if (sub.unreadCount > 0)
+						if (sub.unreadCount > 0 && !handler.excludedStreams().contains(sub.uid))
 							parseItemList(sub.uid.replace("FEED:", ""), handler, sub.getCategories());
 				}
 				else if (uid.startsWith("FOL:")) {
 					for (ISubscription sub : feeds)
-						if ((sub.getCategories().contains(uid)) && (sub.unreadCount > 0))
+						if (sub.unreadCount > 0 && sub.getCategories().contains(uid) && !handler.excludedStreams().contains(sub.uid))
 							parseItemList(sub.uid.replace("FEED:", ""), handler, sub.getCategories());
 				}
 				else if (uid.startsWith("FEED:")) {
-					parseItemList(handler.stream().replace("FEED:", ""), handler, Arrays.asList(""));
+					if (!handler.excludedStreams().contains(uid))
+						parseItemList(handler.stream().replace("FEED:", ""), handler, Arrays.asList(""));
 				}
 				else if (uid.startsWith(ReaderExtension.STATE_STARRED)) {
 					parseItemList(APIHelper.API_URL_STARRED_ITEMS, handler, Arrays.asList(starredTag.label));
