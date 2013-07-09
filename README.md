@@ -8,13 +8,13 @@ Features already implemented:
 * Sync all folders (in a flat mode) and their feeds.
 * Ablility to read all articles for each feed.
 * Mark as read/unread works and syncs to server (might still have some issues).
-* Partially support starred (saved) items.
 * Allow to exclude certain folders/feeds from sync.
 
 TODO:
 -------------------------------
-* Improve handling for API errors.
-* Improve starred supprot
+* Mark as read for feed/folder.
+* Improve handling for API errors + change all calls to be synchronous.
+* Supprot starred items.
 * Implement folder/tag editing + subscription editing.
     
 References:
