@@ -9,14 +9,13 @@ Features already implemented:
 * Ablility to read all articles for each feed.
 * Mark as read/unread works and syncs to server (might still have some issues).
 * Partially support starred (saved) items.
+* Allow to exclude certain folders/feeds from sync.
 
 TODO:
 -------------------------------
 * Improve handling for API errors.
 * Improve starred supprot
 * Implement folder/tag editing + subscription editing.
-* Allow to exclude certain folders/feeds from sync.
-* Fix date/time not showing bug.
     
 References:
 -------------------------------
