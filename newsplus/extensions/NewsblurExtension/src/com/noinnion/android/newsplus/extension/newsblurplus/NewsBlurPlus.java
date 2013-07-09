@@ -98,6 +98,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		final Context c = getApplicationContext();
 		APIHelper.wrapCallback(c, cb);
 		aq.ajax(APIHelper.API_URL_FOLDERS_AND_FEEDS, JSONObject.class, cb);
+		cb.block();
 		if ((APIHelper.isErrorCode(cb.getStatus().getCode())) || feeds.size() == 0)
 			throw new ReaderException("Network error");
 		updateFeedCounts();
@@ -143,6 +144,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		for (String h : unread_hashes)
 			url += "h=" + h + "&";
 		aq.ajax(url + "read_filter=unread", JSONObject.class, cb);
+		cb.block();
 	}
 	
 	/*
@@ -293,6 +295,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		final Context c = getApplicationContext();
 		APIHelper.wrapCallback(c, cb);
 		aq.ajax(url, JSONObject.class, cb);
+		cb.block();
 	}
 	
 	
