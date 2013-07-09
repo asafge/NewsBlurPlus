@@ -266,7 +266,7 @@ public class NewsBlurPlus extends ReaderExtension {
 							item.updatedTime = story.getLong("story_timestamp");
 							item.publishedTime = story.getLong("story_timestamp");
 							item.read = (story.getInt("read_status") == 1);
-							item.content = APIHelper.getImageTagFromUrls(story);
+							item.content = story.getString("story_content");
 							if (story.has("starred") && story.getString("starred") == "true") {
 								item.starred = true;
 								item.addCategory(starredTag.label);

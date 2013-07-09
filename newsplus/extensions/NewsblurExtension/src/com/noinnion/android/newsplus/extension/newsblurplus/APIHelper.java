@@ -56,17 +56,6 @@ public class APIHelper {
 		return feedID;
 	}
 	
-	// Get an HTML image tag to place in the item's content (for thumbnails)
-	public static String getImageTagFromUrls(JSONObject story) {
-		try {
-			JSONArray images =  story.getJSONArray("image_urls");
-			return "<img src='" + images.getString(0) + "'>";
-		}
-		catch (JSONException e) {
-			return "";
-		}
-	}
-	
 	// Create a new tag object
 	public static ITag createTag(String name, Boolean isStar) {
 		ITag tag = new ITag();
