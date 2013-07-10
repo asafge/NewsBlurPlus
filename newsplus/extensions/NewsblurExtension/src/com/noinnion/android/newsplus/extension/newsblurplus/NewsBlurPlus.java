@@ -44,69 +44,65 @@ public class NewsBlurPlus extends ReaderExtension {
 	 */
 	@Override
 	public void handleReaderList(ITagListHandler tagHandler, ISubscriptionListHandler subHandler, long syncTime) throws IOException, ReaderException {
-		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
-			@Override
-			public void callback(String url, JSONObject json, AjaxStatus status) {
-				if (APIHelper.isJSONResponseValid(json, status)) {
-					try {
-						JSONObject json_feeds = json.getJSONObject("feeds");
-						JSONObject json_folders = json.getJSONObject("flat_folders");
-
-						Iterator<?> keys = json_folders.keys();
-						if (keys.hasNext()) {
-							tags = new ArrayList<ITag>();
-							feeds = new ArrayList<ISubscription>();
-							if (starredTag == null) {
-								starredTag = APIHelper.createTag("Starred items", true);
-								tags.add(starredTag);
-							}
-						}
-						while (keys.hasNext()) {
-							String catName = ((String)keys.next());
-							JSONArray feedsPerFolder = json_folders.getJSONArray(catName);
-							catName = catName.trim();
-							ITag cat = APIHelper.createTag(catName, false);		// TODO: Don't create when empty?
-							if (!TextUtils.isEmpty(catName))
-								tags.add(cat);
-							
-							// Add all feeds in this category
-							for (int i=0; i<feedsPerFolder.length(); i++) {
-								ISubscription sub = new ISubscription();
-								String feedID = feedsPerFolder.getString(i);
-								JSONObject f = json_feeds.getJSONObject(feedID);
-								Calendar updateTime = Calendar.getInstance();
-								updateTime.add(Calendar.SECOND, (-1) * f.getInt("updated_seconds_ago"));
-								sub.newestItemTime = updateTime.getTimeInMillis() / 1000;
-								sub.uid = "FEED:" + APIHelper.getFeedUrlFromFeedId(feedID);
-								sub.title = f.getString("feed_title");
-								sub.htmlUrl = f.getString("feed_link");
-								sub.unreadCount = f.getInt("nt") + f.getInt("ps");
-								if (!TextUtils.isEmpty(catName))
-									sub.addCategory(cat.uid);
-								feeds.add(sub);
-							}
-						}
-					}
-					catch (JSONException e) {
-						AQUtility.report(e);
-					}
-				}
-			}
-		};
+		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
 		final AQuery aq = new AQuery(this);
 		final Context c = getApplicationContext();
 		APIHelper.wrapCallback(c, cb);
-		aq.ajax(APIHelper.API_URL_FOLDERS_AND_FEEDS, JSONObject.class, cb);
-		cb.block();
-		if ((APIHelper.isErrorCode(cb.getStatus().getCode())) || feeds.size() == 0)
-			throw new ReaderException("Network error");
-		updateFeedCounts();
-		try {
-			tagHandler.tags(tags);
-			subHandler.subscriptions(feeds);
-		}
-		catch (RemoteException e) {
-			throw new ReaderException(e);			
+		cb.url(APIHelper.API_URL_FOLDERS_AND_FEEDS).type(JSONObject.class);
+		aq.sync(cb);
+		
+		JSONObject json = cb.getResult();
+		AjaxStatus status = cb.getStatus();
+		if (APIHelper.isJSONResponseValid(json, status)) {
+			try {
+				JSONObject json_feeds = json.getJSONObject("feeds");
+				JSONObject json_folders = json.getJSONObject("flat_folders");
+				Iterator<?> keys = json_folders.keys();
+				if (keys.hasNext()) {
+					tags = new ArrayList<ITag>();
+					feeds = new ArrayList<ISubscription>();
+					if (starredTag == null) {
+						starredTag = APIHelper.createTag("Starred items", true);
+						tags.add(starredTag);
+					}
+				}
+				while (keys.hasNext()) {
+					String catName = ((String)keys.next());
+					JSONArray feedsPerFolder = json_folders.getJSONArray(catName);
+					catName = catName.trim();
+					ITag cat = APIHelper.createTag(catName, false);		// TODO: Don't create when empty?
+					if (!TextUtils.isEmpty(catName))
+						tags.add(cat);
+
+					// Add all feeds in this category
+					for (int i=0; i<feedsPerFolder.length(); i++) {
+						ISubscription sub = new ISubscription();
+						String feedID = feedsPerFolder.getString(i);
+						JSONObject f = json_feeds.getJSONObject(feedID);
+						Calendar updateTime = Calendar.getInstance();
+						updateTime.add(Calendar.SECOND, (-1) * f.getInt("updated_seconds_ago"));
+						sub.newestItemTime = updateTime.getTimeInMillis() / 1000;
+						sub.uid = "FEED:" + APIHelper.getFeedUrlFromFeedId(feedID);
+						sub.title = f.getString("feed_title");
+						sub.htmlUrl = f.getString("feed_link");
+						sub.unreadCount = f.getInt("nt") + f.getInt("ps");
+						if (!TextUtils.isEmpty(catName))
+							sub.addCategory(cat.uid);
+						feeds.add(sub);
+					}
+				}
+				if (APIHelper.isErrorCode(status.getCode()) || feeds.size() == 0)
+					throw new ReaderException("Network error");
+				updateFeedCounts();
+				tagHandler.tags(tags);
+				subHandler.subscriptions(feeds);
+			}
+			catch (JSONException e) {
+				AQUtility.report(e);
+			}
+			catch (RemoteException e) {
+				throw new ReaderException(e);			
+			}
 		}
 	}
 
