@@ -114,8 +114,14 @@ public class NewsBlurPlus extends ReaderExtension {
 	 */
 	@Override
 	public void handleItemIdList(final IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
+		try {
+			if (handler.stream().startsWith(ReaderExtension.STATE_STARRED))
+				return;
+		}
+		catch (RemoteException e) {
+			return;
+		}	
 		getUnreadHashes();
-		
 		AQuery aq = new AQuery(this);
 		Context c = getApplicationContext();
 		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
