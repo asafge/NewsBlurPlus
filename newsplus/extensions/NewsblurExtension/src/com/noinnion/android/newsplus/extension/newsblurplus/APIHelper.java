@@ -1,5 +1,9 @@
 package com.noinnion.android.newsplus.extension.newsblurplus;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -36,6 +40,17 @@ public class APIHelper {
 		catch (JSONException e) {
 			return false;
 		}
+	}
+	
+	// Get a list of story IDs from a json object. Used for unread refresh.
+	public static List<String> getStoryIDs(JSONObject json) throws JSONException { 
+		List<String> list = new ArrayList<String>();
+		JSONArray arr = json.getJSONArray("stories");
+		for (int i=0; i<arr.length(); i++) {
+			JSONObject story = arr.getJSONObject(i);
+			list.add(story.getString("id"));
+		}
+		return list;
 	}
 	
 	// Construct a single feed's URL from it's integer ID

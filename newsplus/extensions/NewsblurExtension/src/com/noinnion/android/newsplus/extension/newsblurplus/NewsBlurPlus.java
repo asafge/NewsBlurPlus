@@ -115,40 +115,35 @@ public class NewsBlurPlus extends ReaderExtension {
 	@Override
 	public void handleItemIdList(final IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
 		try {
-			if (handler.stream().startsWith(ReaderExtension.STATE_STARRED))
-				return;
-		}
-		catch (RemoteException e) {
-			return;
-		}	
-		getUnreadHashes();
-		AQuery aq = new AQuery(this);
-		Context c = getApplicationContext();
-		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
-		APIHelper.wrapCallback(c, cb);
-		
-		String url = APIHelper.API_URL_RIVER;
-		for (String h : unread_hashes)
-			url += "h=" + h + "&";
-		cb.url(url + "read_filter=unread").type(JSONObject.class);
-		aq.sync(cb);
-
-		JSONObject json = cb.getResult();
-		AjaxStatus status = cb.getStatus();
-		if (APIHelper.isJSONResponseValid(json, status)) {
-			try {
-				List<String> unread = new ArrayList<String>();
-				JSONArray arr = json.getJSONArray("stories");
-				for (int i=0; i<arr.length(); i++) {
-					JSONObject story = arr.getJSONObject(i);
-					unread.add(story.getString("id"));
-				}
+			AQuery aq = new AQuery(this);
+			Context c = getApplicationContext();
+			AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
+			APIHelper.wrapCallback(c, cb);
+			
+			if (handler.stream().startsWith(ReaderExtension.STATE_STARRED)) {
+				cb.url(APIHelper.API_URL_STARRED_ITEMS).type(JSONObject.class);
+			}
+			else {
+				getUnreadHashes();
+				String url = APIHelper.API_URL_RIVER;
+				for (String h : unread_hashes)
+					url += "h=" + h + "&";
+				cb.url(url + "read_filter=unread").type(JSONObject.class);
+			}
+			aq.sync(cb);
+			JSONObject json = cb.getResult();
+			AjaxStatus status = cb.getStatus();
+			if (APIHelper.isJSONResponseValid(json, status)) {
+				List<String> unread = APIHelper.getStoryIDs(json);
 				handler.items(unread);
 			}
-			catch (Exception e) {
-				AQUtility.report(e);
-			}
 		}
+		catch (JSONException e) {
+			throw new ReaderException(e);
+		}
+		catch (RemoteException e) {
+			throw new ReaderException(e);
+		}	
 	}
 	
 	/*
