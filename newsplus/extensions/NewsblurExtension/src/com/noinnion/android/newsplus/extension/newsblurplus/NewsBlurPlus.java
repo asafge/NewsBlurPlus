@@ -91,11 +91,13 @@ public class NewsBlurPlus extends ReaderExtension {
 						feeds.add(sub);
 					}
 				}
-				if (APIHelper.isErrorCode(status.getCode()) || feeds.size() == 0)
+				if (feeds.size() == 0)
 					throw new ReaderException("Network error");
-				updateFeedCounts();
-				tagHandler.tags(tags);
-				subHandler.subscriptions(feeds);
+				else {
+					updateFeedCounts();
+					tagHandler.tags(tags);
+					subHandler.subscriptions(feeds);
+				}
 			}
 			catch (JSONException e) {
 				AQUtility.report(e);
