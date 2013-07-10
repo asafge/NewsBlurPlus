@@ -33,7 +33,6 @@ import com.noinnion.android.reader.api.provider.ITag;
 public class NewsBlurPlus extends ReaderExtension {
 	private List<ITag> tags;
 	private List<ISubscription> feeds;
-	private List<String> unread_hashes;
 	private ITag starredTag;
 	
 	/*
@@ -124,7 +123,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				cb.url(APIHelper.API_URL_STARRED_ITEMS).type(JSONObject.class);
 			}
 			else {
-				getUnreadHashes();
+				List<String> unread_hashes = getUnreadHashes();
 				String url = APIHelper.API_URL_RIVER;
 				for (String h : unread_hashes)
 					url += "h=" + h + "&";
@@ -149,12 +148,12 @@ public class NewsBlurPlus extends ReaderExtension {
 	/*
 	 * Get all the unread story hashes at once
 	 */
-	private void getUnreadHashes() {
+	private List<String> getUnreadHashes() {
 		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
-		final AQuery aq = new AQuery(this);
-		final Context c = getApplicationContext();
+		AQuery aq = new AQuery(this);
+		Context c = getApplicationContext();
 		APIHelper.wrapCallback(c, cb);
-		unread_hashes = new ArrayList<String>();
+		List<String> unread_hashes = new ArrayList<String>();
 		cb.url(APIHelper.API_URL_UNREAD_HASHES).type(JSONObject.class);
 		aq.sync(cb);		
 
@@ -174,6 +173,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				AQUtility.report(e);
 			}
 		}
+		return unread_hashes;
 	}
 	
 	/*
