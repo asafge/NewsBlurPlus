@@ -247,58 +247,58 @@ public class NewsBlurPlus extends ReaderExtension {
 	 *   feeds/[ID]/feed_link (http://www.codinghorror.com/blog/ - site's link)
 	 */
 	public void parseItemList(String url, final IItemListHandler handler, final List<String> categories) throws IOException, ReaderException {
-		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
-			@Override
-			public void callback(String url, JSONObject json, AjaxStatus status) {
-				try {
-					if (APIHelper.isJSONResponseValid(json, status)) {
-						List<IItem> items = new ArrayList<IItem>();
-						JSONArray arr = json.getJSONArray("stories");
-						int length = 0;
-						for (int i=0; i<arr.length(); i++) {
-							JSONObject story = arr.getJSONObject(i);
-							IItem item = new IItem();
-							item.subUid = "FEED:" + url;
-							item.title = story.getString("story_title");
-							item.link = story.getString("story_permalink");
-							item.uid = story.getString("id");
-							item.author = story.getString("story_authors");
-							item.updatedTime = story.getLong("story_timestamp");
-							item.publishedTime = story.getLong("story_timestamp");
-							item.read = (story.getInt("read_status") == 1);
-							item.content = story.getString("story_content");
-							if (story.has("starred") && story.getString("starred") == "true") {
-								item.starred = true;
-								item.addCategory(starredTag.uid);
-							}
-							if (categories != null)
-								for (String cat : categories)
-									item.addCategory(cat);
-							items.add(item);
-							
-							// Handle TransactionTooLargeException, based on Noin's recommendation
-							length += item.getLength();
-							if (items.size() % 200 == 0 || length > 300000) {
-								handler.items(items);
-								items.clear();
-								length = 0;
-							}
-						}
-						handler.items(items);
-					}
-				}
-				catch (Exception e) {
-					AQUtility.report(e);
-				}
-			}
-		};
+		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
 		final AQuery aq = new AQuery(this);
 		final Context c = getApplicationContext();
 		APIHelper.wrapCallback(c, cb);
-		aq.ajax(url, JSONObject.class, cb);
-		cb.block();
+
+		cb.url(url).type(JSONObject.class);
+		aq.sync(cb);
+		
+		JSONObject json = cb.getResult();
+		AjaxStatus status = cb.getStatus();
+		if (APIHelper.isJSONResponseValid(json, status)) {
+			try {
+				List<IItem> items = new ArrayList<IItem>();
+				JSONArray arr = json.getJSONArray("stories");
+				int length = 0;
+				for (int i=0; i<arr.length(); i++) {
+					JSONObject story = arr.getJSONObject(i);
+					IItem item = new IItem();
+					item.subUid = "FEED:" + url;
+					item.title = story.getString("story_title");
+					item.link = story.getString("story_permalink");
+					item.uid = story.getString("id");
+					item.author = story.getString("story_authors");
+					item.updatedTime = story.getLong("story_timestamp");
+					item.publishedTime = story.getLong("story_timestamp");
+					item.read = (story.getInt("read_status") == 1);
+					item.content = story.getString("story_content");
+					if (story.has("starred") && story.getString("starred") == "true") {
+						item.starred = true;
+						item.addCategory(starredTag.uid);
+					}
+					if (categories != null)
+						for (String cat : categories)
+							item.addCategory(cat);
+					items.add(item);
+					
+					// Handle TransactionTooLargeException, based on Noin's recommendation
+					length += item.getLength();
+					if (items.size() % 200 == 0 || length > 300000) {
+						handler.items(items);
+						items.clear();
+						length = 0;
+					}
+				}
+				handler.items(items);
+			}
+			catch (Exception e) {
+				AQUtility.report(e);
+			}
+		}
 	}
-	
+
 	
 	/*
 	 * Main function for marking stories (and their feeds) as read/unread.
