@@ -225,10 +225,10 @@ public class NewsBlurPlus extends ReaderExtension {
 				}
 				else if (uid.startsWith("FEED:")) {
 					if (!handler.excludedStreams().contains(uid))
-						parseItemList(handler.stream().replace("FEED:", ""), handler, Arrays.asList(""));
+						parseItemList(handler.stream().replace("FEED:", ""), handler, null);
 				}
 				else if (uid.startsWith(ReaderExtension.STATE_STARRED)) {
-					parseItemList(APIHelper.API_URL_STARRED_ITEMS, handler, Arrays.asList(""));
+					parseItemList(APIHelper.API_URL_STARRED_ITEMS, handler, null);
 				}
 			}
 		}
@@ -271,8 +271,9 @@ public class NewsBlurPlus extends ReaderExtension {
 								item.starred = true;
 								item.addCategory(starredTag.uid);
 							}
-							for (String cat : categories)
-								item.addCategory(cat);
+							if (categories != null)
+								for (String cat : categories)
+									item.addCategory(cat);
 							items.add(item);
 							
 							// Handle TransactionTooLargeException, based on Noin's recommendation
