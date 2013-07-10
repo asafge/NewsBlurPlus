@@ -2,7 +2,6 @@ package com.noinnion.android.newsplus.extension.newsblurplus;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -117,34 +116,35 @@ public class NewsBlurPlus extends ReaderExtension {
 	 */
 	@Override
 	public void handleItemIdList(final IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
-		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
-			@Override
-			public void callback(String url, JSONObject json, AjaxStatus status) {
-				try {
-					if (APIHelper.isJSONResponseValid(json, status)) {
-						List<String> unread = new ArrayList<String>();
-						JSONArray arr = json.getJSONArray("stories");
-						for (int i=0; i<arr.length(); i++) {
-							JSONObject story = arr.getJSONObject(i);
-							unread.add(story.getString("id"));
-						}
-						handler.items(unread);
-					}
-				}
-				catch (Exception e) {
-					AQUtility.report(e);
-				}
-			}
-		};
 		getUnreadHashes();
-		final AQuery aq = new AQuery(this);
-		final Context c = getApplicationContext();
+		
+		AQuery aq = new AQuery(this);
+		Context c = getApplicationContext();
+		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
 		APIHelper.wrapCallback(c, cb);
+		
 		String url = APIHelper.API_URL_RIVER;
 		for (String h : unread_hashes)
 			url += "h=" + h + "&";
-		//aq.ajax(url + "read_filter=unread", JSONObject.class, cb);
-		//cb.block();
+		cb.url(url + "read_filter=unread").type(JSONObject.class);
+		aq.sync(cb);
+
+		JSONObject json = cb.getResult();
+		AjaxStatus status = cb.getStatus();
+		if (APIHelper.isJSONResponseValid(json, status)) {
+			try {
+				List<String> unread = new ArrayList<String>();
+				JSONArray arr = json.getJSONArray("stories");
+				for (int i=0; i<arr.length(); i++) {
+					JSONObject story = arr.getJSONObject(i);
+					unread.add(story.getString("id"));
+				}
+				handler.items(unread);
+			}
+			catch (Exception e) {
+				AQUtility.report(e);
+			}
+		}
 	}
 	
 	/*
