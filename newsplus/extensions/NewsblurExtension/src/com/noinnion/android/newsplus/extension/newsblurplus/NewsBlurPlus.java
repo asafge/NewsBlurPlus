@@ -145,8 +145,6 @@ public class NewsBlurPlus extends ReaderExtension {
 		}	
 	}
 	
-
-	
 	/*
 	 * Call for an update on all feeds' unread counters, and store the result
 	 */

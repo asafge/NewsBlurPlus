@@ -29,7 +29,7 @@ public class APIHelper {
 	}
 	
 	// Check that the json object is not null and that the user is authenticated
-	public static Boolean isJSONResponseValid(JSONObject json, AjaxStatus status)
+	public static boolean isJSONResponseValid(JSONObject json, AjaxStatus status)
 	{
 		try {
 			if (json == null)
@@ -97,7 +97,7 @@ public class APIHelper {
 	}
 	
 	// Create a new tag object
-	public static ITag createTag(String name, Boolean isStar) {
+	public static ITag createTag(String name, boolean isStar) {
 		ITag tag = new ITag();
 		tag.label = name;
 		String prefix = isStar ? "STAR" : "FOL";
