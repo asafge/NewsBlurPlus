@@ -302,35 +302,20 @@ public class NewsBlurPlus extends ReaderExtension {
 	 * Main function for marking stories (and their feeds) as read/unread.
 	 */
 	private boolean markAs(boolean read, String[]  itemUids, String[]  subUIds) throws IOException, ReaderException	{
-		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
-			@Override
-			public void callback(String url, JSONObject json, AjaxStatus status) {
-				if (APIHelper.isJSONResponseValid(json, status)) {
-					try {
-						if (!json.getString("result").startsWith("ok"))
-							throw new ReaderException("Failed marking as read"); 
-					}
-					catch (Exception e) {
-						AQUtility.report(e);
-					}
-				}
-			}
-		};
-		final AQuery aq = new AQuery(this);
-		final Context c = getApplicationContext();
-		APIHelper.wrapCallback(c, cb);
+		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
+		AQuery aq = new AQuery(this);
+		Context c = getApplicationContext();
+		APIHelper.wrapCallback(c, cb);		
 		
 		if (itemUids == null && subUIds == null) {
-			aq.ajax(APIHelper.API_URL_MARK_ALL_AS_READ, JSONObject.class, cb);
-			cb.block();
+			cb.url(APIHelper.API_URL_MARK_ALL_AS_READ).type(JSONObject.class);
 		}
 		else {
 			if (itemUids == null) {
 				Map<String, Object> params = new HashMap<String, Object>();
 				for (String sub : subUIds)
 					params.put("feed_id", APIHelper.getFeedIdFromFeedUrl(sub));
-				aq.ajax(APIHelper.API_URL_MARK_FEED_AS_READ, params, JSONObject.class, cb);
-				cb.block();
+				cb.url(APIHelper.API_URL_MARK_FEED_AS_READ).params(params).type(JSONObject.class);
 			}
 			else {
 				String url = read ? APIHelper.API_URL_MARK_STORY_AS_READ : APIHelper.API_URL_MARK_STORY_AS_UNREAD;	
@@ -339,11 +324,19 @@ public class NewsBlurPlus extends ReaderExtension {
 					params.put("story_id", itemUids[i]);
 					params.put("feed_id", APIHelper.getFeedIdFromFeedUrl(subUIds[i]));
 				}
-				aq.ajax(url, params, JSONObject.class, cb);
-				cb.block();
+				cb.url(url).params(params).type(JSONObject.class);
 			}
 		}
-		return true;		// TODO: Return some real feedback
+		aq.sync(cb);
+		
+		JSONObject json = cb.getResult();
+		AjaxStatus status = cb.getStatus();
+		try {
+			return (APIHelper.isJSONResponseValid(json, status) &&  json.getString("result").startsWith("ok"));
+		}
+		catch (JSONException e) {
+			return false;
+		}
 	}
 
 	/* 
