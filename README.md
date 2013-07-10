@@ -9,12 +9,11 @@ Features already implemented:
 * Ablility to read all articles for each feed.
 * Mark as read/unread works and syncs to server (might still have some issues).
 * Allow to exclude certain folders/feeds from sync.
+* Supprot starred items.
 
 TODO:
 -------------------------------
 * Mark as read for feed/folder.
-* Improve handling for API errors + change all calls to be synchronous.
-* Supprot starred items.
 * Implement folder/tag editing + subscription editing.
     
 References:
