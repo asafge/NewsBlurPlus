@@ -237,7 +237,6 @@ public class NewsBlurPlus extends ReaderExtension {
 		}
 	}
 	
-
 	/*
 	 * Get the content of a single feed 
 	 * 
@@ -348,7 +347,6 @@ public class NewsBlurPlus extends ReaderExtension {
 		return true;		// TODO: Return some real feedback
 	}
 
-	
 	/* 
 	 * Mark a list of stories (and their feeds) as read
 	 */
@@ -357,7 +355,6 @@ public class NewsBlurPlus extends ReaderExtension {
 		return this.markAs(true, itemUids, subUIds);
 	}
 
-	
 	/* 
 	 * Mark a list of stories (and their feeds) as unread
 	 */
@@ -366,7 +363,6 @@ public class NewsBlurPlus extends ReaderExtension {
 		return this.markAs(false, itemUids, subUids);
 	}
 
-	
 	/*
 	 * Mark all stories on all feeds as read.
 	 * Note: S = subscription (feed), t = tag
