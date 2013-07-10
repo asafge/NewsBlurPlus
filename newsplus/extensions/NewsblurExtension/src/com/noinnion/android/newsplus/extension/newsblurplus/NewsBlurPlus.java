@@ -123,7 +123,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				cb.url(APIHelper.API_URL_STARRED_ITEMS).type(JSONObject.class);
 			}
 			else {
-				List<String> unread_hashes = getUnreadHashes();
+				List<String> unread_hashes = APIHelper.getUnreadHashes(aq, c);
 				String url = APIHelper.API_URL_RIVER;
 				for (String h : unread_hashes)
 					url += "h=" + h + "&";
@@ -145,36 +145,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		}	
 	}
 	
-	/*
-	 * Get all the unread story hashes at once
-	 */
-	private List<String> getUnreadHashes() {
-		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
-		AQuery aq = new AQuery(this);
-		Context c = getApplicationContext();
-		APIHelper.wrapCallback(c, cb);
-		List<String> unread_hashes = new ArrayList<String>();
-		cb.url(APIHelper.API_URL_UNREAD_HASHES).type(JSONObject.class);
-		aq.sync(cb);		
 
-		JSONObject json = cb.getResult();
-		AjaxStatus status = cb.getStatus();
-		if (APIHelper.isJSONResponseValid(json, status)) {
-			try {
-				JSONObject json_folders = json.getJSONObject("unread_feed_story_hashes");
-				Iterator<?> keys = json_folders.keys();
-				while (keys.hasNext()) {
-					JSONArray items = json_folders.getJSONArray((String)keys.next());
-					for (int i=0; i<items.length(); i++)
-						unread_hashes.add(items.getString(i));
-				}
-			} 
-			catch (Exception e) {
-				AQUtility.report(e);
-			}
-		}
-		return unread_hashes;
-	}
 	
 	/*
 	 * Call for an update on all feeds' unread counters, and store the result

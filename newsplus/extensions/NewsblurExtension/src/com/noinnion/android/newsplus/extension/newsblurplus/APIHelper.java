@@ -1,6 +1,7 @@
 package com.noinnion.android.newsplus.extension.newsblurplus;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -10,8 +11,10 @@ import org.json.JSONObject;
 import android.annotation.SuppressLint;
 import android.content.Context;
 
+import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
+import com.androidquery.util.AQUtility;
 import com.noinnion.android.reader.api.provider.ITag;
 
 @SuppressLint("DefaultLocale")
@@ -51,6 +54,33 @@ public class APIHelper {
 			list.add(story.getString("id"));
 		}
 		return list;
+	}
+	
+	// Get all the unread story hashes at once
+	public static List<String> getUnreadHashes(AQuery aq, Context c) {
+		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
+		APIHelper.wrapCallback(c, cb);
+		List<String> unread_hashes = new ArrayList<String>();
+		cb.url(APIHelper.API_URL_UNREAD_HASHES).type(JSONObject.class);
+		aq.sync(cb);		
+
+		JSONObject json = cb.getResult();
+		AjaxStatus status = cb.getStatus();
+		if (APIHelper.isJSONResponseValid(json, status)) {
+			try {
+				JSONObject json_folders = json.getJSONObject("unread_feed_story_hashes");
+				Iterator<?> keys = json_folders.keys();
+				while (keys.hasNext()) {
+					JSONArray items = json_folders.getJSONArray((String)keys.next());
+					for (int i=0; i<items.length(); i++)
+						unread_hashes.add(items.getString(i));
+				}
+			} 
+			catch (Exception e) {
+				AQUtility.report(e);
+			}
+		}
+		return unread_hashes;
 	}
 	
 	// Construct a single feed's URL from it's integer ID
