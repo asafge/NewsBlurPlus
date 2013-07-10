@@ -44,8 +44,8 @@ public class NewsBlurPlus extends ReaderExtension {
 	@Override
 	public void handleReaderList(ITagListHandler tagHandler, ISubscriptionListHandler subHandler, long syncTime) throws IOException, ReaderException {
 		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
-		final AQuery aq = new AQuery(this);
-		final Context c = getApplicationContext();
+		AQuery aq = new AQuery(this);
+		Context c = getApplicationContext();
 		APIHelper.wrapCallback(c, cb);
 		cb.url(APIHelper.API_URL_FOLDERS_AND_FEEDS).type(JSONObject.class);
 		aq.sync(cb);
@@ -112,7 +112,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	 * This really speeds up the sync process. 
 	 */
 	@Override
-	public void handleItemIdList(final IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
+	public void handleItemIdList(IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
 		try {
 			AQuery aq = new AQuery(this);
 			Context c = getApplicationContext();
@@ -181,8 +181,8 @@ public class NewsBlurPlus extends ReaderExtension {
 	 */
 	private void updateFeedCounts() {
 		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
-		final AQuery aq = new AQuery(this);
-		final Context c = getApplicationContext();
+		AQuery aq = new AQuery(this);
+		Context c = getApplicationContext();
 		APIHelper.wrapCallback(c, cb);
 		cb.url(APIHelper.API_URL_REFRESH_FEEDS).type(JSONObject.class);
 		aq.sync(cb);
@@ -245,10 +245,10 @@ public class NewsBlurPlus extends ReaderExtension {
 	 *   feeds/[ID]/feed_title ("Coding Horror")
 	 *   feeds/[ID]/feed_link (http://www.codinghorror.com/blog/ - site's link)
 	 */
-	public void parseItemList(String url, final IItemListHandler handler, final List<String> categories) throws IOException, ReaderException {
+	public void parseItemList(String url, IItemListHandler handler, List<String> categories) throws IOException, ReaderException {
 		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
-		final AQuery aq = new AQuery(this);
-		final Context c = getApplicationContext();
+		AQuery aq = new AQuery(this);
+		Context c = getApplicationContext();
 		APIHelper.wrapCallback(c, cb);
 
 		cb.url(url).type(JSONObject.class);
