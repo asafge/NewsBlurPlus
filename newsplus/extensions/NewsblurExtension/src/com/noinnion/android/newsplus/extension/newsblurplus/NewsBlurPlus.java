@@ -143,8 +143,8 @@ public class NewsBlurPlus extends ReaderExtension {
 		String url = APIHelper.API_URL_RIVER;
 		for (String h : unread_hashes)
 			url += "h=" + h + "&";
-		aq.ajax(url + "read_filter=unread", JSONObject.class, cb);
-		cb.block();
+		//aq.ajax(url + "read_filter=unread", JSONObject.class, cb);
+		//cb.block();
 	}
 	
 	/*
@@ -228,7 +228,7 @@ public class NewsBlurPlus extends ReaderExtension {
 						parseItemList(handler.stream().replace("FEED:", ""), handler, Arrays.asList(""));
 				}
 				else if (uid.startsWith(ReaderExtension.STATE_STARRED)) {
-					parseItemList(APIHelper.API_URL_STARRED_ITEMS, handler, Arrays.asList(starredTag.label));
+					parseItemList(APIHelper.API_URL_STARRED_ITEMS, handler, Arrays.asList(""));
 				}
 			}
 		}
@@ -270,7 +270,7 @@ public class NewsBlurPlus extends ReaderExtension {
 							item.content = story.getString("story_content");
 							if (story.has("starred") && story.getString("starred") == "true") {
 								item.starred = true;
-								item.addCategory(starredTag.label);
+								item.addCategory(starredTag.uid);
 							}
 							for (String cat : categories)
 								item.addCategory(cat);
