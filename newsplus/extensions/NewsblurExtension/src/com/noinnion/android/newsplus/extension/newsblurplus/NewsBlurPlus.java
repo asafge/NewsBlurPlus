@@ -70,7 +70,7 @@ public class NewsBlurPlus extends ReaderExtension {
 					String catName = ((String)keys.next());
 					JSONArray feedsPerFolder = json_folders.getJSONArray(catName);
 					catName = catName.trim();
-					ITag cat = APIHelper.createTag(catName, false);		// TODO: Don't create when empty?
+					ITag cat = APIHelper.createTag(catName, false);
 					if (!TextUtils.isEmpty(catName))
 						tags.add(cat);
 
