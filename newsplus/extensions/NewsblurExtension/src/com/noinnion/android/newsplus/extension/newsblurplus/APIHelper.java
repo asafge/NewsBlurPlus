@@ -15,6 +15,7 @@ import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.AQUtility;
+import com.noinnion.android.reader.api.provider.ISubscription;
 import com.noinnion.android.reader.api.provider.ITag;
 
 @SuppressLint("DefaultLocale")
@@ -81,6 +82,29 @@ public class APIHelper {
 			}
 		}
 		return unread_hashes;
+	}
+	
+	// Call for an update on all feeds' unread counters, and store the result
+	public static void updateFeedCounts(AQuery aq, Context c, List<ISubscription> feeds) {
+		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
+		APIHelper.wrapCallback(c, cb);
+		cb.url(APIHelper.API_URL_REFRESH_FEEDS).type(JSONObject.class);
+		aq.sync(cb);
+		
+		JSONObject json = cb.getResult();
+		AjaxStatus status = cb.getStatus();
+		if (APIHelper.isJSONResponseValid(json, status)) {
+			try {
+				JSONObject json_feeds = json.getJSONObject("feeds");
+				for (ISubscription sub : feeds) {
+					JSONObject f = json_feeds.getJSONObject(APIHelper.getFeedIdFromFeedUrl(sub.uid));
+					sub.unreadCount = f.getInt("ps") + f.getInt("nt");
+				}
+			}
+			catch (Exception e) {
+				AQUtility.report(e);
+			}
+		}
 	}
 	
 	// Construct a single feed's URL from it's integer ID

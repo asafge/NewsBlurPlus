@@ -94,7 +94,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				if (feeds.size() == 0)
 					throw new ReaderException("Network error");
 				else {
-					updateFeedCounts();
+					APIHelper.updateFeedCounts(aq, c, feeds);
 					tagHandler.tags(tags);
 					subHandler.subscriptions(feeds);
 				}
@@ -144,33 +144,6 @@ public class NewsBlurPlus extends ReaderExtension {
 		catch (RemoteException e) {
 			throw new ReaderException(e);
 		}	
-	}
-	
-	/*
-	 * Call for an update on all feeds' unread counters, and store the result
-	 */
-	private void updateFeedCounts() {
-		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
-		AQuery aq = new AQuery(this);
-		Context c = getApplicationContext();
-		APIHelper.wrapCallback(c, cb);
-		cb.url(APIHelper.API_URL_REFRESH_FEEDS).type(JSONObject.class);
-		aq.sync(cb);
-		
-		JSONObject json = cb.getResult();
-		AjaxStatus status = cb.getStatus();
-		if (APIHelper.isJSONResponseValid(json, status)) {
-			try {
-				JSONObject json_feeds = json.getJSONObject("feeds");
-				for (ISubscription sub : feeds) {
-					JSONObject f = json_feeds.getJSONObject(APIHelper.getFeedIdFromFeedUrl(sub.uid));
-					sub.unreadCount = f.getInt("ps") + f.getInt("nt");
-				}
-			}
-			catch (Exception e) {
-				AQUtility.report(e);
-			}
-		}
 	}
 	
 	/*
