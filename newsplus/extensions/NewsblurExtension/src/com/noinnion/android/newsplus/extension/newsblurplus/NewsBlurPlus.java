@@ -33,8 +33,8 @@ import com.noinnion.android.reader.api.provider.ITag;
 public class NewsBlurPlus extends ReaderExtension {
 	private List<ITag> tags;
 	private List<ISubscription> feeds;
-	private ITag starredTag;
 	private IItemListHandler itemListHandler;
+	private ITag starredTag;
 	
 	/*
 	 * Main sync function to get folders, feeds, and counts.
