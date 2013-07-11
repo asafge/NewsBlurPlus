@@ -7,13 +7,12 @@ Features already implemented:
 -------------------------------
 * Sync all folders (in a flat mode) and their feeds.
 * Ablility to read all articles for each feed.
-* Mark as read/unread works and syncs to server (might still have some issues).
+* Mark as read/unread (might still have some issues).
 * Allow to exclude certain folders/feeds from sync.
 * Supprot starred items.
 
 TODO:
 -------------------------------
-* Mark as read for feed/folder.
 * Implement folder/tag editing + subscription editing.
     
 References:
