@@ -34,7 +34,17 @@ public class NewsBlurPlus extends ReaderExtension {
 	private List<ITag> tags;
 	private List<ISubscription> feeds;
 	private IItemListHandler itemListHandler;
+	private Context c;
 	private ITag starredTag;
+	
+	/*
+	 * Constructor
+	 */
+	@Override
+	public void onCreate() {
+		super.onCreate();
+		c = getApplicationContext();
+	};
 	
 	/*
 	 * Main sync function to get folders, feeds, and counts.
@@ -46,7 +56,6 @@ public class NewsBlurPlus extends ReaderExtension {
 	public void handleReaderList(ITagListHandler tagHandler, ISubscriptionListHandler subHandler, long syncTime) throws IOException, ReaderException {
 		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
 		AQuery aq = new AQuery(this);
-		Context c = getApplicationContext();
 		APIHelper.wrapCallback(c, cb);
 		cb.url(APIHelper.API_URL_FOLDERS_AND_FEEDS).type(JSONObject.class);
 		aq.sync(cb);
@@ -116,7 +125,6 @@ public class NewsBlurPlus extends ReaderExtension {
 	public void handleItemIdList(IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
 		try {
 			AQuery aq = new AQuery(this);
-			Context c = getApplicationContext();
 			AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
 			APIHelper.wrapCallback(c, cb);
 			
@@ -192,7 +200,6 @@ public class NewsBlurPlus extends ReaderExtension {
 	public void parseItemList(String url, IItemListHandler handler, List<String> categories) throws IOException, ReaderException {
 		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
 		AQuery aq = new AQuery(this);
-		Context c = getApplicationContext();
 		APIHelper.wrapCallback(c, cb);
 
 		cb.url(url).type(JSONObject.class);
@@ -249,7 +256,6 @@ public class NewsBlurPlus extends ReaderExtension {
 	private boolean markAs(boolean read, String[]  itemUids, String[]  subUIds)	{
 		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
 		AQuery aq = new AQuery(this);
-		Context c = getApplicationContext();
 		APIHelper.wrapCallback(c, cb);		
 		
 		if (itemUids == null && subUIds == null) {
