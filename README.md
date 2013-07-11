@@ -7,7 +7,7 @@ Features already implemented:
 -------------------------------
 * Sync all folders (in a flat mode) and their feeds.
 * Ablility to read all articles for each feed.
-* Mark as read/unread (might still have some issues).
+* Mark as read/unread (might still have some [issues](https://github.com/noinnion/newsplus/issues/12)).
 * Allow to exclude certain folders/feeds from sync.
 * Supprot starred items.
 
