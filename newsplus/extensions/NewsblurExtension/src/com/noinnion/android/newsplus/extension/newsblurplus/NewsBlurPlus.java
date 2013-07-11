@@ -301,12 +301,14 @@ public class NewsBlurPlus extends ReaderExtension {
 		
 		JSONObject json = cb.getResult();
 		AjaxStatus status = cb.getStatus();
+		boolean result = true;
 		try {
-			return (APIHelper.isJSONResponseValid(json, status) &&  json.getString("result").startsWith("ok"));
+			result = (APIHelper.isJSONResponseValid(json, status) &&  json.getString("result").startsWith("ok"));
 		} 
 		catch (JSONException e) {
-			return false;
+			result = false;
 		}
+		return result;
 	}
 
 	/* 
@@ -347,7 +349,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				result = this.markAs(true, null, (String[])subUIDs.toArray());
 		}
 		else
-			result = false;	// Can't mark a folder/tag as read
+			result = false;	// Can't mark a tag as read
 		
 		return result;
 	}
