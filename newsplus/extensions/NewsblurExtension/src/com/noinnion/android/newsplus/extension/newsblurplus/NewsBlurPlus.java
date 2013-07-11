@@ -34,6 +34,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	private List<ITag> tags;
 	private List<ISubscription> feeds;
 	private ITag starredTag;
+	private IItemListHandler itemListHandler;
 	
 	/*
 	 * Main sync function to get folders, feeds, and counts.
@@ -178,6 +179,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	 */
 	@Override
 	public void handleItemList(IItemListHandler handler, long syncTime) throws IOException, ReaderException {
+		itemListHandler = handler;
 		try {
 			if ((tags != null) && (feeds != null)) {
 				String uid = handler.stream();
@@ -334,23 +336,24 @@ public class NewsBlurPlus extends ReaderExtension {
 	@Override
 	public boolean markAllAsRead(String s, String t, long syncTime) throws IOException, ReaderException {
 		boolean result = true;
-		if (s == null && t == null)
-			return this.markAs(true, null, null);
-		else if (s.startsWith("FEED:")) {
-			String[] feed = { APIHelper.getFeedIdFromFeedUrl(s) };
-			result = this.markAs(true, null, feed);
+		try {
+			if (s != null && s.startsWith("FEED:")) {
+				String[] feed = { APIHelper.getFeedIdFromFeedUrl(s) };
+				result = this.markAs(true, null, feed);
+			}
+			else if ((itemListHandler != null) && ((s == null && t == null) || s.startsWith("FOL:"))) {
+				List<String> subUIDs = new ArrayList<String>();
+				for (ISubscription sub : feeds)
+					if ((!itemListHandler.excludedStreams().contains(sub.uid)) && (s == null || sub.getCategories().contains(s)))
+						subUIDs.add(sub.uid);
+				result = subUIDs.isEmpty() ? false : this.markAs(true, null, (String[])subUIDs.toArray());
+			}
+			else
+				result = false;	// Can't mark a tag as read
 		}
-		else if (s.startsWith("FOL:")) {
-			List<String> subUIDs = new ArrayList<String>();
-			for (ISubscription sub : feeds)
-				if (sub.getCategories().contains(s))
-					subUIDs.add(sub.uid);
-			if (subUIDs.size() > 0)
-				result = this.markAs(true, null, (String[])subUIDs.toArray());
+		catch (RemoteException e) {
+			result = false;
 		}
-		else
-			result = false;	// Can't mark a tag as read
-		
 		return result;
 	}
 
