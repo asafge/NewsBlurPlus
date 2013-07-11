@@ -246,7 +246,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	/*
 	 * Main function for marking stories (and their feeds) as read/unread.
 	 */
-	private boolean markAs(boolean read, String[]  itemUids, String[]  subUIds) throws IOException, ReaderException	{
+	private boolean markAs(boolean read, String[]  itemUids, String[]  subUIds)	{
 		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
 		AQuery aq = new AQuery(this);
 		Context c = getApplicationContext();
