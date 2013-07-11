@@ -303,7 +303,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		AjaxStatus status = cb.getStatus();
 		try {
 			return (APIHelper.isJSONResponseValid(json, status) &&  json.getString("result").startsWith("ok"));
-		}
+		} 
 		catch (JSONException e) {
 			return false;
 		}
@@ -331,11 +331,12 @@ public class NewsBlurPlus extends ReaderExtension {
 	 */
 	@Override
 	public boolean markAllAsRead(String s, String t, long syncTime) throws IOException, ReaderException {
+		boolean result = true;
 		if (s == null && t == null)
 			return this.markAs(true, null, null);
 		else if (s.startsWith("FEED:")) {
 			String[] feed = { APIHelper.getFeedIdFromFeedUrl(s) };
-			return this.markAs(true, null, feed);
+			result = this.markAs(true, null, feed);
 		}
 		else if (s.startsWith("FOL:")) {
 			List<String> subUIDs = new ArrayList<String>();
@@ -343,11 +344,12 @@ public class NewsBlurPlus extends ReaderExtension {
 				if (sub.getCategories().contains(s))
 					subUIDs.add(sub.uid);
 			if (subUIDs.size() > 0)
-				return this.markAs(true, null, (String[])subUIDs.toArray());
-			return true;
+				result = this.markAs(true, null, (String[])subUIDs.toArray());
 		}
 		else
-			return false;	// Can't mark a folder/tag as read
+			result = false;	// Can't mark a folder/tag as read
+		
+		return result;
 	}
 
 	
