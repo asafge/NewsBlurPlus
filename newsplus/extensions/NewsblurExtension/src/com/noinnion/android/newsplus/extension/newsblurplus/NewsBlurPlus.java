@@ -3,10 +3,8 @@ package com.noinnion.android.newsplus.extension.newsblurplus;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,9 +14,6 @@ import android.content.Context;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
-import com.androidquery.AQuery;
-import com.androidquery.callback.AjaxCallback;
-import com.androidquery.callback.AjaxStatus;
 import com.androidquery.util.AQUtility;
 import com.noinnion.android.reader.api.ReaderException;
 import com.noinnion.android.reader.api.ReaderExtension;
@@ -54,18 +49,11 @@ public class NewsBlurPlus extends ReaderExtension {
 	 */
 	@Override
 	public void handleReaderList(ITagListHandler tagHandler, ISubscriptionListHandler subHandler, long syncTime) throws IOException, ReaderException {
-		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
-		AQuery aq = new AQuery(this);
-		APIHelper.wrapCallback(c, cb);
-		cb.url(APIHelper.API_URL_FOLDERS_AND_FEEDS).type(JSONObject.class);
-		aq.sync(cb);
-		
-		JSONObject json = cb.getResult();
-		AjaxStatus status = cb.getStatus();
-		if (APIHelper.isJSONResponseValid(json, status)) {
+		APICall ac = new APICall(APIHelper.API_URL_FOLDERS_AND_FEEDS, c);	
+		if (ac.sync()) {
 			try {
-				JSONObject json_feeds = json.getJSONObject("feeds");
-				JSONObject json_folders = json.getJSONObject("flat_folders");
+				JSONObject json_feeds = ac.Json.getJSONObject("feeds");
+				JSONObject json_folders = ac.Json.getJSONObject("flat_folders");
 				Iterator<?> keys = json_folders.keys();
 				if (keys.hasNext()) {
 					tags = new ArrayList<ITag>();
@@ -103,7 +91,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				if (feeds.size() == 0)
 					throw new ReaderException("Network error");
 				else {
-					APIHelper.updateFeedCounts(aq, c, feeds);
+					APIHelper.updateFeedCounts(c, feeds);
 					tagHandler.tags(tags);
 					subHandler.subscriptions(feeds);
 				}
@@ -124,25 +112,20 @@ public class NewsBlurPlus extends ReaderExtension {
 	@Override
 	public void handleItemIdList(IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
 		try {
-			AQuery aq = new AQuery(this);
-			AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
-			APIHelper.wrapCallback(c, cb);
-			
+			String url;
 			if (handler.stream().startsWith(ReaderExtension.STATE_STARRED)) {
-				cb.url(APIHelper.API_URL_STARRED_ITEMS).type(JSONObject.class);
+				url = APIHelper.API_URL_STARRED_ITEMS;
 			}
 			else {
-				List<String> unread_hashes = APIHelper.getUnreadHashes(aq, c);
-				String url = APIHelper.API_URL_RIVER;
+				List<String> unread_hashes = APIHelper.getUnreadHashes(c);
+				url = APIHelper.API_URL_RIVER;
 				for (String h : unread_hashes)
 					url += "h=" + h + "&";
-				cb.url(url + "read_filter=unread").type(JSONObject.class);
+				url += "read_filter=unread";
 			}
-			aq.sync(cb);
-			JSONObject json = cb.getResult();
-			AjaxStatus status = cb.getStatus();
-			if (APIHelper.isJSONResponseValid(json, status)) {
-				List<String> unread = APIHelper.getStoryIDs(json);
+			APICall ac = new APICall(url, c);
+			if (ac.sync()) {
+				List<String> unread = APIHelper.extractStoryIDs(ac.Json);
 				handler.items(unread);
 			}
 		}
@@ -198,19 +181,11 @@ public class NewsBlurPlus extends ReaderExtension {
 	 *   feeds/[ID]/feed_link (http://www.codinghorror.com/blog/ - site's link)
 	 */
 	public void parseItemList(String url, IItemListHandler handler, List<String> categories) throws IOException, ReaderException {
-		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
-		AQuery aq = new AQuery(this);
-		APIHelper.wrapCallback(c, cb);
-
-		cb.url(url).type(JSONObject.class);
-		aq.sync(cb);
-		
-		JSONObject json = cb.getResult();
-		AjaxStatus status = cb.getStatus();
-		if (APIHelper.isJSONResponseValid(json, status)) {
+		APICall ac = new APICall(url, c);
+		if (ac.sync()) {
 			try {
 				List<IItem> items = new ArrayList<IItem>();
-				JSONArray arr = json.getJSONArray("stories");
+				JSONArray arr = ac.Json.getJSONArray("stories");
 				int length = 0;
 				for (int i=0; i<arr.length(); i++) {
 					JSONObject story = arr.getJSONObject(i);
@@ -248,43 +223,33 @@ public class NewsBlurPlus extends ReaderExtension {
 			}
 		}
 	}
-
 	
 	/*
 	 * Main function for marking stories (and their feeds) as read/unread.
 	 */
-	private boolean markAs(boolean read, String[]  itemUids, String[]  subUIds)	{
-		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>();
-		AQuery aq = new AQuery(this);
-		APIHelper.wrapCallback(c, cb);		
-		
+	private boolean markAs(boolean read, String[]  itemUids, String[]  subUIds)	{	
+		APICall ac;
 		if (itemUids == null && subUIds == null) {
-			cb.url(APIHelper.API_URL_MARK_ALL_AS_READ).type(JSONObject.class);
+			ac = new APICall(APIHelper.API_URL_MARK_ALL_AS_READ, c);
 		}
 		else {
 			if (itemUids == null) {
-				Map<String, Object> params = new HashMap<String, Object>();
+				ac = new APICall(APIHelper.API_URL_MARK_FEED_AS_READ, c);
 				for (String sub : subUIds)
-					params.put("feed_id", APIHelper.getFeedIdFromFeedUrl(sub));
-				cb.url(APIHelper.API_URL_MARK_FEED_AS_READ).params(params).type(JSONObject.class);
+					ac.addParam("feed_id", APIHelper.getFeedIdFromFeedUrl(sub));
 			}
 			else {
-				String url = read ? APIHelper.API_URL_MARK_STORY_AS_READ : APIHelper.API_URL_MARK_STORY_AS_UNREAD;	
-				Map<String, Object> params = new HashMap<String, Object>();
-				for (int i=0; i<itemUids.length; i++) {	
-					params.put("story_id", itemUids[i]);
-					params.put("feed_id", APIHelper.getFeedIdFromFeedUrl(subUIds[i]));
+				String url = read ? APIHelper.API_URL_MARK_STORY_AS_READ : APIHelper.API_URL_MARK_STORY_AS_UNREAD;
+				ac = new APICall(url, c);
+				for (int i=0; i<itemUids.length; i++) {
+					ac.addParam("story_id", itemUids[i]);
+					ac.addParam("feed_id", APIHelper.getFeedIdFromFeedUrl(subUIds[i]));
 				}
-				cb.url(url).params(params).type(JSONObject.class);
 			}
 		}
-		aq.sync(cb);
-		
-		JSONObject json = cb.getResult();
-		AjaxStatus status = cb.getStatus();
 		boolean result = true;
 		try {
-			result = (APIHelper.isJSONResponseValid(json, status) &&  json.getString("result").startsWith("ok"));
+			result = (ac.sync() && ac.Json.getString("result").startsWith("ok"));
 		} 
 		catch (JSONException e) {
 			result = false;
