@@ -1,11 +1,5 @@
 package com.noinnion.android.newsplus.extension.newsblurplus;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -15,10 +9,6 @@ import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.androidquery.AQuery;
-import com.androidquery.callback.AjaxCallback;
-import com.androidquery.callback.AjaxStatus;
-import com.androidquery.util.AQUtility;
 import com.noinnion.android.newsplus.extension.newsblurplus.R;
 import com.noinnion.android.reader.api.ReaderExtension;
 
@@ -44,6 +34,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 		findViewById(R.id.ok_button).setOnClickListener(this);
 	}
 
+	// Function for logging out - remove cookie
 	private void logout() {
 		final Context c = getApplicationContext();
 		Prefs.setLoggedIn(c, false);
@@ -52,41 +43,21 @@ public class LoginActivity extends Activity implements OnClickListener {
 		finish();
 	}
 	
-	/*
-	 * Login function - an API call to Newsblur.
-	 * Displays a long toast for errors.
-	 */
+	// Login function, saves cookie when login is successful
 	private void login(String user, String pass) {
-		final Context c = getApplicationContext();
-		final AQuery aq = new AQuery(this);
-		
-		AjaxCallback<JSONObject> cb = new AjaxCallback<JSONObject>() {
-			@Override
-			public void callback(String url, JSONObject json, AjaxStatus status) {
-				try
-				{
-					if (json != null && json.getString("authenticated") == "true") {
-						Prefs.setSessionID(c, status.getCookies().get(0).getName(), status.getCookies().get(0).getValue());
-						Prefs.setLoggedIn(c, true);
-						setResult(ReaderExtension.RESULT_LOGIN);
-						finish();
-					}
-					else
-					{
-						Toast.makeText(aq.getContext(), "Error:" + status.getMessage(), Toast.LENGTH_LONG).show();
-					}
-				}
-				catch (JSONException e) {
-					AQUtility.report(e);
-				}
-			}
-		};
-
-		Map<String, Object> params = new HashMap<String, Object>();
-		params.put("username", user);
-		params.put("password", pass);
-		cb.header("User-Agent", Prefs.USER_AGENT);
-		aq.ajax(APIHelper.API_URL_LOGIN, params, JSONObject.class, cb);
+		Context c = getApplicationContext();
+		APICall ac = new APICall(APIHelper.API_URL_LOGIN, c);
+		ac.addParam("username", user);
+		ac.addParam("password", pass);
+		if (ac.sync()) {
+			Prefs.setSessionID(c, ac.Status.getCookies().get(0).getName(), ac.Status.getCookies().get(0).getValue());
+			Prefs.setLoggedIn(c, true);
+			setResult(ReaderExtension.RESULT_LOGIN);
+			finish();
+		}
+		else {
+			Toast.makeText(c, "Error:" + ac.Status.getMessage(), Toast.LENGTH_LONG).show();
+		}
 	}
 	
 	@Override
