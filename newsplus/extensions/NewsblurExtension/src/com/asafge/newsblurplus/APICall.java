@@ -1,4 +1,4 @@
-package com.noinnion.android.newsplus.extension.newsblurplus;
+package com.asafge.newsblurplus;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,10 +36,10 @@ public class APICall {
 	
 	// Run synchronous HTTP request and check for valid response
 	public boolean sync() {
-		aquery.sync(callback);
-		Json = callback.getResult();
-		Status = callback.getStatus();
 		try {
+			aquery.sync(callback);
+			Json = callback.getResult();
+			Status = callback.getStatus();
 			if (Json == null)
 				return false;
 			if (Json.getString("authenticated") != "true") {
@@ -48,7 +48,7 @@ public class APICall {
 			}
 			return (Status.getCode() == 200);
 		}
-		catch (JSONException e) {
+		catch (Exception e) {
 			return false;
 		}
 	}

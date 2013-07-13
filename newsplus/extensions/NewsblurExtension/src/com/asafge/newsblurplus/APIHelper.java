@@ -1,4 +1,4 @@
-package com.noinnion.android.newsplus.extension.newsblurplus;
+package com.asafge.newsblurplus;
 
 import java.util.ArrayList;
 import java.util.Iterator;

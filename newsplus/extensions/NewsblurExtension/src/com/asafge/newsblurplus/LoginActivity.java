@@ -1,4 +1,4 @@
-package com.noinnion.android.newsplus.extension.newsblurplus;
+package com.asafge.newsblurplus;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -9,7 +9,7 @@ import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.noinnion.android.newsplus.extension.newsblurplus.R;
+import com.asafge.newsblurplus.R;
 import com.noinnion.android.reader.api.ReaderExtension;
 
 public class LoginActivity extends Activity implements OnClickListener {
@@ -45,7 +45,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 	
 	// Login function, saves cookie when login is successful
 	private void login(String user, String pass) {
-		Context c = getApplicationContext();
+		final Context c = getApplicationContext();
 		APICall ac = new APICall(APIHelper.API_URL_LOGIN, c);
 		ac.addParam("username", user);
 		ac.addParam("password", pass);

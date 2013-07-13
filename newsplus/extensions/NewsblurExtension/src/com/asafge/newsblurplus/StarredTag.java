@@ -1,6 +1,6 @@
-package com.noinnion.android.newsplus.extension.newsblurplus;
+package com.asafge.newsblurplus;
 
-import com.noinnion.android.newsplus.extension.newsblurplus.APIHelper;
+import com.asafge.newsblurplus.APIHelper;
 import com.noinnion.android.reader.api.provider.ITag;
 
 /*
