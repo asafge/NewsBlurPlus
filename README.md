@@ -9,12 +9,11 @@ Features already implemented:
 * Ablility to read all articles for each feed.
 * Mark as read/unread (might still have some [issues](https://github.com/noinnion/newsplus/issues/12)).
 * Allow to exclude certain folders/feeds from sync.
-* Fetching starred items.
+* Fetching starred items + starring/unstarring items.
 
 TODO:
 -------------------------------
-* Implement star/unstar functionality.
-* Implement folder/tag editing + subscription editing.
+* Implement feed add/remove/move to folder.
     
 References:
 -------------------------------
