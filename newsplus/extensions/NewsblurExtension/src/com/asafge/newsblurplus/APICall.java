@@ -48,7 +48,7 @@ public class APICall {
 			}
 			return (Status.getCode() == 200);
 		}
-		catch (Exception e) {
+		catch (JSONException e) {
 			return false;
 		}
 	}
