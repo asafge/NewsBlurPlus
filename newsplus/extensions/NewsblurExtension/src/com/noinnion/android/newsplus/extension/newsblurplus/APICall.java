@@ -52,4 +52,16 @@ public class APICall {
 			return false;
 		}
 	}
+	
+	// Run synchronous HTTP request, check valid response + successful operation 
+	public boolean syncGetBool() {
+		boolean result = true;
+		try {
+			result = (this.sync() && this.Json.getString("result").startsWith("ok"));
+		} 
+		catch (JSONException e) {
+			result = false;
+		}
+		return result;		
+	}
 }

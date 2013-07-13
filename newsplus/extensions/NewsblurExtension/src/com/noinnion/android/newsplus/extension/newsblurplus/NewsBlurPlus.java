@@ -243,14 +243,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				}
 			}
 		}
-		boolean result = true;
-		try {
-			result = (ac.sync() && ac.Json.getString("result").startsWith("ok"));
-		} 
-		catch (JSONException e) {
-			result = false;
-		}
-		return result;
+		return ac.syncGetBool();
 	}
 
 	/* 
@@ -318,13 +311,8 @@ public class NewsBlurPlus extends ReaderExtension {
 			APICall ac = new APICall(url, c);
 			ac.addParam("story_id", itemUids[i]);
 			ac.addParam("feed_id", APIHelper.getFeedIdFromFeedUrl(subUids[i]));
-			try {
-				result = result && (ac.sync() && ac.Json.getString("result").startsWith("ok"));
-			} 
-			catch (JSONException e) {
-				result = false;
+			if (!ac.syncGetBool())
 				break;
-			}
 		}
 		return result;
 	}
@@ -342,14 +330,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			ac.addParam("folder_to_rename", oldLabel);
 			ac.addParam("new_folder_lable", newLabel);
 			ac.addParam("in_folder", "");
-			boolean result = true;
-			try {
-				result = (ac.sync() && ac.Json.getString("result").startsWith("ok"));
-			} 
-			catch (JSONException e) {
-				result = false;
-			}
-			return result;
+			return ac.syncGetBool();
 		}
 	}
 	
