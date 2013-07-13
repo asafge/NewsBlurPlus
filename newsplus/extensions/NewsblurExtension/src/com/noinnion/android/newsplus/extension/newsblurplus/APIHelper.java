@@ -103,4 +103,5 @@ public class APIHelper {
 	public static String API_URL_UNREAD_HASHES = API_URL_BASE + "reader/unread_story_hashes/";
 	public static String API_URL_MARK_STORY_AS_STARRED = API_URL_BASE + "reader/mark_story_as_starred/";
 	public static String API_URL_MARK_STORY_AS_UNSTARRED = API_URL_BASE + "reader/mark_story_as_unstarred/";
+	public static String API_URL_FOLDER_RENAME = API_URL_BASE + "reader/rename_folder";
 }

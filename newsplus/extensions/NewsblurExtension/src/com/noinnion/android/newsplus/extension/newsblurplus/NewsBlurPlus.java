@@ -329,14 +329,32 @@ public class NewsBlurPlus extends ReaderExtension {
 		return result;
 	}
 
-	//TODO: Tag/Folder handling
-	@Override
-	public boolean editSubscription(String uid, String title, String url, String[] tag, int action, long syncTime) throws IOException, ReaderException {
-		return false;
-	}
-
+	/*
+	 * Rename a top level folder both in News+ and in NewsBlur server
+	 */
 	@Override
 	public boolean renameTag(String tagUid, String oldLabel, String newLabel) throws IOException, ReaderException {
+		if (!tagUid.startsWith("FOL:"))
+			return false;
+		else 
+		{
+			APICall ac = new APICall(APIHelper.API_URL_FOLDER_RENAME, c);
+			ac.addParam("folder_to_rename", oldLabel);
+			ac.addParam("new_folder_lable", newLabel);
+			ac.addParam("in_folder", "");
+			boolean result = true;
+			try {
+				result = (ac.sync() && ac.Json.getString("result").startsWith("ok"));
+			} 
+			catch (JSONException e) {
+				result = false;
+			}
+			return result;
+		}
+	}
+	
+	@Override
+	public boolean editSubscription(String uid, String title, String url, String[] tag, int action, long syncTime) throws IOException, ReaderException {
 		return false;
 	}
 
