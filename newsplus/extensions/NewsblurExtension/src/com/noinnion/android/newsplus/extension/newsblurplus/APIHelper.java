@@ -101,4 +101,6 @@ public class APIHelper {
 	public static String API_URL_MARK_ALL_AS_READ = API_URL_BASE + "reader/mark_all_as_read/";
 	public static String API_URL_STARRED_ITEMS = API_URL_BASE + "reader/starred_stories/";
 	public static String API_URL_UNREAD_HASHES = API_URL_BASE + "reader/unread_story_hashes/";
+	public static String API_URL_MARK_STORY_AS_STARRED = API_URL_BASE + "reader/mark_story_as_starred/";
+	public static String API_URL_MARK_STORY_AS_UNSTARRED = API_URL_BASE + "reader/mark_story_as_unstarred/";
 }

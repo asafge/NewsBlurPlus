@@ -30,7 +30,6 @@ public class NewsBlurPlus extends ReaderExtension {
 	private List<ISubscription> feeds;
 	private IItemListHandler itemListHandler;
 	private Context c;
-	private ITag starredTag;
 	
 	/*
 	 * Constructor
@@ -57,11 +56,8 @@ public class NewsBlurPlus extends ReaderExtension {
 				Iterator<?> keys = json_folders.keys();
 				if (keys.hasNext()) {
 					tags = new ArrayList<ITag>();
+					tags.add(StarredTag.get());
 					feeds = new ArrayList<ISubscription>();
-					if (starredTag == null) {
-						starredTag = APIHelper.createTag("Starred items", true);
-						tags.add(starredTag);
-					}
 				}
 				while (keys.hasNext()) {
 					String catName = ((String)keys.next());
@@ -201,7 +197,7 @@ public class NewsBlurPlus extends ReaderExtension {
 					item.content = story.getString("story_content");
 					if (story.has("starred") && story.getString("starred") == "true") {
 						item.starred = true;
-						item.addCategory(starredTag.uid);
+						item.addCategory(StarredTag.get().uid);
 					}
 					if (categories != null)
 						for (String cat : categories)
@@ -301,13 +297,39 @@ public class NewsBlurPlus extends ReaderExtension {
 		return result;
 	}
 
-	
-	//TODO: Tag/Folder handling
+	/*
+	 * Edit an item's tag - currently supports only starring/unstarring items
+	 */
 	@Override
 	public boolean editItemTag(String[]  itemUids, String[]  subUids, String[]  addTags, String[]  removeTags) throws IOException, ReaderException {
-		return false;
+		boolean result = true;
+		for (int i=0; i<itemUids.length; i++) {
+			String url;
+			if ((addTags != null) && addTags[i].startsWith(StarredTag.get().uid)) {
+				url = APIHelper.API_URL_MARK_STORY_AS_STARRED;
+			}
+			else if ((removeTags != null) && removeTags[i].startsWith(StarredTag.get().uid)) {
+				url = APIHelper.API_URL_MARK_STORY_AS_UNSTARRED;
+			}
+			else {
+				result = false;
+				break;
+			}
+			APICall ac = new APICall(url, c);
+			ac.addParam("story_id", itemUids[i]);
+			ac.addParam("feed_id", APIHelper.getFeedIdFromFeedUrl(subUids[i]));
+			try {
+				result = result && (ac.sync() && ac.Json.getString("result").startsWith("ok"));
+			} 
+			catch (JSONException e) {
+				result = false;
+				break;
+			}
+		}
+		return result;
 	}
 
+	//TODO: Tag/Folder handling
 	@Override
 	public boolean editSubscription(String uid, String title, String url, String[] tag, int action, long syncTime) throws IOException, ReaderException {
 		return false;
