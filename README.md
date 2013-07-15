@@ -3,7 +3,7 @@ NewsBlur+ (beta)
 
 A News+ (gReader branch) extension for the NewsBlur RSS reading service. Still in early stages.
 
-Features already implemented:
+Features
 -------------------------------
 * Sync all folders (in a flat mode) and their feeds.
 * Ablility to read all articles for each feed.
@@ -13,7 +13,7 @@ Features already implemented:
 * Feed add/remove/move to folder + Folder add/remove (might still have some issues).
 
     
-References:
+References
 -------------------------------
 * News+ - https://github.com/noinnion/newsplus
 * NewsBlur API - http://www.newsblur.com/api
