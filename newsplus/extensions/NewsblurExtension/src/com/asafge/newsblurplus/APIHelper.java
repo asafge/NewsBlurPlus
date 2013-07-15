@@ -110,6 +110,7 @@ public class APIHelper {
 	public static String API_URL_FEED_ADD = API_URL_BASE + "/reader/add_url";
 	public static String API_URL_FEED_RENAME = API_URL_BASE + "reader/rename_feed";
 	public static String API_URL_FEED_DEL = API_URL_BASE + "reader/delete_feed";
+	public static String API_URL_FEED_MOVE_TO_FOLDER = API_URL_BASE + "reader/move_feed_to_folder";
 	public static String API_URL_FOLDER_ADD = API_URL_BASE + "reader/add_folder";
 	public static String API_URL_FOLDER_RENAME = API_URL_BASE + "reader/rename_folder";
 	public static String API_URL_FOLDER_DEL = API_URL_BASE + "reader/delete_folder";
