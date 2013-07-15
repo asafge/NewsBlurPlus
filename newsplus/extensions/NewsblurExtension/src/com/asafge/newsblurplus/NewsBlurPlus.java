@@ -176,48 +176,52 @@ public class NewsBlurPlus extends ReaderExtension {
 	 *   feeds/[ID]/feed_link (http://www.codinghorror.com/blog/ - site's link)
 	 */
 	public void parseItemList(String url, IItemListHandler handler, List<String> categories) throws IOException, ReaderException {
-		APICall ac = new APICall(url, c);
-		if (ac.sync()) {
-			try {
-				List<IItem> items = new ArrayList<IItem>();
-				JSONArray arr = ac.Json.getJSONArray("stories");
-				int length = 0;
-				for (int i=0; i<arr.length(); i++) {
-					JSONObject story = arr.getJSONObject(i);
-					IItem item = new IItem();
-					item.subUid = "FEED:" + APIHelper.getFeedUrlFromFeedId(story.getString("story_feed_id"));
-					item.title = story.getString("story_title");
-					item.link = story.getString("story_permalink");
-					item.uid = story.getString("id");
-					item.author = story.getString("story_authors");
-					item.updatedTime = story.getLong("story_timestamp");
-					item.publishedTime = story.getLong("story_timestamp");
-					item.read = (story.getInt("read_status") == 1);
-					item.content = story.getString("story_content");
-					if (story.has("starred") && story.getString("starred") == "true") {
-						item.starred = true;
-						item.addCategory(StarredTag.get().uid);
+		Integer page = 1;
+		while (page > 0) {
+			APICall ac = new APICall(url + "&page=" + page.toString(), c);
+			if (ac.sync()) {			
+				try {
+					List<IItem> items = new ArrayList<IItem>();
+					JSONArray arr = ac.Json.getJSONArray("stories");
+					int length = 0;
+					for (int i=0; i<arr.length(); i++) {
+						JSONObject story = arr.getJSONObject(i);
+						IItem item = new IItem();
+						item.subUid = "FEED:" + APIHelper.getFeedUrlFromFeedId(story.getString("story_feed_id"));
+						item.title = story.getString("story_title");
+						item.link = story.getString("story_permalink");
+						item.uid = story.getString("id");
+						item.author = story.getString("story_authors");
+						item.updatedTime = story.getLong("story_timestamp");
+						item.publishedTime = story.getLong("story_timestamp");
+						item.read = (story.getInt("read_status") == 1);
+						item.content = story.getString("story_content");
+						if (story.has("starred") && story.getString("starred") == "true") {
+							item.starred = true;
+							item.addCategory(StarredTag.get().uid);
+						}
+						if (categories != null)
+							for (String cat : categories)
+								item.addCategory(cat);
+						items.add(item);
+						
+						// Handle TransactionTooLargeException, based on Noin's recommendation
+						length += item.getLength();
+						if (items.size() % 200 == 0 || length > 300000) {
+							handler.items(items);
+							items.clear();
+							length = 0;
+						}
 					}
-					if (categories != null)
-						for (String cat : categories)
-							item.addCategory(cat);
-					items.add(item);
-					
-					// Handle TransactionTooLargeException, based on Noin's recommendation
-					length += item.getLength();
-					if (items.size() % 200 == 0 || length > 300000) {
-						handler.items(items);
-						items.clear();
-						length = 0;
-					}
+					page = (arr.length() > 0) ? (page + 1) : -1; 
+					handler.items(items);
 				}
-				handler.items(items);
-			}
-			catch (JSONException e) {
-				throw new ReaderException("Data parse error", e);
-			}
-			catch (RemoteException e) {
-				throw new ReaderException("Remote connection error", e);
+				catch (JSONException e) {
+					throw new ReaderException("Data parse error", e);
+				}
+				catch (RemoteException e) {
+					throw new ReaderException("Remote connection error", e);
+				}
 			}
 		}
 	}
