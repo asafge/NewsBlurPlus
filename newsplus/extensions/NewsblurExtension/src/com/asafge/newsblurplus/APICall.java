@@ -40,9 +40,11 @@ public class APICall {
 	}
 	
 	// Add a parameter to the call
-	public void addParam(String key, Object value) {
-		if (callback != null)
-			callback.param(key, value);
+	public boolean addParam(String key, Object value) {
+		if (callback == null)
+			return false;
+		callback.param(key, value);
+		return true;
 	}
 	
 	// Run synchronous HTTP request and check for valid response
