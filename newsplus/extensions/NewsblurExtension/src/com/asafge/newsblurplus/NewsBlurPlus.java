@@ -344,6 +344,13 @@ public class NewsBlurPlus extends ReaderExtension {
 		if (tagUid.startsWith("STAR:"))
 			return false;
 		else {
+			for (ISubscription sub : feeds) {
+				if (sub.getCategories().contains(label)) {
+					String[] tags = { label };
+					if (!editSubscription(sub.uid, sub.title, sub.uid, tags, ReaderExtension.SUBSCRIPTION_ACTION_REMOVE_LABEL, Long.MIN_VALUE))
+						return false;
+				}
+			}		
 			APICall ac = new APICall(APIHelper.API_URL_FOLDER_DEL, c);
 			ac.addParam("folder_to_delete", label);
 			return ac.syncGetBool();
