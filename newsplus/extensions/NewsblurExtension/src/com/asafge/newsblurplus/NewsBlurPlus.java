@@ -326,8 +326,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	public boolean renameTag(String tagUid, String oldLabel, String newLabel) throws IOException, ReaderException {
 		if (!tagUid.startsWith("FOL:"))
 			return false;
-		else 
-		{
+		else {
 			APICall ac = new APICall(APIHelper.API_URL_FOLDER_RENAME, c);
 			ac.addParam("folder_to_rename", oldLabel);
 			ac.addParam("new_folder_lable", newLabel);
@@ -336,8 +335,24 @@ public class NewsBlurPlus extends ReaderExtension {
 		}
 	}
 	
+	/*
+	 * Delete a top level folder both in News+ and in NewsBlur server
+	 * This just removes the folder, not the feeds in it
+	 */
 	@Override
-	public boolean editSubscription(String uid, String title, String feed_url, String[] tag, int action, long syncTime) throws IOException, ReaderException {
+	public boolean disableTag(String tagUid, String label) throws IOException, ReaderException {
+		if (tagUid.startsWith("STAR:"))
+			return false;
+		else {
+			APICall ac = new APICall(APIHelper.API_URL_FOLDER_DEL, c);
+			ac.addParam("folder_to_delete", label);
+			return ac.syncGetBool();
+		}
+	}
+	
+	
+	@Override
+	public boolean editSubscription(String uid, String title, String feed_url, String[] tags, int action, long syncTime) throws IOException, ReaderException {
 		APICall ac = new APICall(c);
 		switch (action) {
 			case ReaderExtension.SUBSCRIPTION_ACTION_SUBCRIBE:
@@ -353,21 +368,19 @@ public class NewsBlurPlus extends ReaderExtension {
 				ac.addParam("feed_id", APIHelper.getFeedIdFromFeedUrl(uid));
 				ac.addParam("feed_title", title);
 				break;
-				
+
+			// TODO: Looks like there's a bug with News+, always getting tags=[]
 			case ReaderExtension.SUBSCRIPTION_ACTION_ADD_LABEL:
 				ac.createCallback(APIHelper.API_URL_FOLDER_ADD, c);
-				ac.addParam("folder", tag[0]); // TODO: tag?
+				for (String t : tags)
+					ac.addParam("folder", t);
 				break;
 			case ReaderExtension.SUBSCRIPTION_ACTION_REMOVE_LABEL:
 				ac.createCallback(APIHelper.API_URL_FOLDER_DEL, c);
-				ac.addParam("folder_to_delete", tag[0]); // TODO: tag?
+				for (String t : tags)
+					ac.addParam("folder_to_delete", t);
 				break;
 		}
 		return ac.syncGetBool();
-	}
-
-	@Override
-	public boolean disableTag(String tagUid, String label) throws IOException, ReaderException {
-		return false;
 	}
 }
