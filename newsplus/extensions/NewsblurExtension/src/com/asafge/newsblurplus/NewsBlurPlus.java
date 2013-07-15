@@ -338,26 +338,32 @@ public class NewsBlurPlus extends ReaderExtension {
 	
 	@Override
 	public boolean editSubscription(String uid, String title, String feed_url, String[] tag, int action, long syncTime) throws IOException, ReaderException {
-		String url;
+		APICall ac = new APICall(c);
 		switch (action) {
 			case ReaderExtension.SUBSCRIPTION_ACTION_SUBCRIBE:
-				url = APIHelper.API_URL_FEED_ADD;
+				ac.createCallback(APIHelper.API_URL_FEED_ADD, c);
+				ac.addParam("url", feed_url);
 				break;
 			case ReaderExtension.SUBSCRIPTION_ACTION_UNSUBCRIBE:
-				url = APIHelper.API_URL_FEED_DEL;
+				ac.createCallback(APIHelper.API_URL_FEED_DEL, c);
+				ac.addParam("feed_id", APIHelper.getFeedIdFromFeedUrl(uid));
 				break;
 			case ReaderExtension.SUBSCRIPTION_ACTION_EDIT:
-				url = APIHelper.API_URL_FEED_RENAME;
+				ac.createCallback(APIHelper.API_URL_FEED_RENAME, c);
+				ac.addParam("feed_id", APIHelper.getFeedIdFromFeedUrl(uid));
+				ac.addParam("feed_title", title);
 				break;
 				
 			case ReaderExtension.SUBSCRIPTION_ACTION_ADD_LABEL:
-				url = APIHelper.API_URL_FOLDER_ADD;
+				ac.createCallback(APIHelper.API_URL_FOLDER_ADD, c);
+				ac.addParam("folder", tag[0]); // TODO: tag?
 				break;
 			case ReaderExtension.SUBSCRIPTION_ACTION_REMOVE_LABEL:
-				url = APIHelper.API_URL_FOLDER_DEL;
+				ac.createCallback(APIHelper.API_URL_FOLDER_DEL, c);
+				ac.addParam("folder_to_delete", tag[0]); // TODO: tag?
 				break;
 		}
-		return false;
+		return ac.syncGetBool();
 	}
 
 	@Override
