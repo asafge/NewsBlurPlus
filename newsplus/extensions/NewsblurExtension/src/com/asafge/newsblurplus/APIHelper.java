@@ -9,6 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.androidquery.util.AQUtility;
 import com.noinnion.android.reader.api.provider.ISubscription;
@@ -63,6 +64,15 @@ public class APIHelper {
 				AQUtility.report(e);
 			}
 		}
+	}
+	
+	// Move a feed from one folder to the other
+	public static boolean moveFeedToFolder(Context c, String feed_id, String in_folder, String to_folder) {
+		APICall ac = new APICall(APIHelper.API_URL_FEED_MOVE_TO_FOLDER, c);
+		ac.addParam("feed_id", feed_id);
+		ac.addParam("in_folder", !TextUtils.isEmpty(in_folder) ? in_folder : "[Top Level]");
+		ac.addParam("to_folder", !TextUtils.isEmpty(to_folder) ? to_folder : "[Top Level]");
+		return ac.syncGetBool();
 	}
 	
 	// Construct a single feed's URL from it's integer ID

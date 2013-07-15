@@ -346,24 +346,13 @@ public class NewsBlurPlus extends ReaderExtension {
 		else {
 			for (ISubscription sub : feeds) {
 				if (sub.getCategories().contains(label))
-					if (!moveFeedToFolder(APIHelper.getFeedIdFromFeedUrl(sub.uid), label, ""));
+					if (!APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(sub.uid), label, ""));
 						return false;
 			}		
 			APICall ac = new APICall(APIHelper.API_URL_FOLDER_DEL, c);
 			ac.addParam("folder_to_delete", label);
 			return ac.syncGetBool();
 		}
-	}
-	
-	/*
-	 * Move a feed from one folder to the other
-	 */
-	private boolean moveFeedToFolder(String feed_id, String in_folder, String to_folder) {
-		APICall ac = new APICall(APIHelper.API_URL_FEED_MOVE_TO_FOLDER, c);
-		ac.addParam("feed_id", feed_id);
-		ac.addParam("in_folder", !TextUtils.isEmpty(in_folder) ? in_folder : "[Top Level]");
-		ac.addParam("to_folder", !TextUtils.isEmpty(to_folder) ? to_folder : "[Top Level]");
-		return ac.syncGetBool();
 	}
 	
 	/*
@@ -393,9 +382,9 @@ public class NewsBlurPlus extends ReaderExtension {
 				// TODO: Always getting tags=[]
 				ac.createCallback(APIHelper.API_URL_FOLDER_ADD, c);
 				ac.addParam("folder", tags[0]);
-				return ac.syncGetBool() && moveFeedToFolder(APIHelper.getFeedIdFromFeedUrl(uid), "", tags[0]);
+				return ac.syncGetBool() && APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(uid), "", tags[0]);
 			case ReaderExtension.SUBSCRIPTION_ACTION_REMOVE_LABEL:
-				return moveFeedToFolder(APIHelper.getFeedIdFromFeedUrl(uid), tags[0], "");
+				return APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(uid), tags[0], "");
 				
 			default:
 				return false;
