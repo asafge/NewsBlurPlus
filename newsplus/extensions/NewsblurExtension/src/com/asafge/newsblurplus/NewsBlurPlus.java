@@ -366,9 +366,9 @@ public class NewsBlurPlus extends ReaderExtension {
 		return ac.syncGetBool();
 	}
 	
-
-	
-	
+	/*
+	 * Main function for editing subscriptions - add/delete/rename/change-folder
+	 */	
 	@Override
 	public boolean editSubscription(String uid, String title, String feed_url, String[] tags, int action, long syncTime) throws IOException, ReaderException {
 		APICall ac = new APICall(c);
