@@ -9,7 +9,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.text.TextUtils;
 
 import com.androidquery.util.AQUtility;
 import com.noinnion.android.reader.api.provider.ISubscription;
