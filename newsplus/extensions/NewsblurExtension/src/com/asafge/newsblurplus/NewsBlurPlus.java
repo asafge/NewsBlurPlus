@@ -373,32 +373,32 @@ public class NewsBlurPlus extends ReaderExtension {
 	public boolean editSubscription(String uid, String title, String feed_url, String[] tags, int action, long syncTime) throws IOException, ReaderException {
 		APICall ac = new APICall(c);
 		switch (action) {
+			// Feed - add/delete/rename
 			case ReaderExtension.SUBSCRIPTION_ACTION_SUBCRIBE:
 				ac.createCallback(APIHelper.API_URL_FEED_ADD, c);
 				ac.addParam("url", feed_url);
-				break;
+				return ac.syncGetBool();
 			case ReaderExtension.SUBSCRIPTION_ACTION_UNSUBCRIBE:
 				ac.createCallback(APIHelper.API_URL_FEED_DEL, c);
 				ac.addParam("feed_id", APIHelper.getFeedIdFromFeedUrl(uid));
-				break;
+				return ac.syncGetBool();
 			case ReaderExtension.SUBSCRIPTION_ACTION_EDIT:
 				ac.createCallback(APIHelper.API_URL_FEED_RENAME, c);
 				ac.addParam("feed_id", APIHelper.getFeedIdFromFeedUrl(uid));
 				ac.addParam("feed_title", title);
-				break;
+				return ac.syncGetBool();
 
-			// TODO: Looks like there's a bug with News+, always getting tags=[]
+			// Feed's parent folder - add/delete 
 			case ReaderExtension.SUBSCRIPTION_ACTION_ADD_LABEL:
+				// TODO: Always getting tags=[]
 				ac.createCallback(APIHelper.API_URL_FOLDER_ADD, c);
-				for (String t : tags)
-					ac.addParam("folder", t);
-				break;
+				ac.addParam("folder", tags[0]);
+				return ac.syncGetBool() && moveFeedToFolder(APIHelper.getFeedIdFromFeedUrl(uid), "", tags[0]);
 			case ReaderExtension.SUBSCRIPTION_ACTION_REMOVE_LABEL:
-				ac.createCallback(APIHelper.API_URL_FOLDER_DEL, c);
-				for (String t : tags)
-					ac.addParam("folder_to_delete", t);
-				break;
+				return moveFeedToFolder(APIHelper.getFeedIdFromFeedUrl(uid), tags[0], "");
+				
+			default:
+				return false;
 		}
-		return ac.syncGetBool();
 	}
 }
