@@ -14,7 +14,6 @@ import android.content.Context;
 import android.os.RemoteException;
 import android.text.TextUtils;
 
-import com.androidquery.util.AQUtility;
 import com.noinnion.android.reader.api.ReaderException;
 import com.noinnion.android.reader.api.ReaderExtension;
 import com.noinnion.android.reader.api.internal.IItemIdListHandler;
@@ -93,10 +92,10 @@ public class NewsBlurPlus extends ReaderExtension {
 				}
 			}
 			catch (JSONException e) {
-				AQUtility.report(e);
+				throw new ReaderException("Data parse error", e);
 			}
 			catch (RemoteException e) {
-				throw new ReaderException(e);			
+				throw new ReaderException("Remote connection error", e);
 			}
 		}
 	}
@@ -126,11 +125,11 @@ public class NewsBlurPlus extends ReaderExtension {
 			}
 		}
 		catch (JSONException e) {
-			throw new ReaderException(e);
+			throw new ReaderException("Data parse error", e);
 		}
 		catch (RemoteException e) {
-			throw new ReaderException(e);
-		}	
+			throw new ReaderException("Remote connection error", e);
+		}
 	}
 	
 	/*
@@ -163,7 +162,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			}
 		}
 		catch (RemoteException e) {
-			throw new ReaderException(e);
+			throw new ReaderException("Remote connection error", e);
 		}
 	}
 	
@@ -214,8 +213,11 @@ public class NewsBlurPlus extends ReaderExtension {
 				}
 				handler.items(items);
 			}
-			catch (Exception e) {
-				AQUtility.report(e);
+			catch (JSONException e) {
+				throw new ReaderException("Data parse error", e);
+			}
+			catch (RemoteException e) {
+				throw new ReaderException("Remote connection error", e);
 			}
 		}
 	}
@@ -263,7 +265,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	}
 
 	/*
-	 * Mark all stories on all feeds as read.
+	 * Mark all stories on all feeds as read. Iterate all feeds in order to avoid marking excluded feeds as read. 
 	 * Note: S = subscription (feed), t = tag
 	 */
 	@Override
