@@ -337,7 +337,26 @@ public class NewsBlurPlus extends ReaderExtension {
 	}
 	
 	@Override
-	public boolean editSubscription(String uid, String title, String url, String[] tag, int action, long syncTime) throws IOException, ReaderException {
+	public boolean editSubscription(String uid, String title, String feed_url, String[] tag, int action, long syncTime) throws IOException, ReaderException {
+		String url;
+		switch (action) {
+			case ReaderExtension.SUBSCRIPTION_ACTION_SUBCRIBE:
+				url = APIHelper.API_URL_FEED_ADD;
+				break;
+			case ReaderExtension.SUBSCRIPTION_ACTION_UNSUBCRIBE:
+				url = APIHelper.API_URL_FEED_DEL;
+				break;
+			case ReaderExtension.SUBSCRIPTION_ACTION_EDIT:
+				url = APIHelper.API_URL_FEED_RENAME;
+				break;
+				
+			case ReaderExtension.SUBSCRIPTION_ACTION_ADD_LABEL:
+				url = APIHelper.API_URL_FOLDER_ADD;
+				break;
+			case ReaderExtension.SUBSCRIPTION_ACTION_REMOVE_LABEL:
+				url = APIHelper.API_URL_FOLDER_DEL;
+				break;
+		}
 		return false;
 	}
 
