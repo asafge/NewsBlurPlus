@@ -10,10 +10,9 @@ Features already implemented:
 * Mark as read/unread (might still have some [issues](https://github.com/noinnion/newsplus/issues/12)).
 * Allow to exclude certain folders/feeds from sync.
 * Fetching starred items + starring/unstarring items.
+* Feed add/remove/move to folder.
+* Folder add/remove.
 
-TODO:
--------------------------------
-* Implement feed add/remove/move to folder.
     
 References:
 -------------------------------
