@@ -1,7 +1,7 @@
 NewsBlur+ (beta)
 ================
 
-A News+ (gReader branch) extension for the NewsBlur RSS reading service. Still in a very early alpha.
+A News+ (gReader branch) extension for the NewsBlur RSS reading service. Still in early stages.
 
 Features already implemented:
 -------------------------------
