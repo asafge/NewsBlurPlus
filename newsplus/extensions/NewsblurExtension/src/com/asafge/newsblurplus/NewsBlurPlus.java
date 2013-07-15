@@ -296,7 +296,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	 * Edit an item's tag - currently supports only starring/unstarring items
 	 */
 	@Override
-	public boolean editItemTag(String[]  itemUids, String[]  subUids, String[]  addTags, String[]  removeTags) throws IOException, ReaderException {
+	public boolean editItemTag(String[] itemUids, String[] subUids, String[] addTags, String[] removeTags) throws IOException, ReaderException {
 		boolean result = true;
 		for (int i=0; i<itemUids.length; i++) {
 			String url;
