@@ -29,9 +29,11 @@ public class LoginActivity extends Activity implements OnClickListener {
 		if (Prefs.isLoggedIn(c)) {
 			setResult(RESULT_OK);
 			finish();
-		}		
-		setContentView(R.layout.login_newsblur);
-		findViewById(R.id.ok_button).setOnClickListener(this);
+		}
+		else {
+			setContentView(R.layout.login_newsblur);
+			findViewById(R.id.ok_button).setOnClickListener(this);
+		}
 	}
 
 	// Function for logging out - remove cookie
