@@ -329,7 +329,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		else {
 			APICall ac = new APICall(APIHelper.API_URL_FOLDER_RENAME, c);
 			ac.addParam("folder_to_rename", oldLabel);
-			ac.addParam("new_folder_label", newLabel);
+			ac.addParam("new_folder_name", newLabel);
 			ac.addParam("in_folder", "");
 			return ac.syncGetBool();
 		}
