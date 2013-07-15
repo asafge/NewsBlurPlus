@@ -70,8 +70,8 @@ public class APIHelper {
 	public static boolean moveFeedToFolder(Context c, String feed_id, String in_folder, String to_folder) {
 		APICall ac = new APICall(APIHelper.API_URL_FEED_MOVE_TO_FOLDER, c);
 		ac.addParam("feed_id", feed_id);
-		ac.addParam("in_folder", !TextUtils.isEmpty(in_folder) ? in_folder : "[Top Level]");
-		ac.addParam("to_folder", !TextUtils.isEmpty(to_folder) ? to_folder : "[Top Level]");
+		ac.addParam("in_folder", in_folder);
+		ac.addParam("to_folder", to_folder);
 		return ac.syncGetBool();
 	}
 	
