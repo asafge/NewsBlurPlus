@@ -100,6 +100,17 @@ public class APIHelper {
 		return tags;
 	}
 	
+	// Sort a list of subscriptions
+	public static List<ISubscription> sortSubscriptions(List<ISubscription> subs) {
+		Collections.sort(subs, new Comparator<ISubscription>() {
+			@Override
+			public int compare(ISubscription lhs, ISubscription rhs) {
+				return lhs.title.toLowerCase().compareTo(rhs.title.toLowerCase());
+			}
+		});
+		return subs;
+	}
+	
 	// Create a new tag object
 	public static ITag createTag(String name, boolean isStar) {
 		ITag tag = new ITag();
