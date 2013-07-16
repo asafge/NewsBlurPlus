@@ -26,7 +26,7 @@ import com.noinnion.android.reader.api.provider.ITag;
 
 public class NewsBlurPlus extends ReaderExtension {
 	private List<ITag> tags;
-	private List<ISubscription> feeds;
+	private List<ISubscription> subs;
 	private IItemListHandler itemListHandler;
 	private Context c;
 	
@@ -56,7 +56,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				if (keys.hasNext()) {
 					tags = new ArrayList<ITag>();
 					tags.add(StarredTag.get());
-					feeds = new ArrayList<ISubscription>();
+					subs = new ArrayList<ISubscription>();
 				}
 				while (keys.hasNext()) {
 					String catName = ((String)keys.next());
@@ -80,15 +80,15 @@ public class NewsBlurPlus extends ReaderExtension {
 						sub.unreadCount = f.getInt("nt") + f.getInt("ps");
 						if (!TextUtils.isEmpty(catName))
 							sub.addCategory(cat.uid);
-						feeds.add(sub);
+						subs.add(sub);
 					}
 				}
-				if (feeds.size() == 0)
+				if (subs.size() == 0)
 					throw new ReaderException("Network error");
 				else {
-					APIHelper.updateFeedCounts(c, feeds);
+					APIHelper.updateFeedCounts(c, subs);
 					tagHandler.tags(APIHelper.sortTags(tags));
-					subHandler.subscriptions(APIHelper.sortSubscriptions(feeds));
+					subHandler.subscriptions(APIHelper.sortSubscriptions(subs));
 				}
 			}
 			catch (JSONException e) {
@@ -140,15 +140,15 @@ public class NewsBlurPlus extends ReaderExtension {
 	public void handleItemList(IItemListHandler handler, long syncTime) throws IOException, ReaderException {
 		itemListHandler = handler;
 		try {
-			if ((tags != null) && (feeds != null)) {
+			if ((tags != null) && (subs != null)) {
 				String uid = handler.stream();
 				if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
-					for (ISubscription sub : feeds)
+					for (ISubscription sub : subs)
 						if (sub.unreadCount > 0 && !handler.excludedStreams().contains(sub.uid))
 							parseItemList(sub.uid.replace("FEED:", ""), handler, sub.getCategories());
 				}
 				else if (uid.startsWith("FOL:")) {
-					for (ISubscription sub : feeds)
+					for (ISubscription sub : subs)
 						if (sub.unreadCount > 0 && sub.getCategories().contains(uid) && !handler.excludedStreams().contains(sub.uid))
 							parseItemList(sub.uid.replace("FEED:", ""), handler, sub.getCategories());
 				}
@@ -283,7 +283,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			}
 			else if ((itemListHandler != null) && ((s == null && t == null) || s.startsWith("FOL:"))) {
 				List<String> subUIDs = new ArrayList<String>();
-				for (ISubscription sub : feeds)
+				for (ISubscription sub : subs)
 					if ((!itemListHandler.excludedStreams().contains(sub.uid)) && (s == null || sub.getCategories().contains(s)))
 						subUIDs.add(sub.uid);
 				result = subUIDs.isEmpty() ? false : this.markAs(true, null, (String[])subUIDs.toArray());
@@ -349,7 +349,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		if (tagUid.startsWith("STAR:"))
 			return false;
 		else {
-			for (ISubscription sub : feeds) {
+			for (ISubscription sub : subs) {
 				if (sub.getCategories().contains(label))
 					if (!APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(sub.uid), label, ""));
 						return false;
