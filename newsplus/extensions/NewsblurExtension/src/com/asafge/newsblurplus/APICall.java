@@ -79,4 +79,31 @@ public class APICall {
 		}
 		return result;		
 	}
+	
+	// API constants
+	public static String API_URL_BASE = "http://www.newsblur.com/";
+	public static String API_URL_BASE_SECURE = "https://www.newsblur.com/";
+	public static String API_URL_LOGIN = API_URL_BASE_SECURE + "api/login/";
+	
+	public static String API_URL_FOLDERS_AND_FEEDS = API_URL_BASE + "reader/feeds?flat=true";
+	public static String API_URL_UNREAD_HASHES = API_URL_BASE + "reader/unread_story_hashes/";
+	public static String API_URL_RIVER = API_URL_BASE + "reader/river_stories?";
+	public static String API_URL_REFRESH_FEEDS = API_URL_BASE + "reader/refresh_feeds/";
+	
+	public static String API_URL_MARK_STORY_AS_READ = API_URL_BASE + "reader/mark_story_as_read/";
+	public static String API_URL_MARK_STORY_AS_UNREAD = API_URL_BASE + "reader/mark_story_as_unread/";
+	public static String API_URL_MARK_FEED_AS_READ = API_URL_BASE + "reader/mark_feed_as_read/";
+	public static String API_URL_MARK_ALL_AS_READ = API_URL_BASE + "reader/mark_all_as_read/";
+	
+	public static String API_URL_STARRED_ITEMS = API_URL_BASE + "reader/starred_stories?order=newest";
+	public static String API_URL_MARK_STORY_AS_STARRED = API_URL_BASE + "reader/mark_story_as_starred/";
+	public static String API_URL_MARK_STORY_AS_UNSTARRED = API_URL_BASE + "reader/mark_story_as_unstarred/";
+	
+	public static String API_URL_FEED_ADD = API_URL_BASE + "/reader/add_url";
+	public static String API_URL_FEED_RENAME = API_URL_BASE + "reader/rename_feed";
+	public static String API_URL_FEED_DEL = API_URL_BASE + "reader/delete_feed";
+	public static String API_URL_FEED_MOVE_TO_FOLDER = API_URL_BASE + "reader/move_feed_to_folder";
+	public static String API_URL_FOLDER_ADD = API_URL_BASE + "reader/add_folder";
+	public static String API_URL_FOLDER_RENAME = API_URL_BASE + "reader/rename_folder";
+	public static String API_URL_FOLDER_DEL = API_URL_BASE + "reader/delete_folder";
 }

@@ -47,7 +47,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	 */
 	@Override
 	public void handleReaderList(ITagListHandler tagHandler, ISubscriptionListHandler subHandler, long syncTime) throws IOException, ReaderException {
-		APICall ac = new APICall(APIHelper.API_URL_FOLDERS_AND_FEEDS, c);	
+		APICall ac = new APICall(APICall.API_URL_FOLDERS_AND_FEEDS, c);	
 		if (ac.sync()) {
 			try {
 				JSONObject json_feeds = ac.Json.getJSONObject("feeds");
@@ -109,11 +109,11 @@ public class NewsBlurPlus extends ReaderExtension {
 		try {
 			String url;
 			if (handler.stream().startsWith(ReaderExtension.STATE_STARRED)) {
-				url = APIHelper.API_URL_STARRED_ITEMS;
+				url = APICall.API_URL_STARRED_ITEMS;
 			}
 			else {
 				List<String> unread_hashes = APIHelper.getUnreadHashes(c);
-				url = APIHelper.API_URL_RIVER;
+				url = APICall.API_URL_RIVER;
 				for (String h : unread_hashes)
 					url += "h=" + h + "&";
 				url += "read_filter=unread";
@@ -157,7 +157,7 @@ public class NewsBlurPlus extends ReaderExtension {
 						parseItemList(handler.stream().replace("FEED:", ""), handler, null);
 				}
 				else if (uid.startsWith(ReaderExtension.STATE_STARRED)) {
-					parseItemList(APIHelper.API_URL_STARRED_ITEMS, handler, null);
+					parseItemList(APICall.API_URL_STARRED_ITEMS, handler, null);
 				}
 			}
 		}
@@ -233,16 +233,16 @@ public class NewsBlurPlus extends ReaderExtension {
 	private boolean markAs(boolean read, String[]  itemUids, String[]  subUIds)	{	
 		APICall ac;
 		if (itemUids == null && subUIds == null) {
-			ac = new APICall(APIHelper.API_URL_MARK_ALL_AS_READ, c);
+			ac = new APICall(APICall.API_URL_MARK_ALL_AS_READ, c);
 		}
 		else {
 			if (itemUids == null) {
-				ac = new APICall(APIHelper.API_URL_MARK_FEED_AS_READ, c);
+				ac = new APICall(APICall.API_URL_MARK_FEED_AS_READ, c);
 				for (String sub : subUIds)
 					ac.addParam("feed_id", APIHelper.getFeedIdFromFeedUrl(sub));
 			}
 			else {
-				String url = read ? APIHelper.API_URL_MARK_STORY_AS_READ : APIHelper.API_URL_MARK_STORY_AS_UNREAD;
+				String url = read ? APICall.API_URL_MARK_STORY_AS_READ : APICall.API_URL_MARK_STORY_AS_UNREAD;
 				ac = new APICall(url, c);
 				for (int i=0; i<itemUids.length; i++) {
 					ac.addParam("story_id", itemUids[i]);
@@ -306,10 +306,10 @@ public class NewsBlurPlus extends ReaderExtension {
 		for (int i=0; i<itemUids.length; i++) {
 			String url;
 			if ((addTags != null) && addTags[i].startsWith(StarredTag.get().uid)) {
-				url = APIHelper.API_URL_MARK_STORY_AS_STARRED;
+				url = APICall.API_URL_MARK_STORY_AS_STARRED;
 			}
 			else if ((removeTags != null) && removeTags[i].startsWith(StarredTag.get().uid)) {
-				url = APIHelper.API_URL_MARK_STORY_AS_UNSTARRED;
+				url = APICall.API_URL_MARK_STORY_AS_UNSTARRED;
 			}
 			else {
 				result = false;
@@ -332,7 +332,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		if (!tagUid.startsWith("FOL:"))
 			return false;
 		else {
-			APICall ac = new APICall(APIHelper.API_URL_FOLDER_RENAME, c);
+			APICall ac = new APICall(APICall.API_URL_FOLDER_RENAME, c);
 			ac.addParam("folder_to_rename", oldLabel);
 			ac.addParam("new_folder_name", newLabel);
 			ac.addParam("in_folder", "");
@@ -354,7 +354,7 @@ public class NewsBlurPlus extends ReaderExtension {
 					if (!APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(sub.uid), label, ""));
 						return false;
 			}		
-			APICall ac = new APICall(APIHelper.API_URL_FOLDER_DEL, c);
+			APICall ac = new APICall(APICall.API_URL_FOLDER_DEL, c);
 			ac.addParam("folder_to_delete", label);
 			return ac.syncGetBool();
 		}
@@ -369,15 +369,15 @@ public class NewsBlurPlus extends ReaderExtension {
 		switch (action) {
 			// Feed - add/delete/rename
 			case ReaderExtension.SUBSCRIPTION_ACTION_SUBCRIBE:
-				ac.createCallback(APIHelper.API_URL_FEED_ADD, c);
+				ac.createCallback(APICall.API_URL_FEED_ADD, c);
 				ac.addParam("url", feed_url);
 				return ac.syncGetBool();
 			case ReaderExtension.SUBSCRIPTION_ACTION_UNSUBCRIBE:
-				ac.createCallback(APIHelper.API_URL_FEED_DEL, c);
+				ac.createCallback(APICall.API_URL_FEED_DEL, c);
 				ac.addParam("feed_id", APIHelper.getFeedIdFromFeedUrl(uid));
 				return ac.syncGetBool();
 			case ReaderExtension.SUBSCRIPTION_ACTION_EDIT:
-				ac.createCallback(APIHelper.API_URL_FEED_RENAME, c);
+				ac.createCallback(APICall.API_URL_FEED_RENAME, c);
 				ac.addParam("feed_id", APIHelper.getFeedIdFromFeedUrl(uid));
 				ac.addParam("feed_title", title);
 				return ac.syncGetBool();
@@ -385,7 +385,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			// Feed's parent folder - add/delete 
 			case ReaderExtension.SUBSCRIPTION_ACTION_ADD_LABEL:
 				// TODO: Always getting tags=[]
-				ac.createCallback(APIHelper.API_URL_FOLDER_ADD, c);
+				ac.createCallback(APICall.API_URL_FOLDER_ADD, c);
 				ac.addParam("folder", tags[0]);
 				return ac.syncGetBool() && APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(uid), "", tags[0]);
 			case ReaderExtension.SUBSCRIPTION_ACTION_REMOVE_LABEL:

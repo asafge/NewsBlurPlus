@@ -31,7 +31,7 @@ public class APIHelper {
 	
 	// Get all the unread story hashes at once
 	public static List<String> getUnreadHashes(Context c) {
-		APICall ac = new APICall(APIHelper.API_URL_UNREAD_HASHES, c);
+		APICall ac = new APICall(APICall.API_URL_UNREAD_HASHES, c);
 		List<String> unread_hashes = new ArrayList<String>();
 		if (ac.sync()) {
 			try {
@@ -52,7 +52,7 @@ public class APIHelper {
 	
 	// Call for an update on all feeds' unread counters, and store the result
 	public static void updateFeedCounts(Context c, List<ISubscription> feeds) {
-		APICall ac = new APICall(APIHelper.API_URL_REFRESH_FEEDS, c);
+		APICall ac = new APICall(APICall.API_URL_REFRESH_FEEDS, c);
 		if (ac.sync()) {
 			try {
 				JSONObject json_feeds = ac.Json.getJSONObject("feeds");
@@ -69,7 +69,7 @@ public class APIHelper {
 	
 	// Move a feed from one folder to the other
 	public static boolean moveFeedToFolder(Context c, String feed_id, String in_folder, String to_folder) {
-		APICall ac = new APICall(APIHelper.API_URL_FEED_MOVE_TO_FOLDER, c);
+		APICall ac = new APICall(APICall.API_URL_FEED_MOVE_TO_FOLDER, c);
 		ac.addParam("feed_id", feed_id);
 		ac.addParam("in_folder", in_folder);
 		ac.addParam("to_folder", to_folder);
@@ -78,13 +78,13 @@ public class APIHelper {
 	
 	// Construct a single feed's URL from it's integer ID
 	public static String getFeedUrlFromFeedId(String feedID) {
-		return API_URL_RIVER + "feeds=" + feedID;
+		return APICall.API_URL_RIVER + "feeds=" + feedID;
 	}
 	
 	// Get the feed ID from a given URL
 	public static String getFeedIdFromFeedUrl(String feedURL) {
 		String feedID = feedURL.replace("FEED:", "");
-		feedID = feedID.replace(API_URL_RIVER, "");
+		feedID = feedID.replace(APICall.API_URL_RIVER, "");
 		feedID = feedID.replace("feeds=", "");
 		return feedID;
 	}
@@ -120,31 +120,4 @@ public class APIHelper {
 		tag.type = isStar ? ITag.TYPE_TAG_STARRED : ITag.TYPE_FOLDER;
 		return tag;
 	}
-	
-	// API constants
-	public static String API_URL_BASE = "http://www.newsblur.com/";
-	public static String API_URL_BASE_SECURE = "https://www.newsblur.com/";
-	public static String API_URL_LOGIN = API_URL_BASE_SECURE + "api/login/";
-	
-	public static String API_URL_FOLDERS_AND_FEEDS = API_URL_BASE + "reader/feeds?flat=true";
-	public static String API_URL_UNREAD_HASHES = API_URL_BASE + "reader/unread_story_hashes/";
-	public static String API_URL_RIVER = API_URL_BASE + "reader/river_stories?";
-	public static String API_URL_REFRESH_FEEDS = API_URL_BASE + "reader/refresh_feeds/";
-	
-	public static String API_URL_MARK_STORY_AS_READ = API_URL_BASE + "reader/mark_story_as_read/";
-	public static String API_URL_MARK_STORY_AS_UNREAD = API_URL_BASE + "reader/mark_story_as_unread/";
-	public static String API_URL_MARK_FEED_AS_READ = API_URL_BASE + "reader/mark_feed_as_read/";
-	public static String API_URL_MARK_ALL_AS_READ = API_URL_BASE + "reader/mark_all_as_read/";
-	
-	public static String API_URL_STARRED_ITEMS = API_URL_BASE + "reader/starred_stories?order=newest";
-	public static String API_URL_MARK_STORY_AS_STARRED = API_URL_BASE + "reader/mark_story_as_starred/";
-	public static String API_URL_MARK_STORY_AS_UNSTARRED = API_URL_BASE + "reader/mark_story_as_unstarred/";
-	
-	public static String API_URL_FEED_ADD = API_URL_BASE + "/reader/add_url";
-	public static String API_URL_FEED_RENAME = API_URL_BASE + "reader/rename_feed";
-	public static String API_URL_FEED_DEL = API_URL_BASE + "reader/delete_feed";
-	public static String API_URL_FEED_MOVE_TO_FOLDER = API_URL_BASE + "reader/move_feed_to_folder";
-	public static String API_URL_FOLDER_ADD = API_URL_BASE + "reader/add_folder";
-	public static String API_URL_FOLDER_RENAME = API_URL_BASE + "reader/rename_folder";
-	public static String API_URL_FOLDER_DEL = API_URL_BASE + "reader/delete_folder";
 }

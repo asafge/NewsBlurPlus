@@ -48,7 +48,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 	// Login function, saves cookie when login is successful
 	private void login(String user, String pass) {
 		final Context c = getApplicationContext();
-		APICall ac = new APICall(APIHelper.API_URL_LOGIN, c);
+		APICall ac = new APICall(APICall.API_URL_LOGIN, c);
 		ac.addParam("username", user);
 		ac.addParam("password", pass);
 		if (ac.sync()) {
