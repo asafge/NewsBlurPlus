@@ -67,6 +67,21 @@ public class APIHelper {
 		}
 	}
 	
+	// Get a story and return its total intelligence score
+	public static int getIntelligence(JSONObject story) {
+		try {
+			JSONObject intel = story.getJSONObject("intelligence");
+			int feed = intel.getInt("feed");
+			int tags = intel.getInt("tags");
+			int author = intel.getInt("author");
+			int title = intel.getInt("title");
+			return feed + tags + author + title;
+		}
+		catch (JSONException e) {
+			return 0;
+		}
+	}
+	
 	// Move a feed from one folder to the other
 	public static boolean moveFeedToFolder(Context c, String feed_id, String in_folder, String to_folder) {
 		APICall ac = new APICall(APICall.API_URL_FEED_MOVE_TO_FOLDER, c);
