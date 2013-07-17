@@ -191,9 +191,10 @@ public class NewsBlurPlus extends ReaderExtension {
 		}
 		else {
 			if (itemUids == null) {
-				ac = new APICall(APICall.API_URL_MARK_FEED_AS_READ, c);
+				String url = APICall.API_URL_MARK_FEED_AS_READ + "?";
 				for (String sub : subUIds)
-					ac.addParam("feed_id", APIHelper.getFeedIdFromFeedUrl(sub));
+					url += ("feed_id=" + APIHelper.getFeedIdFromFeedUrl(sub) + "&");
+				ac = new APICall(url, c);
 			}
 			else {
 				String url = read ? APICall.API_URL_MARK_STORY_AS_READ : APICall.API_URL_MARK_STORY_AS_UNREAD;
@@ -240,7 +241,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				for (ISubscription sub : SubsStruct.Instance(c).Subs)
 					if (s == null || sub.getCategories().contains(s))
 						subUIDs.add(sub.uid);
-				result = subUIDs.isEmpty() ? false : this.markAs(true, null, (String[])subUIDs.toArray());
+				result = subUIDs.isEmpty() ? false : this.markAs(true, null, subUIDs.toArray(new String[0]));
 			}
 			else
 				result = false;
