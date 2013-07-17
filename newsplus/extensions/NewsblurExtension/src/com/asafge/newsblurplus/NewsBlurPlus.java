@@ -36,6 +36,15 @@ public class NewsBlurPlus extends ReaderExtension {
 	};
 	
 	/*
+	 * Wrapper function to get all the folders and feeds in a flat structure
+	 */
+	private boolean getSubsStructure() {
+		subs = new ArrayList<ISubscription>();
+		tags = new ArrayList<ITag>();
+		return APIHelper.getSubsStructure(c, subs, tags);
+	}
+	
+	/*
 	 * Main sync function to get folders, feeds, and counts.
 	 * 1. Get the folders (tags) and their feeds.
 	 * 2. Ask NewsBlur to Refresh feed counts + save to feeds.
@@ -43,8 +52,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	 */
 	@Override
 	public void handleReaderList(ITagListHandler tagHandler, ISubscriptionListHandler subHandler, long syncTime) throws ReaderException {
-		
-		if (!APIHelper.getSubsStructure(c, subs, tags))
+		if (!getSubsStructure())
 			throw new ReaderException("Network error");
 		else {
 			try {
@@ -96,12 +104,12 @@ public class NewsBlurPlus extends ReaderExtension {
 	public void handleItemList(IItemListHandler handler, long syncTime) throws IOException, ReaderException {
 		try {
 			String uid = handler.stream();
-			if (uid.equals(ReaderExtension.STATE_READING_LIST) && APIHelper.getSubsStructure(c, subs, tags)) {
+			if (uid.equals(ReaderExtension.STATE_READING_LIST) && getSubsStructure()) {
 				for (ISubscription sub : subs)
 					if (sub.unreadCount > 0 && !handler.excludedStreams().contains(sub.uid))
 						parseItemList(sub.uid.replace("FEED:", ""), handler, sub.getCategories());
 			}
-			else if (uid.startsWith("FOL:") && APIHelper.getSubsStructure(c, subs, tags)) {
+			else if (uid.startsWith("FOL:") && getSubsStructure()) {
 				for (ISubscription sub : subs)
 					if (sub.unreadCount > 0 && sub.getCategories().contains(uid) && !handler.excludedStreams().contains(sub.uid))
 						parseItemList(sub.uid.replace("FEED:", ""), handler, sub.getCategories());
@@ -235,7 +243,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			String[] feed = { APIHelper.getFeedIdFromFeedUrl(s) };
 			result = this.markAs(true, null, feed);
 		}
-		else if (((s == null && t == null) || s.startsWith("FOL:")) && (APIHelper.getSubsStructure(c, subs, tags))) {
+		else if (((s == null && t == null) || s.startsWith("FOL:")) && getSubsStructure()) {
 			List<String> subUIDs = new ArrayList<String>();
 			for (ISubscription sub : subs)
 				if (s == null || sub.getCategories().contains(s))
@@ -298,7 +306,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	public boolean disableTag(String tagUid, String label) throws IOException, ReaderException {
 		if (tagUid.startsWith("STAR:"))
 			return false;
-		else if (APIHelper.getSubsStructure(c, subs, tags)) {
+		else if (getSubsStructure()) {
 			for (ISubscription sub : subs) {
 				if (sub.getCategories().contains(label))
 					if (!APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(sub.uid), label, ""));

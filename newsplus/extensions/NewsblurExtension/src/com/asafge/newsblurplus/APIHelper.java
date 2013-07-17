@@ -26,11 +26,8 @@ public class APIHelper {
 				JSONObject json_feeds = ac.Json.getJSONObject("feeds");
 				JSONObject json_folders = ac.Json.getJSONObject("flat_folders");
 				Iterator<?> keys = json_folders.keys();
-				if (keys.hasNext()) {
-					subs = new ArrayList<ISubscription>();
-					tags = new ArrayList<ITag>();
+				if (keys.hasNext())
 					tags.add(StarredTag.get());
-				}
 				while (keys.hasNext()) {
 					String catName = ((String)keys.next());
 					JSONArray feedsPerFolder = json_folders.getJSONArray(catName);
@@ -96,12 +93,12 @@ public class APIHelper {
 	}
 	
 	// Call for an update on all feeds' unread counters, and store the result
-	public static void updateFeedCounts(Context c, List<ISubscription> feeds) {
+	public static void updateFeedCounts(Context c, List<ISubscription> subs) {
 		APICall ac = new APICall(APICall.API_URL_REFRESH_FEEDS, c);
 		if (ac.sync()) {
 			try {
 				JSONObject json_feeds = ac.Json.getJSONObject("feeds");
-				for (ISubscription sub : feeds) {
+				for (ISubscription sub : subs) {
 					JSONObject f = json_feeds.getJSONObject(APIHelper.getFeedIdFromFeedUrl(sub.uid));
 					sub.unreadCount = f.getInt("ps") + f.getInt("nt");
 				}
