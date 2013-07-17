@@ -2,8 +2,6 @@ package com.asafge.newsblurplus;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Iterator;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -12,7 +10,6 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.os.RemoteException;
-import android.text.TextUtils;
 
 import com.noinnion.android.reader.api.ReaderException;
 import com.noinnion.android.reader.api.ReaderExtension;
@@ -45,54 +42,16 @@ public class NewsBlurPlus extends ReaderExtension {
 	 * 3. Send handler the tags and feeds.
 	 */
 	@Override
-	public void handleReaderList(ITagListHandler tagHandler, ISubscriptionListHandler subHandler, long syncTime) throws IOException, ReaderException {
-		APICall ac = new APICall(APICall.API_URL_FOLDERS_AND_FEEDS, c);	
-		if (ac.sync()) {
+	public void handleReaderList(ITagListHandler tagHandler, ISubscriptionListHandler subHandler, long syncTime) throws ReaderException {
+		
+		if (!APIHelper.getSubsStructure(c, subs, tags))
+			throw new ReaderException("Network error");
+		else {
 			try {
-				JSONObject json_feeds = ac.Json.getJSONObject("feeds");
-				JSONObject json_folders = ac.Json.getJSONObject("flat_folders");
-				Iterator<?> keys = json_folders.keys();
-				if (keys.hasNext()) {
-					tags = new ArrayList<ITag>();
-					tags.add(StarredTag.get());
-					subs = new ArrayList<ISubscription>();
-				}
-				while (keys.hasNext()) {
-					String catName = ((String)keys.next());
-					JSONArray feedsPerFolder = json_folders.getJSONArray(catName);
-					catName = catName.trim();
-					ITag cat = APIHelper.createTag(catName, false);
-					if (!TextUtils.isEmpty(catName))
-						tags.add(cat);
-
-					// Add all feeds in this category
-					for (int i=0; i<feedsPerFolder.length(); i++) {
-						ISubscription sub = new ISubscription();
-						String feedID = feedsPerFolder.getString(i);
-						JSONObject f = json_feeds.getJSONObject(feedID);
-						Calendar updateTime = Calendar.getInstance();
-						updateTime.add(Calendar.SECOND, (-1) * f.getInt("updated_seconds_ago"));
-						sub.newestItemTime = updateTime.getTimeInMillis() / 1000;
-						sub.uid = "FEED:" + APIHelper.getFeedUrlFromFeedId(feedID);
-						sub.title = f.getString("feed_title");
-						sub.htmlUrl = f.getString("feed_link");
-						sub.unreadCount = f.getInt("nt") + f.getInt("ps");
-						if (!TextUtils.isEmpty(catName))
-							sub.addCategory(cat.uid);
-						subs.add(sub);
-					}
-				}
-				if (subs.size() == 0)
-					throw new ReaderException("Network error");
-				else {
-					APIHelper.updateFeedCounts(c, subs);
-					tagHandler.tags(tags);
-					subHandler.subscriptions(subs);
-				}
-			}
-			catch (JSONException e) {
-				throw new ReaderException("Data parse error", e);
-			}
+				APIHelper.updateFeedCounts(c, subs);
+				tagHandler.tags(tags);
+				subHandler.subscriptions(subs);
+			} 
 			catch (RemoteException e) {
 				throw new ReaderException("Remote connection error", e);
 			}
@@ -118,10 +77,8 @@ public class NewsBlurPlus extends ReaderExtension {
 				url += "read_filter=unread";
 			}
 			APICall ac = new APICall(url, c);
-			if (ac.sync()) {
-				List<String> unread = APIHelper.extractStoryIDs(ac.Json);
-				handler.items(unread);
-			}
+			if (ac.sync())
+				handler.items(APIHelper.extractStoryIDs(ac.Json));
 		}
 		catch (JSONException e) {
 			throw new ReaderException("Data parse error", e);
@@ -138,26 +95,26 @@ public class NewsBlurPlus extends ReaderExtension {
 	@Override
 	public void handleItemList(IItemListHandler handler, long syncTime) throws IOException, ReaderException {
 		try {
-			if ((tags != null) && (subs != null)) {
-				String uid = handler.stream();
-				if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
-					for (ISubscription sub : subs)
-						if (sub.unreadCount > 0 && !handler.excludedStreams().contains(sub.uid))
-							parseItemList(sub.uid.replace("FEED:", ""), handler, sub.getCategories());
-				}
-				else if (uid.startsWith("FOL:")) {
-					for (ISubscription sub : subs)
-						if (sub.unreadCount > 0 && sub.getCategories().contains(uid) && !handler.excludedStreams().contains(sub.uid))
-							parseItemList(sub.uid.replace("FEED:", ""), handler, sub.getCategories());
-				}
-				else if (uid.startsWith("FEED:")) {
-					if (!handler.excludedStreams().contains(uid))
-						parseItemList(handler.stream().replace("FEED:", ""), handler, null);
-				}
-				else if (uid.startsWith(ReaderExtension.STATE_STARRED)) {
-					parseItemList(APICall.API_URL_STARRED_ITEMS, handler, null);
-				}
+			String uid = handler.stream();
+			if (uid.equals(ReaderExtension.STATE_READING_LIST) && APIHelper.getSubsStructure(c, subs, tags)) {
+				for (ISubscription sub : subs)
+					if (sub.unreadCount > 0 && !handler.excludedStreams().contains(sub.uid))
+						parseItemList(sub.uid.replace("FEED:", ""), handler, sub.getCategories());
 			}
+			else if (uid.startsWith("FOL:") && APIHelper.getSubsStructure(c, subs, tags)) {
+				for (ISubscription sub : subs)
+					if (sub.unreadCount > 0 && sub.getCategories().contains(uid) && !handler.excludedStreams().contains(sub.uid))
+						parseItemList(sub.uid.replace("FEED:", ""), handler, sub.getCategories());
+			}
+			else if (uid.startsWith("FEED:")) {
+				if (!handler.excludedStreams().contains(uid))
+					parseItemList(handler.stream().replace("FEED:", ""), handler, null);
+			}
+			else if (uid.startsWith(ReaderExtension.STATE_STARRED)) {
+				parseItemList(APICall.API_URL_STARRED_ITEMS, handler, null);
+			}
+			else
+				throw new ReaderException("Error parsing data");
 		}
 		catch (RemoteException e) {
 			throw new ReaderException("Remote connection error", e);
@@ -255,7 +212,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	 * Mark a list of stories (and their feeds) as read
 	 */
 	@Override
-	public boolean markAsRead(String[]  itemUids, String[]  subUIds) throws IOException, ReaderException {
+	public boolean markAsRead(String[]  itemUids, String[]  subUIds) {
 		return this.markAs(true, itemUids, subUIds);
 	}
 
@@ -263,7 +220,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	 * Mark a list of stories (and their feeds) as unread
 	 */
 	@Override
-	public boolean markAsUnread(String[]  itemUids, String[]  subUids, boolean keepUnread) throws IOException, ReaderException {
+	public boolean markAsUnread(String[]  itemUids, String[]  subUids, boolean keepUnread) {
 		return this.markAs(false, itemUids, subUids);
 	}
 
@@ -272,13 +229,13 @@ public class NewsBlurPlus extends ReaderExtension {
 	 * Note: S = subscription (feed), t = tag
 	 */
 	@Override
-	public boolean markAllAsRead(String s, String t, long syncTime) throws IOException, ReaderException {
+	public boolean markAllAsRead(String s, String t, long syncTime) {
 		boolean result = true;
 		if (s != null && s.startsWith("FEED:")) {
 			String[] feed = { APIHelper.getFeedIdFromFeedUrl(s) };
 			result = this.markAs(true, null, feed);
 		}
-		else if ((s == null && t == null) || s.startsWith("FOL:")) {
+		else if (((s == null && t == null) || s.startsWith("FOL:")) && (APIHelper.getSubsStructure(c, subs, tags))) {
 			List<String> subUIDs = new ArrayList<String>();
 			for (ISubscription sub : subs)
 				if (s == null || sub.getCategories().contains(s))
@@ -286,7 +243,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			result = subUIDs.isEmpty() ? false : this.markAs(true, null, (String[])subUIDs.toArray());
 		}
 		else
-			result = false;	// Can't mark a tag as read
+			result = false;
 		return result;
 	}
 
@@ -341,16 +298,18 @@ public class NewsBlurPlus extends ReaderExtension {
 	public boolean disableTag(String tagUid, String label) throws IOException, ReaderException {
 		if (tagUid.startsWith("STAR:"))
 			return false;
-		else {
+		else if (APIHelper.getSubsStructure(c, subs, tags)) {
 			for (ISubscription sub : subs) {
 				if (sub.getCategories().contains(label))
 					if (!APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(sub.uid), label, ""));
 						return false;
-			}		
+			}
 			APICall ac = new APICall(APICall.API_URL_FOLDER_DEL, c);
 			ac.addParam("folder_to_delete", label);
 			return ac.syncGetBool();
 		}
+		else
+			return false;
 	}
 	
 	/*

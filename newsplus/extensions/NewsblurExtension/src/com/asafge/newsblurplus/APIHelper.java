@@ -1,6 +1,7 @@
 package com.asafge.newsblurplus;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 
@@ -9,12 +10,58 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.androidquery.util.AQUtility;
 import com.noinnion.android.reader.api.provider.ISubscription;
 import com.noinnion.android.reader.api.provider.ITag;
 
 public class APIHelper {
+	
+	// Get all the folders and feeds in a flat structure
+	public static boolean getSubsStructure(Context c, List<ISubscription> subs, List<ITag> tags) {
+		try{
+			APICall ac = new APICall(APICall.API_URL_FOLDERS_AND_FEEDS, c);	
+			if (ac.sync()) {
+				JSONObject json_feeds = ac.Json.getJSONObject("feeds");
+				JSONObject json_folders = ac.Json.getJSONObject("flat_folders");
+				Iterator<?> keys = json_folders.keys();
+				if (keys.hasNext()) {
+					subs = new ArrayList<ISubscription>();
+					tags = new ArrayList<ITag>();
+					tags.add(StarredTag.get());
+				}
+				while (keys.hasNext()) {
+					String catName = ((String)keys.next());
+					JSONArray feedsPerFolder = json_folders.getJSONArray(catName);
+					catName = catName.trim();
+					ITag cat = APIHelper.createTag(catName, false);
+					if (!TextUtils.isEmpty(catName))
+						tags.add(cat);
+					// Add all feeds in this category
+					for (int i=0; i<feedsPerFolder.length(); i++) {
+						ISubscription sub = new ISubscription();
+						String feedID = feedsPerFolder.getString(i);
+						JSONObject f = json_feeds.getJSONObject(feedID);
+						Calendar updateTime = Calendar.getInstance();
+						updateTime.add(Calendar.SECOND, (-1) * f.getInt("updated_seconds_ago"));
+						sub.newestItemTime = updateTime.getTimeInMillis() / 1000;
+						sub.uid = "FEED:" + APIHelper.getFeedUrlFromFeedId(feedID);
+						sub.title = f.getString("feed_title");
+						sub.htmlUrl = f.getString("feed_link");
+						sub.unreadCount = f.getInt("nt") + f.getInt("ps");
+						if (!TextUtils.isEmpty(catName))
+							sub.addCategory(cat.uid);
+						subs.add(sub);
+					}
+				}
+			}
+			return (subs.size() > 0);
+		}
+		catch (JSONException e) {
+			return false;
+		}
+	}
 	
 	// Get a list of story IDs from a JSON object. Used for unread refresh.
 	public static List<String> extractStoryIDs(JSONObject json) throws JSONException { 
