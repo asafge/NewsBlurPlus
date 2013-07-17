@@ -4,6 +4,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.net.Uri;
 
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
@@ -39,11 +40,22 @@ public class APICall {
 		callback.url(callbackUrl).type(JSONObject.class);
 	}
 	
-	// Add a parameter to the call
-	public boolean addParam(String key, Object value) {
+	// Add a post parameter to the call
+	public boolean addPostParam(String key, String value) {
 		if (callback == null)
 			return false;
 		callback.param(key, value);
+		return true;
+	}
+	
+	// Add a post (Url) parameter to the call
+	public boolean addGetParam(String key, String value) {
+		if (callback == null)
+			return false;
+		Uri.Builder b = Uri.parse(callbackUrl).buildUpon();
+		b.appendQueryParameter(key, value);
+		callbackUrl = b.build().toString();
+		callback.url(callbackUrl);
 		return true;
 	}
 	
@@ -92,7 +104,7 @@ public class APICall {
 	
 	public static String API_URL_MARK_STORY_AS_READ = API_URL_BASE + "reader/mark_story_as_read/";
 	public static String API_URL_MARK_STORY_AS_UNREAD = API_URL_BASE + "reader/mark_story_as_unread/";
-	public static String API_URL_MARK_FEED_AS_READ = API_URL_BASE + "reader/mark_feed_as_read/";
+	public static String API_URL_MARK_FEED_AS_READ = API_URL_BASE + "reader/mark_feed_as_read";
 	public static String API_URL_MARK_ALL_AS_READ = API_URL_BASE + "reader/mark_all_as_read/";
 	
 	public static String API_URL_STARRED_ITEMS = API_URL_BASE + "reader/starred_stories?order=newest";

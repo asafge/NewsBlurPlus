@@ -67,9 +67,9 @@ public class APIHelper {
 	// Move a feed from one folder to the other
 	public static boolean moveFeedToFolder(Context c, String feed_id, String in_folder, String to_folder) {
 		APICall ac = new APICall(APICall.API_URL_FEED_MOVE_TO_FOLDER, c);
-		ac.addParam("feed_id", feed_id);
-		ac.addParam("in_folder", in_folder);
-		ac.addParam("to_folder", to_folder);
+		ac.addPostParam("feed_id", feed_id);
+		ac.addPostParam("in_folder", in_folder);
+		ac.addPostParam("to_folder", to_folder);
 		return ac.syncGetBool();
 	}
 	

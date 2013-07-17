@@ -49,8 +49,8 @@ public class LoginActivity extends Activity implements OnClickListener {
 	private void login(String user, String pass) {
 		final Context c = getApplicationContext();
 		APICall ac = new APICall(APICall.API_URL_LOGIN, c);
-		ac.addParam("username", user);
-		ac.addParam("password", pass);
+		ac.addPostParam("username", user);
+		ac.addPostParam("password", pass);
 		if (ac.sync()) {
 			Prefs.setSessionID(c, ac.Status.getCookies().get(0).getName(), ac.Status.getCookies().get(0).getValue());
 			Prefs.setLoggedIn(c, true);

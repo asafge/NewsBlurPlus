@@ -61,20 +61,19 @@ public class NewsBlurPlus extends ReaderExtension {
 	@Override
 	public void handleItemIdList(IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
 		try {
-			String url;
 			if (handler.stream().startsWith(ReaderExtension.STATE_STARRED)) {
-				url = APICall.API_URL_STARRED_ITEMS;
+				APICall ac = new APICall(APICall.API_URL_STARRED_ITEMS, c);
+				if (ac.sync())
+					handler.items(APIHelper.extractStoryIDs(ac.Json));
 			}
 			else {
+				APICall ac = new APICall(APICall.API_URL_RIVER, c);
 				List<String> unread_hashes = APIHelper.getUnreadHashes(c);
-				url = APICall.API_URL_RIVER;
 				for (String h : unread_hashes)
-					url += "h=" + h + "&";
-				url += "read_filter=unread";
+					ac.addGetParam("h", h);
+				if (ac.sync())
+					handler.items(APIHelper.extractStoryIDs(ac.Json));
 			}
-			APICall ac = new APICall(url, c);
-			if (ac.sync())
-				handler.items(APIHelper.extractStoryIDs(ac.Json));
 		}
 		catch (JSONException e) {
 			throw new ReaderException("Data parse error", e);
@@ -132,7 +131,8 @@ public class NewsBlurPlus extends ReaderExtension {
 	public void parseItemList(String url, IItemListHandler handler, List<String> categories) throws IOException, ReaderException {
 		Integer page = 1;
 		while (page > 0) {
-			APICall ac = new APICall(url + "&page=" + page.toString(), c);
+			APICall ac = new APICall(url, c);
+			ac.addGetParam("page", page.toString());
 			if (ac.sync()) {			
 				try {
 					List<IItem> items = new ArrayList<IItem>();
@@ -191,17 +191,16 @@ public class NewsBlurPlus extends ReaderExtension {
 		}
 		else {
 			if (itemUids == null) {
-				String url = APICall.API_URL_MARK_FEED_AS_READ + "?";
+				ac = new APICall(APICall.API_URL_MARK_FEED_AS_READ, c);		
 				for (String sub : subUIds)
-					url += ("feed_id=" + APIHelper.getFeedIdFromFeedUrl(sub) + "&");
-				ac = new APICall(url, c);
+					ac.addGetParam("feed_id", APIHelper.getFeedIdFromFeedUrl(sub));
 			}
 			else {
 				String url = read ? APICall.API_URL_MARK_STORY_AS_READ : APICall.API_URL_MARK_STORY_AS_UNREAD;
 				ac = new APICall(url, c);
 				for (int i=0; i<itemUids.length; i++) {
-					ac.addParam("story_id", itemUids[i]);
-					ac.addParam("feed_id", APIHelper.getFeedIdFromFeedUrl(subUIds[i]));
+					ac.addPostParam("story_id", itemUids[i]);
+					ac.addPostParam("feed_id", APIHelper.getFeedIdFromFeedUrl(subUIds[i]));
 				}
 			}
 		}
@@ -271,8 +270,8 @@ public class NewsBlurPlus extends ReaderExtension {
 				break;
 			}
 			APICall ac = new APICall(url, c);
-			ac.addParam("story_id", itemUids[i]);
-			ac.addParam("feed_id", APIHelper.getFeedIdFromFeedUrl(subUids[i]));
+			ac.addPostParam("story_id", itemUids[i]);
+			ac.addPostParam("feed_id", APIHelper.getFeedIdFromFeedUrl(subUids[i]));
 			if (!ac.syncGetBool())
 				break;
 		}
@@ -288,9 +287,9 @@ public class NewsBlurPlus extends ReaderExtension {
 			return false;
 		else {
 			APICall ac = new APICall(APICall.API_URL_FOLDER_RENAME, c);
-			ac.addParam("folder_to_rename", oldLabel);
-			ac.addParam("new_folder_name", newLabel);
-			ac.addParam("in_folder", "");
+			ac.addPostParam("folder_to_rename", oldLabel);
+			ac.addPostParam("new_folder_name", newLabel);
+			ac.addPostParam("in_folder", "");
 			return ac.syncGetBool();
 		}
 	}
@@ -311,7 +310,7 @@ public class NewsBlurPlus extends ReaderExtension {
 							return false;
 				}
 				APICall ac = new APICall(APICall.API_URL_FOLDER_DEL, c);
-				ac.addParam("folder_to_delete", label);
+				ac.addPostParam("folder_to_delete", label);
 				return ac.syncGetBool();
 			}
 			catch (JSONException e) {
@@ -330,23 +329,23 @@ public class NewsBlurPlus extends ReaderExtension {
 			// Feed - add/delete/rename
 			case ReaderExtension.SUBSCRIPTION_ACTION_SUBCRIBE:
 				ac.createCallback(APICall.API_URL_FEED_ADD, c);
-				ac.addParam("url", feed_url);
+				ac.addPostParam("url", feed_url);
 				return ac.syncGetBool();
 			case ReaderExtension.SUBSCRIPTION_ACTION_UNSUBCRIBE:
 				ac.createCallback(APICall.API_URL_FEED_DEL, c);
-				ac.addParam("feed_id", APIHelper.getFeedIdFromFeedUrl(uid));
+				ac.addPostParam("feed_id", APIHelper.getFeedIdFromFeedUrl(uid));
 				return ac.syncGetBool();
 			case ReaderExtension.SUBSCRIPTION_ACTION_EDIT:
 				ac.createCallback(APICall.API_URL_FEED_RENAME, c);
-				ac.addParam("feed_id", APIHelper.getFeedIdFromFeedUrl(uid));
-				ac.addParam("feed_title", title);
+				ac.addPostParam("feed_id", APIHelper.getFeedIdFromFeedUrl(uid));
+				ac.addPostParam("feed_title", title);
 				return ac.syncGetBool();
 
 			// Feed's parent folder - add/delete 
 			case ReaderExtension.SUBSCRIPTION_ACTION_ADD_LABEL:
 				// TODO: Always getting tags=[]
 				ac.createCallback(APICall.API_URL_FOLDER_ADD, c);
-				ac.addParam("folder", tags[0]);
+				ac.addPostParam("folder", tags[0]);
 				return ac.syncGetBool() && APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(uid), "", tags[0]);
 			case ReaderExtension.SUBSCRIPTION_ACTION_REMOVE_LABEL:
 				return APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(uid), tags[0], "");
