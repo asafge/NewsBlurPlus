@@ -87,8 +87,8 @@ public class NewsBlurPlus extends ReaderExtension {
 					throw new ReaderException("Network error");
 				else {
 					APIHelper.updateFeedCounts(c, subs);
-					tagHandler.tags(APIHelper.sortTags(tags));
-					subHandler.subscriptions(APIHelper.sortSubscriptions(subs));
+					tagHandler.tags(tags);
+					subHandler.subscriptions(subs);
 				}
 			}
 			catch (JSONException e) {

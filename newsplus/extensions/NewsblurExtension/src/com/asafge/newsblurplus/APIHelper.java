@@ -1,8 +1,6 @@
 package com.asafge.newsblurplus;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -102,28 +100,6 @@ public class APIHelper {
 		feedID = feedID.replace(APICall.API_URL_RIVER, "");
 		feedID = feedID.replace("feeds=", "");
 		return feedID;
-	}
-	
-	// Sort a list of tags
-	public static List<ITag> sortTags(List<ITag> tags) {
-		Collections.sort(tags, new Comparator<ITag>() {
-			@Override
-			public int compare(ITag lhs, ITag rhs) {
-				return lhs.uid.compareTo(rhs.uid);
-				}
-		});
-		return tags;
-	}
-	
-	// Sort a list of subscriptions
-	public static List<ISubscription> sortSubscriptions(List<ISubscription> subs) {
-		Collections.sort(subs, new Comparator<ISubscription>() {
-			@Override
-			public int compare(ISubscription lhs, ISubscription rhs) {
-				return lhs.title.toLowerCase().compareTo(rhs.title.toLowerCase());
-			}
-		});
-		return subs;
 	}
 	
 	// Create a new tag object
