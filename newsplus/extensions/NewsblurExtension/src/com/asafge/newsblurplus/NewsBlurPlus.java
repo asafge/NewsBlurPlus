@@ -19,7 +19,6 @@ import com.noinnion.android.reader.api.internal.ISubscriptionListHandler;
 import com.noinnion.android.reader.api.internal.ITagListHandler;
 import com.noinnion.android.reader.api.provider.IItem;
 import com.noinnion.android.reader.api.provider.ISubscription;
-import com.noinnion.android.reader.api.provider.ITag;
 
 public class NewsBlurPlus extends ReaderExtension {
 	private Context c;
@@ -42,12 +41,10 @@ public class NewsBlurPlus extends ReaderExtension {
 	@Override
 	public void handleReaderList(ITagListHandler tagHandler, ISubscriptionListHandler subHandler, long syncTime) throws ReaderException {
 		try {
-			List<ITag> tags = new ArrayList<ITag>();
-			List<ISubscription>subs = new ArrayList<ISubscription>();
-			APIHelper.getSubsStructure(c, subs, tags);
-			APIHelper.updateFeedCounts(c, subs);
-			tagHandler.tags(tags);
-			subHandler.subscriptions(subs);
+			SubsStruct.InstanceRefresh(c);
+			APIHelper.updateFeedCounts(c, SubsStruct.Instance(c).Subs);
+			tagHandler.tags(SubsStruct.Instance(c).Tags);
+			subHandler.subscriptions(SubsStruct.Instance(c).Subs);
 		}
 		catch (JSONException e) {
 			throw new ReaderException("Data parse error", e);
@@ -96,18 +93,12 @@ public class NewsBlurPlus extends ReaderExtension {
 		try {
 			String uid = handler.stream();
 			if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
-				List<ITag> tags = new ArrayList<ITag>();
-				List<ISubscription>subs = new ArrayList<ISubscription>();
-				APIHelper.getSubsStructure(c, subs, tags);
-				for (ISubscription sub : subs)
+				for (ISubscription sub : SubsStruct.Instance(c).Subs)
 					if (sub.unreadCount > 0 && !handler.excludedStreams().contains(sub.uid))
 						parseItemList(sub.uid.replace("FEED:", ""), handler, sub.getCategories());
 			}
 			else if (uid.startsWith("FOL:")) {
-				List<ITag> tags = new ArrayList<ITag>();
-				List<ISubscription>subs = new ArrayList<ISubscription>();
-				APIHelper.getSubsStructure(c, subs, tags);
-				for (ISubscription sub : subs)
+				for (ISubscription sub : SubsStruct.Instance(c).Subs)
 					if (sub.unreadCount > 0 && sub.getCategories().contains(uid) && !handler.excludedStreams().contains(sub.uid))
 						parseItemList(sub.uid.replace("FEED:", ""), handler, sub.getCategories());
 			}
@@ -245,11 +236,8 @@ public class NewsBlurPlus extends ReaderExtension {
 				result = this.markAs(true, null, feed);
 			}
 			else if (((s == null && t == null) || s.startsWith("FOL:"))) {
-				List<ITag> tags = new ArrayList<ITag>();
-				List<ISubscription>subs = new ArrayList<ISubscription>();
-				APIHelper.getSubsStructure(c, subs, tags);
 				List<String> subUIDs = new ArrayList<String>();
-				for (ISubscription sub : subs)
+				for (ISubscription sub : SubsStruct.Instance(c).Subs)
 					if (s == null || sub.getCategories().contains(s))
 						subUIDs.add(sub.uid);
 				result = subUIDs.isEmpty() ? false : this.markAs(true, null, (String[])subUIDs.toArray());
@@ -316,10 +304,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			return false;
 		else {
 			try {
-				List<ITag> tags = new ArrayList<ITag>();
-				List<ISubscription>subs = new ArrayList<ISubscription>();
-				APIHelper.getSubsStructure(c, subs, tags);
-				for (ISubscription sub : subs) {
+				for (ISubscription sub : SubsStruct.Instance(c).Subs) {
 					if (sub.getCategories().contains(label))
 						if (!APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(sub.uid), label, ""));
 							return false;
