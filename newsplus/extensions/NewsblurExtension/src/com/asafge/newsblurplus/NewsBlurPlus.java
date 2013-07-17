@@ -22,8 +22,6 @@ import com.noinnion.android.reader.api.provider.ISubscription;
 import com.noinnion.android.reader.api.provider.ITag;
 
 public class NewsBlurPlus extends ReaderExtension {
-	private List<ITag> tags;
-	private List<ISubscription> subs;
 	private Context c;
 	
 	/*
@@ -36,15 +34,6 @@ public class NewsBlurPlus extends ReaderExtension {
 	};
 	
 	/*
-	 * Wrapper function to get all the folders and feeds in a flat structure
-	 */
-	private boolean getSubsStructure() throws JSONException {
-		subs = new ArrayList<ISubscription>();
-		tags = new ArrayList<ITag>();
-		return APIHelper.getSubsStructure(c, subs, tags);
-	}
-	
-	/*
 	 * Main sync function to get folders, feeds, and counts.
 	 * 1. Get the folders (tags) and their feeds.
 	 * 2. Ask NewsBlur to Refresh feed counts + save to feeds.
@@ -53,7 +42,9 @@ public class NewsBlurPlus extends ReaderExtension {
 	@Override
 	public void handleReaderList(ITagListHandler tagHandler, ISubscriptionListHandler subHandler, long syncTime) throws ReaderException {
 		try {
-			getSubsStructure();
+			List<ITag> tags = new ArrayList<ITag>();
+			List<ISubscription>subs = new ArrayList<ISubscription>();
+			APIHelper.getSubsStructure(c, subs, tags);
 			APIHelper.updateFeedCounts(c, subs);
 			tagHandler.tags(tags);
 			subHandler.subscriptions(subs);
@@ -104,12 +95,18 @@ public class NewsBlurPlus extends ReaderExtension {
 	public void handleItemList(IItemListHandler handler, long syncTime) throws IOException, ReaderException {
 		try {
 			String uid = handler.stream();
-			if (uid.equals(ReaderExtension.STATE_READING_LIST) && getSubsStructure()) {
+			if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
+				List<ITag> tags = new ArrayList<ITag>();
+				List<ISubscription>subs = new ArrayList<ISubscription>();
+				APIHelper.getSubsStructure(c, subs, tags);
 				for (ISubscription sub : subs)
 					if (sub.unreadCount > 0 && !handler.excludedStreams().contains(sub.uid))
 						parseItemList(sub.uid.replace("FEED:", ""), handler, sub.getCategories());
 			}
-			else if (uid.startsWith("FOL:") && getSubsStructure()) {
+			else if (uid.startsWith("FOL:")) {
+				List<ITag> tags = new ArrayList<ITag>();
+				List<ISubscription>subs = new ArrayList<ISubscription>();
+				APIHelper.getSubsStructure(c, subs, tags);
 				for (ISubscription sub : subs)
 					if (sub.unreadCount > 0 && sub.getCategories().contains(uid) && !handler.excludedStreams().contains(sub.uid))
 						parseItemList(sub.uid.replace("FEED:", ""), handler, sub.getCategories());
@@ -247,7 +244,10 @@ public class NewsBlurPlus extends ReaderExtension {
 				String[] feed = { APIHelper.getFeedIdFromFeedUrl(s) };
 				result = this.markAs(true, null, feed);
 			}
-			else if (((s == null && t == null) || s.startsWith("FOL:")) && getSubsStructure()) {
+			else if (((s == null && t == null) || s.startsWith("FOL:"))) {
+				List<ITag> tags = new ArrayList<ITag>();
+				List<ISubscription>subs = new ArrayList<ISubscription>();
+				APIHelper.getSubsStructure(c, subs, tags);
 				List<String> subUIDs = new ArrayList<String>();
 				for (ISubscription sub : subs)
 					if (s == null || sub.getCategories().contains(s))
@@ -316,18 +316,17 @@ public class NewsBlurPlus extends ReaderExtension {
 			return false;
 		else {
 			try {
-				if (getSubsStructure()) {
-					for (ISubscription sub : subs) {
-						if (sub.getCategories().contains(label))
-							if (!APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(sub.uid), label, ""));
-								return false;
-					}
-					APICall ac = new APICall(APICall.API_URL_FOLDER_DEL, c);
-					ac.addParam("folder_to_delete", label);
-					return ac.syncGetBool();
+				List<ITag> tags = new ArrayList<ITag>();
+				List<ISubscription>subs = new ArrayList<ISubscription>();
+				APIHelper.getSubsStructure(c, subs, tags);
+				for (ISubscription sub : subs) {
+					if (sub.getCategories().contains(label))
+						if (!APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(sub.uid), label, ""));
+							return false;
 				}
-				else
-					return false;
+				APICall ac = new APICall(APICall.API_URL_FOLDER_DEL, c);
+				ac.addParam("folder_to_delete", label);
+				return ac.syncGetBool();
 			}
 			catch (JSONException e) {
 				return false;
