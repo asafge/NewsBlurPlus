@@ -12,52 +12,46 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.text.TextUtils;
 
-import com.androidquery.util.AQUtility;
 import com.noinnion.android.reader.api.provider.ISubscription;
 import com.noinnion.android.reader.api.provider.ITag;
 
 public class APIHelper {
 	
 	// Get all the folders and feeds in a flat structure
-	public static boolean getSubsStructure(Context c, List<ISubscription> subs, List<ITag> tags) {
-		try{
-			APICall ac = new APICall(APICall.API_URL_FOLDERS_AND_FEEDS, c);	
-			if (ac.sync()) {
-				JSONObject json_feeds = ac.Json.getJSONObject("feeds");
-				JSONObject json_folders = ac.Json.getJSONObject("flat_folders");
-				Iterator<?> keys = json_folders.keys();
-				if (keys.hasNext())
-					tags.add(StarredTag.get());
-				while (keys.hasNext()) {
-					String catName = ((String)keys.next());
-					JSONArray feedsPerFolder = json_folders.getJSONArray(catName);
-					catName = catName.trim();
-					ITag cat = APIHelper.createTag(catName, false);
+	public static boolean getSubsStructure(Context c, List<ISubscription> subs, List<ITag> tags) throws JSONException {
+		APICall ac = new APICall(APICall.API_URL_FOLDERS_AND_FEEDS, c);	
+		if (ac.sync()) {
+			JSONObject json_feeds = ac.Json.getJSONObject("feeds");
+			JSONObject json_folders = ac.Json.getJSONObject("flat_folders");
+			Iterator<?> keys = json_folders.keys();
+			if (keys.hasNext())
+				tags.add(StarredTag.get());
+			while (keys.hasNext()) {
+				String catName = ((String)keys.next());
+				JSONArray feedsPerFolder = json_folders.getJSONArray(catName);
+				catName = catName.trim();
+				ITag cat = APIHelper.createTag(catName, false);
+				if (!TextUtils.isEmpty(catName))
+					tags.add(cat);
+				// Add all feeds in this category
+				for (int i=0; i<feedsPerFolder.length(); i++) {
+					ISubscription sub = new ISubscription();
+					String feedID = feedsPerFolder.getString(i);
+					JSONObject f = json_feeds.getJSONObject(feedID);
+					Calendar updateTime = Calendar.getInstance();
+					updateTime.add(Calendar.SECOND, (-1) * f.getInt("updated_seconds_ago"));
+					sub.newestItemTime = updateTime.getTimeInMillis() / 1000;
+					sub.uid = "FEED:" + APIHelper.getFeedUrlFromFeedId(feedID);
+					sub.title = f.getString("feed_title");
+					sub.htmlUrl = f.getString("feed_link");
+					sub.unreadCount = f.getInt("nt") + f.getInt("ps");
 					if (!TextUtils.isEmpty(catName))
-						tags.add(cat);
-					// Add all feeds in this category
-					for (int i=0; i<feedsPerFolder.length(); i++) {
-						ISubscription sub = new ISubscription();
-						String feedID = feedsPerFolder.getString(i);
-						JSONObject f = json_feeds.getJSONObject(feedID);
-						Calendar updateTime = Calendar.getInstance();
-						updateTime.add(Calendar.SECOND, (-1) * f.getInt("updated_seconds_ago"));
-						sub.newestItemTime = updateTime.getTimeInMillis() / 1000;
-						sub.uid = "FEED:" + APIHelper.getFeedUrlFromFeedId(feedID);
-						sub.title = f.getString("feed_title");
-						sub.htmlUrl = f.getString("feed_link");
-						sub.unreadCount = f.getInt("nt") + f.getInt("ps");
-						if (!TextUtils.isEmpty(catName))
-							sub.addCategory(cat.uid);
-						subs.add(sub);
-					}
+						sub.addCategory(cat.uid);
+					subs.add(sub);
 				}
 			}
-			return (subs.size() > 0);
 		}
-		catch (JSONException e) {
-			return false;
-		}
+		return (subs.size() > 0);
 	}
 	
 	// Get a list of story IDs from a JSON object. Used for unread refresh.
@@ -72,56 +66,41 @@ public class APIHelper {
 	}
 	
 	// Get all the unread story hashes at once
-	public static List<String> getUnreadHashes(Context c) {
+	public static List<String> getUnreadHashes(Context c) throws JSONException {
 		APICall ac = new APICall(APICall.API_URL_UNREAD_HASHES, c);
 		List<String> unread_hashes = new ArrayList<String>();
 		if (ac.sync()) {
-			try {
-				JSONObject json_folders = ac.Json.getJSONObject("unread_feed_story_hashes");
-				Iterator<?> keys = json_folders.keys();
-				while (keys.hasNext()) {
-					JSONArray items = json_folders.getJSONArray((String)keys.next());
-					for (int i=0; i<items.length(); i++)
-						unread_hashes.add(items.getString(i));
-				}
-			}
-			catch (Exception e) {
-				AQUtility.report(e);
+			JSONObject json_folders = ac.Json.getJSONObject("unread_feed_story_hashes");
+			Iterator<?> keys = json_folders.keys();
+			while (keys.hasNext()) {
+				JSONArray items = json_folders.getJSONArray((String)keys.next());
+				for (int i=0; i<items.length(); i++)
+					unread_hashes.add(items.getString(i));
 			}
 		}
 		return unread_hashes;
 	}
 	
 	// Call for an update on all feeds' unread counters, and store the result
-	public static void updateFeedCounts(Context c, List<ISubscription> subs) {
+	public static void updateFeedCounts(Context c, List<ISubscription> subs) throws JSONException {
 		APICall ac = new APICall(APICall.API_URL_REFRESH_FEEDS, c);
 		if (ac.sync()) {
-			try {
-				JSONObject json_feeds = ac.Json.getJSONObject("feeds");
-				for (ISubscription sub : subs) {
-					JSONObject f = json_feeds.getJSONObject(APIHelper.getFeedIdFromFeedUrl(sub.uid));
-					sub.unreadCount = f.getInt("ps") + f.getInt("nt");
-				}
-			}
-			catch (Exception e) {
-				AQUtility.report(e);
+			JSONObject json_feeds = ac.Json.getJSONObject("feeds");
+			for (ISubscription sub : subs) {
+				JSONObject f = json_feeds.getJSONObject(APIHelper.getFeedIdFromFeedUrl(sub.uid));
+				sub.unreadCount = f.getInt("ps") + f.getInt("nt");
 			}
 		}
 	}
 	
 	// Get a story and return its total intelligence score
-	public static int getIntelligence(JSONObject story) {
-		try {
-			JSONObject intel = story.getJSONObject("intelligence");
-			int feed = intel.getInt("feed");
-			int tags = intel.getInt("tags");
-			int author = intel.getInt("author");
-			int title = intel.getInt("title");
-			return feed + tags + author + title;
-		}
-		catch (JSONException e) {
-			return 0;
-		}
+	public static int getIntelligence(JSONObject story) throws JSONException {
+		JSONObject intel = story.getJSONObject("intelligence");
+		int feed = intel.getInt("feed");
+		int tags = intel.getInt("tags");
+		int author = intel.getInt("author");
+		int title = intel.getInt("title");
+		return feed + tags + author + title;
 	}
 	
 	// Move a feed from one folder to the other

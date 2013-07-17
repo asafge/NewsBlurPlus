@@ -38,7 +38,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	/*
 	 * Wrapper function to get all the folders and feeds in a flat structure
 	 */
-	private boolean getSubsStructure() {
+	private boolean getSubsStructure() throws JSONException {
 		subs = new ArrayList<ISubscription>();
 		tags = new ArrayList<ITag>();
 		return APIHelper.getSubsStructure(c, subs, tags);
@@ -52,17 +52,17 @@ public class NewsBlurPlus extends ReaderExtension {
 	 */
 	@Override
 	public void handleReaderList(ITagListHandler tagHandler, ISubscriptionListHandler subHandler, long syncTime) throws ReaderException {
-		if (!getSubsStructure())
-			throw new ReaderException("Network error");
-		else {
-			try {
-				APIHelper.updateFeedCounts(c, subs);
-				tagHandler.tags(tags);
-				subHandler.subscriptions(subs);
-			} 
-			catch (RemoteException e) {
-				throw new ReaderException("Remote connection error", e);
-			}
+		try {
+			getSubsStructure();
+			APIHelper.updateFeedCounts(c, subs);
+			tagHandler.tags(tags);
+			subHandler.subscriptions(subs);
+		}
+		catch (JSONException e) {
+			throw new ReaderException("Data parse error", e);
+		}
+		catch (RemoteException e) {
+			throw new ReaderException("Remote connection error", e);
 		}
 	}
 
@@ -122,7 +122,10 @@ public class NewsBlurPlus extends ReaderExtension {
 				parseItemList(APICall.API_URL_STARRED_ITEMS, handler, null);
 			}
 			else
-				throw new ReaderException("Error parsing data");
+				throw new ReaderException("Data parse error");
+		}
+		catch (JSONException e) {
+			throw new ReaderException("Data parse error", e);
 		}
 		catch (RemoteException e) {
 			throw new ReaderException("Remote connection error", e);
@@ -238,21 +241,26 @@ public class NewsBlurPlus extends ReaderExtension {
 	 */
 	@Override
 	public boolean markAllAsRead(String s, String t, long syncTime) {
-		boolean result = true;
-		if (s != null && s.startsWith("FEED:")) {
-			String[] feed = { APIHelper.getFeedIdFromFeedUrl(s) };
-			result = this.markAs(true, null, feed);
+		try {
+			boolean result = true;
+			if (s != null && s.startsWith("FEED:")) {
+				String[] feed = { APIHelper.getFeedIdFromFeedUrl(s) };
+				result = this.markAs(true, null, feed);
+			}
+			else if (((s == null && t == null) || s.startsWith("FOL:")) && getSubsStructure()) {
+				List<String> subUIDs = new ArrayList<String>();
+				for (ISubscription sub : subs)
+					if (s == null || sub.getCategories().contains(s))
+						subUIDs.add(sub.uid);
+				result = subUIDs.isEmpty() ? false : this.markAs(true, null, (String[])subUIDs.toArray());
+			}
+			else
+				result = false;
+			return result;
 		}
-		else if (((s == null && t == null) || s.startsWith("FOL:")) && getSubsStructure()) {
-			List<String> subUIDs = new ArrayList<String>();
-			for (ISubscription sub : subs)
-				if (s == null || sub.getCategories().contains(s))
-					subUIDs.add(sub.uid);
-			result = subUIDs.isEmpty() ? false : this.markAs(true, null, (String[])subUIDs.toArray());
+		catch (JSONException e) {
+			return false;
 		}
-		else
-			result = false;
-		return result;
 	}
 
 	/*
@@ -306,18 +314,25 @@ public class NewsBlurPlus extends ReaderExtension {
 	public boolean disableTag(String tagUid, String label) throws IOException, ReaderException {
 		if (tagUid.startsWith("STAR:"))
 			return false;
-		else if (getSubsStructure()) {
-			for (ISubscription sub : subs) {
-				if (sub.getCategories().contains(label))
-					if (!APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(sub.uid), label, ""));
-						return false;
+		else {
+			try {
+				if (getSubsStructure()) {
+					for (ISubscription sub : subs) {
+						if (sub.getCategories().contains(label))
+							if (!APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(sub.uid), label, ""));
+								return false;
+					}
+					APICall ac = new APICall(APICall.API_URL_FOLDER_DEL, c);
+					ac.addParam("folder_to_delete", label);
+					return ac.syncGetBool();
+				}
+				else
+					return false;
 			}
-			APICall ac = new APICall(APICall.API_URL_FOLDER_DEL, c);
-			ac.addParam("folder_to_delete", label);
-			return ac.syncGetBool();
+			catch (JSONException e) {
+				return false;
+			}
 		}
-		else
-			return false;
 	}
 	
 	/*
