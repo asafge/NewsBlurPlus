@@ -27,7 +27,6 @@ import com.noinnion.android.reader.api.provider.ITag;
 public class NewsBlurPlus extends ReaderExtension {
 	private List<ITag> tags;
 	private List<ISubscription> subs;
-	private IItemListHandler itemListHandler;
 	private Context c;
 	
 	/*
@@ -138,7 +137,6 @@ public class NewsBlurPlus extends ReaderExtension {
 	 */
 	@Override
 	public void handleItemList(IItemListHandler handler, long syncTime) throws IOException, ReaderException {
-		itemListHandler = handler;
 		try {
 			if ((tags != null) && (subs != null)) {
 				String uid = handler.stream();
@@ -276,24 +274,19 @@ public class NewsBlurPlus extends ReaderExtension {
 	@Override
 	public boolean markAllAsRead(String s, String t, long syncTime) throws IOException, ReaderException {
 		boolean result = true;
-		try {
-			if (s != null && s.startsWith("FEED:")) {
-				String[] feed = { APIHelper.getFeedIdFromFeedUrl(s) };
-				result = this.markAs(true, null, feed);
-			}
-			else if ((itemListHandler != null) && ((s == null && t == null) || s.startsWith("FOL:"))) {
-				List<String> subUIDs = new ArrayList<String>();
-				for (ISubscription sub : subs)
-					if ((!itemListHandler.excludedStreams().contains(sub.uid)) && (s == null || sub.getCategories().contains(s)))
-						subUIDs.add(sub.uid);
-				result = subUIDs.isEmpty() ? false : this.markAs(true, null, (String[])subUIDs.toArray());
-			}
-			else
-				result = false;	// Can't mark a tag as read
+		if (s != null && s.startsWith("FEED:")) {
+			String[] feed = { APIHelper.getFeedIdFromFeedUrl(s) };
+			result = this.markAs(true, null, feed);
 		}
-		catch (RemoteException e) {
-			result = false;
+		else if ((s == null && t == null) || s.startsWith("FOL:")) {
+			List<String> subUIDs = new ArrayList<String>();
+			for (ISubscription sub : subs)
+				if (s == null || sub.getCategories().contains(s))
+					subUIDs.add(sub.uid);
+			result = subUIDs.isEmpty() ? false : this.markAs(true, null, (String[])subUIDs.toArray());
 		}
+		else
+			result = false;	// Can't mark a tag as read
 		return result;
 	}
 
