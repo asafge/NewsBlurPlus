@@ -169,7 +169,6 @@ public class NewsBlurPlus extends ReaderExtension {
 					}
 					page = (arr.length() > 0) ? (page + 1) : -1; 
 					handler.items(items);
-					items.clear();
 				}
 				catch (JSONException e) {
 					throw new ReaderException("Data parse error", e);
