@@ -18,20 +18,14 @@ public class APICall {
 	private AQuery aquery;
 	private String callbackUrl;
 	
-	// Empty constructor
-	public APICall(Context c) {
-		aquery = new AQuery(c);
-	}
-	
 	// Constructor
 	public APICall(String url,  Context c) {
 		aquery = new AQuery(c);
-		// Create the callback object
 		createCallback(url, c);
 	}
 
 	// Create a callback object, before running sync
-	public void createCallback(String url, Context c) {
+	private void createCallback(String url, Context c) {
 		callbackUrl = url;
 		callback = new AjaxCallback<JSONObject>();
 		callback.header("User-Agent", Prefs.USER_AGENT);

@@ -57,6 +57,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	/* 
 	 * Get a list of unread story IDS (URLs), UI will mark all other as read.
 	 * This really speeds up the sync process. 
+	 * TODO: Iterate pages in this function as well.
 	 */
 	@Override
 	public void handleItemIdList(IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
@@ -241,8 +242,9 @@ public class NewsBlurPlus extends ReaderExtension {
 						subUIDs.add(sub.uid);
 				result = subUIDs.isEmpty() ? false : this.markAs(true, null, subUIDs.toArray(new String[0]));
 			}
-			else
+			else {
 				result = false;
+			}
 			return result;
 		}
 		catch (JSONException e) {
@@ -323,34 +325,39 @@ public class NewsBlurPlus extends ReaderExtension {
 	 */	
 	@Override
 	public boolean editSubscription(String uid, String title, String feed_url, String[] tags, int action, long syncTime) throws IOException, ReaderException {
-		APICall ac = new APICall(c);
 		switch (action) {
 			// Feed - add/delete/rename
-			case ReaderExtension.SUBSCRIPTION_ACTION_SUBCRIBE:
-				ac.createCallback(APICall.API_URL_FEED_ADD, c);
+			case ReaderExtension.SUBSCRIPTION_ACTION_SUBCRIBE: {
+				APICall ac = new APICall(APICall.API_URL_FEED_ADD, c);
 				ac.addPostParam("url", feed_url);
 				return ac.syncGetBool();
-			case ReaderExtension.SUBSCRIPTION_ACTION_UNSUBCRIBE:
-				ac.createCallback(APICall.API_URL_FEED_DEL, c);
+			}
+			case ReaderExtension.SUBSCRIPTION_ACTION_UNSUBCRIBE: {
+				APICall ac = new APICall(APICall.API_URL_FEED_DEL, c);
 				ac.addPostParam("feed_id", APIHelper.getFeedIdFromFeedUrl(uid));
 				return ac.syncGetBool();
-			case ReaderExtension.SUBSCRIPTION_ACTION_EDIT:
-				ac.createCallback(APICall.API_URL_FEED_RENAME, c);
+			}
+			case ReaderExtension.SUBSCRIPTION_ACTION_EDIT: {
+				APICall ac = new APICall(APICall.API_URL_FEED_RENAME, c);
 				ac.addPostParam("feed_id", APIHelper.getFeedIdFromFeedUrl(uid));
 				ac.addPostParam("feed_title", title);
 				return ac.syncGetBool();
+			}
 
 			// Feed's parent folder - add/delete 
-			case ReaderExtension.SUBSCRIPTION_ACTION_ADD_LABEL:
+			case ReaderExtension.SUBSCRIPTION_ACTION_ADD_LABEL: {
 				// TODO: Always getting tags=[]
-				ac.createCallback(APICall.API_URL_FOLDER_ADD, c);
+				APICall ac = new APICall(APICall.API_URL_FOLDER_ADD, c);
 				ac.addPostParam("folder", tags[0]);
 				return ac.syncGetBool() && APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(uid), "", tags[0]);
-			case ReaderExtension.SUBSCRIPTION_ACTION_REMOVE_LABEL:
+			}
+			case ReaderExtension.SUBSCRIPTION_ACTION_REMOVE_LABEL: {
 				return APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(uid), tags[0], "");
+			}
 				
-			default:
+			default: {
 				return false;
+			}
 		}
 	}
 }
