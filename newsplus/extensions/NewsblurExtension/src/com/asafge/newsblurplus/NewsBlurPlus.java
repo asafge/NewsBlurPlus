@@ -63,9 +63,18 @@ public class NewsBlurPlus extends ReaderExtension {
 	public void handleItemIdList(IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
 		try {
 			if (handler.stream().startsWith(ReaderExtension.STATE_STARRED)) {
-				APICall ac = new APICall(APICall.API_URL_STARRED_ITEMS, c);
-				if (ac.sync())
-					handler.items(APIHelper.extractStoryIDs(ac.Json));
+				Integer page = 1;
+				while (page > 0) {
+					APICall ac = new APICall(APICall.API_URL_STARRED_ITEMS, c);
+					ac.addGetParam("page", page.toString());
+					if (!ac.sync())
+						throw new ReaderException("Remote connection error");
+					else {
+						List<String> hashes = APIHelper.extractStoryIDs(ac.Json);
+						handler.items(hashes);
+						page = (hashes.size() > 0) ? (page + 1) : -1;
+					}
+				}
 			}
 			else {
 				APICall ac = new APICall(APICall.API_URL_RIVER, c);
@@ -134,7 +143,9 @@ public class NewsBlurPlus extends ReaderExtension {
 		while (page > 0) {
 			APICall ac = new APICall(url, c);
 			ac.addGetParam("page", page.toString());
-			if (ac.sync()) {			
+			if (!ac.sync())
+				throw new ReaderException("Remote connection error");
+			else {			
 				try {
 					List<IItem> items = new ArrayList<IItem>();
 					JSONArray arr = ac.Json.getJSONArray("stories");
