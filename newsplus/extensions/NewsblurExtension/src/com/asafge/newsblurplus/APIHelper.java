@@ -21,7 +21,8 @@ public class APIHelper {
 		JSONArray arr = json.getJSONArray("stories");
 		for (int i=0; i<arr.length(); i++) {
 			JSONObject story = arr.getJSONObject(i);
-			list.add(story.getString("id"));
+			if (APIHelper.getIntelligence(story) >= 0)
+				list.add(story.getString("id"));
 		}
 		return list;
 	}
