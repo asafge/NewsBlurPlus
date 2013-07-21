@@ -57,7 +57,6 @@ public class NewsBlurPlus extends ReaderExtension {
 	/* 
 	 * Get a list of unread story IDS (URLs), UI will mark all other as read.
 	 * This really speeds up the sync process. 
-	 * TODO: Iterate pages in this function as well.
 	 */
 	@Override
 	public void handleItemIdList(IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {

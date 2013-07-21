@@ -49,7 +49,7 @@ public class SubsStruct {
 		}
 	
 	// Get all the folders and feeds in a flat structure
-	public boolean Refresh() throws JSONException {
+	public synchronized boolean Refresh() throws JSONException {
 		APICall ac = new APICall(APICall.API_URL_FOLDERS_AND_FEEDS, _context);	
 		if (ac.sync()) {
 			JSONObject json_feeds = ac.Json.getJSONObject("feeds");
