@@ -76,12 +76,26 @@ public class NewsBlurPlus extends ReaderExtension {
 				}
 			}
 			else {
-				APICall ac = new APICall(APICall.API_URL_RIVER, c);
 				List<String> unread_hashes = APIHelper.getUnreadHashes(c);
-				for (String h : unread_hashes)
-					ac.addGetParam("h", h);
-				if (ac.sync())
-					handler.items(APIHelper.extractStoryIDs(ac.Json));
+				APICall ac = new APICall(APICall.API_URL_RIVER, c);
+				int count = 0;
+				for (int i=0; i<unread_hashes.size(); i++)
+				{
+					if (count == 100) {
+						if (!ac.sync())
+							throw new ReaderException("Remote connection error");
+						handler.items(APIHelper.extractStoryIDs(ac.Json));
+						ac = new APICall(APICall.API_URL_RIVER, c);
+						count = 0;
+					}
+					else {
+						ac.addGetParam("h", unread_hashes.get(i));
+						count++;
+					}
+				}
+				if (!ac.sync())
+					throw new ReaderException("Remote connection error");
+				handler.items(APIHelper.extractStoryIDs(ac.Json));
 			}
 		}
 		catch (JSONException e) {
@@ -100,22 +114,21 @@ public class NewsBlurPlus extends ReaderExtension {
 	public void handleItemList(IItemListHandler handler, long syncTime) throws IOException, ReaderException {
 		try {
 			String uid = handler.stream();
-			if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
+			List<String> feeds = new ArrayList<String>();
+			if (uid.equals(ReaderExtension.STATE_READING_LIST) || (uid.startsWith("FOL:"))) {
 				for (ISubscription sub : SubsStruct.Instance(c).Subs)
-					if (sub.unreadCount > 0 && !handler.excludedStreams().contains(sub.uid))
-						parseItemList(sub.uid.replace("FEED:", ""), handler);
-			}
-			else if (uid.startsWith("FOL:")) {
-				for (ISubscription sub : SubsStruct.Instance(c).Subs)
-					if (sub.unreadCount > 0 && sub.getCategories().contains(uid) && !handler.excludedStreams().contains(sub.uid))
-						parseItemList(sub.uid.replace("FEED:", ""), handler);
+					if (!uid.startsWith("FOL:") || sub.getCategories().contains(uid))
+						if (sub.unreadCount > 0 && !handler.excludedStreams().contains(sub.uid))
+							feeds.add(APIHelper.getFeedIdFromFeedUrl(sub.uid));
+				if (feeds.size() > 0)
+					parseItemList(APICall.API_URL_RIVER, feeds, handler);
 			}
 			else if (uid.startsWith("FEED:")) {
 				if (!handler.excludedStreams().contains(uid))
-					parseItemList(handler.stream().replace("FEED:", ""), handler);
+					parseItemList(handler.stream().replace("FEED:", ""), feeds , handler);
 			}
 			else if (uid.startsWith(ReaderExtension.STATE_STARRED)) {
-				parseItemList(APICall.API_URL_STARRED_ITEMS, handler);
+				parseItemList(APICall.API_URL_STARRED_ITEMS, feeds, handler);
 			}
 			else
 				throw new ReaderException("Data parse error");
@@ -137,11 +150,14 @@ public class NewsBlurPlus extends ReaderExtension {
 	 *   feeds/[ID]/feed_title ("Coding Horror")
 	 *   feeds/[ID]/feed_link (http://www.codinghorror.com/blog/ - site's link)
 	 */
-	public void parseItemList(String url, IItemListHandler handler) throws IOException, ReaderException {
+	public void parseItemList(String url, List<String> feeds, IItemListHandler handler) throws IOException, ReaderException {
 		Integer page = 1;
 		while (page > 0) {
-			APICall ac = new APICall(url, c);
+			APICall ac = new APICall(url, c);		
+			for (String f : feeds)
+				ac.addGetParam("feeds", f);
 			ac.addGetParam("page", page.toString());
+			
 			if (!ac.sync())
 				throw new ReaderException("Remote connection error");
 			else {			
