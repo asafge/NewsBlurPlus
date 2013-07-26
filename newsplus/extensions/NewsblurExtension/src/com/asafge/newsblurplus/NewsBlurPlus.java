@@ -103,19 +103,19 @@ public class NewsBlurPlus extends ReaderExtension {
 			if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
 				for (ISubscription sub : SubsStruct.Instance(c).Subs)
 					if (sub.unreadCount > 0 && !handler.excludedStreams().contains(sub.uid))
-						parseItemList(sub.uid.replace("FEED:", ""), handler, sub.getCategories());
+						parseItemList(sub.uid.replace("FEED:", ""), handler);
 			}
 			else if (uid.startsWith("FOL:")) {
 				for (ISubscription sub : SubsStruct.Instance(c).Subs)
 					if (sub.unreadCount > 0 && sub.getCategories().contains(uid) && !handler.excludedStreams().contains(sub.uid))
-						parseItemList(sub.uid.replace("FEED:", ""), handler, sub.getCategories());
+						parseItemList(sub.uid.replace("FEED:", ""), handler);
 			}
 			else if (uid.startsWith("FEED:")) {
 				if (!handler.excludedStreams().contains(uid))
-					parseItemList(handler.stream().replace("FEED:", ""), handler, null);
+					parseItemList(handler.stream().replace("FEED:", ""), handler);
 			}
 			else if (uid.startsWith(ReaderExtension.STATE_STARRED)) {
-				parseItemList(APICall.API_URL_STARRED_ITEMS, handler, null);
+				parseItemList(APICall.API_URL_STARRED_ITEMS, handler);
 			}
 			else
 				throw new ReaderException("Data parse error");
@@ -137,7 +137,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	 *   feeds/[ID]/feed_title ("Coding Horror")
 	 *   feeds/[ID]/feed_link (http://www.codinghorror.com/blog/ - site's link)
 	 */
-	public void parseItemList(String url, IItemListHandler handler, List<String> categories) throws IOException, ReaderException {
+	public void parseItemList(String url, IItemListHandler handler) throws IOException, ReaderException {
 		Integer page = 1;
 		while (page > 0) {
 			APICall ac = new APICall(url, c);
