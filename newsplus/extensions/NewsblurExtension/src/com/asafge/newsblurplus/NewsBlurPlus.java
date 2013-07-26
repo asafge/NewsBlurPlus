@@ -90,9 +90,11 @@ public class NewsBlurPlus extends ReaderExtension {
 						count = 0;
 					}
 				}
-				if (!ac.sync())
-					throw new ReaderException("Remote connection error");
-				handler.items(APIHelper.extractStoryIDs(ac.Json));
+				if (count > 0) {
+					if (!ac.sync())
+						throw new ReaderException("Remote connection error");
+					handler.items(APIHelper.extractStoryIDs(ac.Json));
+				}
 			}
 		}
 		catch (JSONException e) {
