@@ -79,18 +79,15 @@ public class NewsBlurPlus extends ReaderExtension {
 				List<String> unread_hashes = APIHelper.getUnreadHashes(c);
 				APICall ac = new APICall(APICall.API_URL_RIVER, c);
 				int count = 0;
-				for (int i=0; i<unread_hashes.size(); i++)
-				{
-					if (count == 100) {
-						if (!ac.sync())
+				for (int i=0; i<unread_hashes.size(); i++ , count++) {
+					if (count < 100)
+						ac.addGetParam("h", unread_hashes.get(i));
+					else { 
+						if (!ac.sync()) 
 							throw new ReaderException("Remote connection error");
 						handler.items(APIHelper.extractStoryIDs(ac.Json));
 						ac = new APICall(APICall.API_URL_RIVER, c);
 						count = 0;
-					}
-					else {
-						ac.addGetParam("h", unread_hashes.get(i));
-						count++;
 					}
 				}
 				if (!ac.sync())
