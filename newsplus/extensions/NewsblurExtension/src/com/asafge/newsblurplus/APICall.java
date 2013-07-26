@@ -17,6 +17,7 @@ public class APICall {
 	private AjaxCallback<JSONObject> callback;
 	private AQuery aquery;
 	private String callbackUrl;
+	private int retries = 2;
 	
 	// Constructor
 	public APICall(String url,  Context c) {
@@ -61,8 +62,15 @@ public class APICall {
 			aquery.sync(callback);
 			Json = callback.getResult();
 			Status = callback.getStatus();
-			if (Json == null)
-				return false;
+			if (Json == null) {
+				if (retries == 0)
+					return false;
+				else {
+					Thread.sleep(500);
+					retries--;
+					return this.sync();
+				}
+			}
 			if (Json.getString("authenticated") != "true") {
 				// TODO: LoginActivity.logout();
 				return false;
@@ -70,6 +78,9 @@ public class APICall {
 			return (Status.getCode() == 200);
 		}
 		catch (JSONException e) {
+			return false;
+		}
+		catch (InterruptedException e) {
 			return false;
 		}
 	}
