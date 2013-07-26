@@ -165,9 +165,6 @@ public class NewsBlurPlus extends ReaderExtension {
 							item.starred = true;
 							item.addCategory(StarredTag.get().uid);
 						}
-						if (categories != null)
-							for (String cat : categories)
-								item.addCategory(cat);
 						items.add(item);
 						
 						// Handle TransactionTooLargeException, based on Noin's recommendation
