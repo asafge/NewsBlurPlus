@@ -6,6 +6,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -66,6 +67,9 @@ public class LoginActivity extends Activity implements OnClickListener {
 	public void onClick(View v) {
 		switch (v.getId()) {
 			case R.id.ok_button:
+				InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+			    imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
+			    
 				final EditText user = (EditText)findViewById(R.id.username_text);
 				final EditText pass = (EditText)findViewById(R.id.password_text);
 				new Thread(new Runnable() {
@@ -73,7 +77,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 					public void run() {
 						login(user.getText().toString(), pass.getText().toString()); 
 					}
-				}).start();			
+				}).start();
 				break;
 		}
 	}
