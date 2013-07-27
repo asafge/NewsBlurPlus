@@ -43,8 +43,12 @@ public class NewsBlurPlus extends ReaderExtension {
 		try {
 			SubsStruct.InstanceRefresh(c);
 			APIHelper.updateFeedCounts(c, SubsStruct.Instance(c).Subs);
-			tagHandler.tags(SubsStruct.Instance(c).Tags);
-			subHandler.subscriptions(SubsStruct.Instance(c).Subs);
+			if (SubsStruct.Instance(c).Subs.size() == 0)
+				throw new ReaderException("No subscriptions available");
+			else {
+				tagHandler.tags(SubsStruct.Instance(c).Tags);
+				subHandler.subscriptions(SubsStruct.Instance(c).Subs);
+			}
 		}
 		catch (JSONException e) {
 			throw new ReaderException("Data parse error", e);
