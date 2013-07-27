@@ -187,13 +187,13 @@ public class NewsBlurPlus extends ReaderExtension {
 						// Handle TransactionTooLargeException, based on Noin's recommendation
 						length += item.getLength();
 						if (items.size() % 200 == 0 || length > 300000) {
-							handler.items(items);
+							handler.items(items, 0);
 							items.clear();
 							length = 0;
 						}
 					}
 					page = (arr.length() > 0) ? (page + 1) : -1; 
-					handler.items(items);
+					handler.items(items, 0);
 				}
 				catch (JSONException e) {
 					throw new ReaderException("Data parse error", e);
