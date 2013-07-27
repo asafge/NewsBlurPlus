@@ -329,18 +329,17 @@ public class NewsBlurPlus extends ReaderExtension {
 			return false;
 		else {
 			try {
-				for (ISubscription sub : SubsStruct.Instance(c).Subs) {
+				for (ISubscription sub : SubsStruct.Instance(c).Subs)
 					if (sub.getCategories().contains(label))
-						if (!APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(sub.uid), label, ""));
+						if (!APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(sub.uid), label, ""))
 							return false;
-				}
-				APICall ac = new APICall(APICall.API_URL_FOLDER_DEL, c);
-				ac.addPostParam("folder_to_delete", label);
-				return ac.syncGetBool();
 			}
 			catch (JSONException e) {
 				return false;
 			}
+			APICall ac = new APICall(APICall.API_URL_FOLDER_DEL, c);
+			ac.addPostParam("folder_to_delete", label);
+			return ac.syncGetBool();
 		}
 	}
 	
@@ -367,13 +366,17 @@ public class NewsBlurPlus extends ReaderExtension {
 				ac.addPostParam("feed_title", title);
 				return ac.syncGetBool();
 			}
-
-			// Feed's parent folder - add/delete 
-			case ReaderExtension.SUBSCRIPTION_ACTION_ADD_LABEL: {
+			
+			// Feed's parent folder - add/delete
+			case 6: {
 				APICall ac = new APICall(APICall.API_URL_FOLDER_ADD, c);
 				String newTag = tags[0].replace("FOL:", "");
 				ac.addPostParam("folder", newTag);
-				return ac.syncGetBool() && APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(uid), "", newTag);
+				return ac.syncGetBool();
+			}
+			case ReaderExtension.SUBSCRIPTION_ACTION_ADD_LABEL: {
+				String newTag = tags[0].replace("FOL:", "");
+				return APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(uid), "", newTag);
 			}
 			case ReaderExtension.SUBSCRIPTION_ACTION_REMOVE_LABEL: {
 				String newTag = tags[0].replace("FOL:", "");
