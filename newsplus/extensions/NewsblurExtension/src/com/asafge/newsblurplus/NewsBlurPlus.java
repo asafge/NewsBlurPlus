@@ -370,13 +370,14 @@ public class NewsBlurPlus extends ReaderExtension {
 
 			// Feed's parent folder - add/delete 
 			case ReaderExtension.SUBSCRIPTION_ACTION_ADD_LABEL: {
-				// TODO: Always getting tags=[]
 				APICall ac = new APICall(APICall.API_URL_FOLDER_ADD, c);
-				ac.addPostParam("folder", tags[0]);
-				return ac.syncGetBool() && APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(uid), "", tags[0]);
+				String newTag = tags[0].replace("FOL:", "");
+				ac.addPostParam("folder", newTag);
+				return ac.syncGetBool() && APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(uid), "", newTag);
 			}
 			case ReaderExtension.SUBSCRIPTION_ACTION_REMOVE_LABEL: {
-				return APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(uid), tags[0], "");
+				String newTag = tags[0].replace("FOL:", "");
+				return APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(uid), newTag, "");
 			}
 				
 			default: {
