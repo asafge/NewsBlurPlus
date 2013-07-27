@@ -348,44 +348,47 @@ public class NewsBlurPlus extends ReaderExtension {
 	 */	
 	@Override
 	public boolean editSubscription(String uid, String title, String feed_url, String[] tags, int action, long syncTime) throws IOException, ReaderException {
+		boolean result = false;
 		switch (action) {
 			// Feed - add/delete/rename
 			case ReaderExtension.SUBSCRIPTION_ACTION_SUBCRIBE: {
 				APICall ac = new APICall(APICall.API_URL_FEED_ADD, c);
 				ac.addPostParam("url", feed_url);
-				return ac.syncGetBool();
+				result = ac.syncGetBool();
+				break;
 			}
 			case ReaderExtension.SUBSCRIPTION_ACTION_UNSUBCRIBE: {
 				APICall ac = new APICall(APICall.API_URL_FEED_DEL, c);
 				ac.addPostParam("feed_id", APIHelper.getFeedIdFromFeedUrl(uid));
-				return ac.syncGetBool();
+				result = ac.syncGetBool();
+				break;
 			}
 			case ReaderExtension.SUBSCRIPTION_ACTION_EDIT: {
 				APICall ac = new APICall(APICall.API_URL_FEED_RENAME, c);
 				ac.addPostParam("feed_id", APIHelper.getFeedIdFromFeedUrl(uid));
 				ac.addPostParam("feed_title", title);
-				return ac.syncGetBool();
+				result = ac.syncGetBool();
+				break;
 			}
-			
-			// Feed's parent folder - add/delete
+			// Feed's parent folder - new_folder/add_to_folder/delete_from_folder
 			case 6: {
 				APICall ac = new APICall(APICall.API_URL_FOLDER_ADD, c);
 				String newTag = tags[0].replace("FOL:", "");
 				ac.addPostParam("folder", newTag);
-				return ac.syncGetBool();
+				result = ac.syncGetBool();
+				break;
 			}
 			case ReaderExtension.SUBSCRIPTION_ACTION_ADD_LABEL: {
 				String newTag = tags[0].replace("FOL:", "");
-				return APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(uid), "", newTag);
+				result = APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(uid), "", newTag);
+				break;
 			}
 			case ReaderExtension.SUBSCRIPTION_ACTION_REMOVE_LABEL: {
 				String newTag = tags[0].replace("FOL:", "");
-				return APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(uid), newTag, "");
-			}
-				
-			default: {
-				return false;
+				result = APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(uid), newTag, "");
+				break;
 			}
 		}
+		return result;
 	}
 }
