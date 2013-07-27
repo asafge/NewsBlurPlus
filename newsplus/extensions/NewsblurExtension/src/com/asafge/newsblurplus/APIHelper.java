@@ -28,19 +28,23 @@ public class APIHelper {
 	}
 	
 	// Get all the unread story hashes at once
-	public static List<String> getUnreadHashes(Context c) throws JSONException {
-		APICall ac = new APICall(APICall.API_URL_UNREAD_HASHES, c);
-		List<String> unread_hashes = new ArrayList<String>();
+	public static List<String> getHashes(Context c, Boolean isStarred) throws JSONException {
+		List<String> hashes = new ArrayList<String>();
+		
+		String url = isStarred ? APICall.API_URL_STARRED_HASHES : APICall.API_URL_UNREAD_HASHES;
+		String jsonName = isStarred ? "starred_story_hashes" : "unread_feed_story_hashes";	
+		APICall ac = new APICall(url, c);
+		
 		if (ac.sync()) {
-			JSONObject json_folders = ac.Json.getJSONObject("unread_feed_story_hashes");
+			JSONObject json_folders = ac.Json.getJSONObject(jsonName);
 			Iterator<?> keys = json_folders.keys();
 			while (keys.hasNext()) {
 				JSONArray items = json_folders.getJSONArray((String)keys.next());
 				for (int i=0; i<items.length(); i++)
-					unread_hashes.add(items.getString(i));
+					hashes.add(items.getString(i));
 			}
 		}
-		return unread_hashes;
+		return hashes;
 	}
 	
 	// Call for an update on all feeds' unread counters, and store the result

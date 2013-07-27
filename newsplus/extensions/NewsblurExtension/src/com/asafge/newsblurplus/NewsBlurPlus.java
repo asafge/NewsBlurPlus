@@ -80,13 +80,13 @@ public class NewsBlurPlus extends ReaderExtension {
 				}
 			}
 			else {
-				List<String> unread_hashes = APIHelper.getUnreadHashes(c);
+				List<String> unread_hashes = APIHelper.getHashes(c, false);
 				APICall ac = new APICall(APICall.API_URL_RIVER, c);
 				int count = 0;
 				for (int i=0; i<unread_hashes.size(); i++ , count++) {
 					if (count < 100)
 						ac.addGetParam("h", unread_hashes.get(i));
-					else { 
+					else {
 						if (!ac.sync()) 
 							throw new ReaderException("Remote connection error");
 						handler.items(APIHelper.extractStoryIDs(ac.Json));
@@ -115,24 +115,32 @@ public class NewsBlurPlus extends ReaderExtension {
 	public void handleItemList(IItemListHandler handler, long syncTime) throws IOException, ReaderException {
 		try {
 			String uid = handler.stream();
-			List<String> feeds = new ArrayList<String>();
-			if (uid.equals(ReaderExtension.STATE_READING_LIST) || (uid.startsWith("FOL:"))) {
-				for (ISubscription sub : SubsStruct.Instance(c).Subs)
-					if (!uid.startsWith("FOL:") || sub.getCategories().contains(uid))
-						if (sub.unreadCount > 0 && !handler.excludedStreams().contains(sub.uid))
-							feeds.add(APIHelper.getFeedIdFromFeedUrl(sub.uid));
-				if (feeds.size() > 0)
-					parseItemList(APICall.API_URL_RIVER, feeds, handler);
+			List<String> hashes;
+			APICall ac = new APICall(APICall.API_URL_RIVER, c);
+			
+			if (uid.startsWith(ReaderExtension.STATE_STARRED)) {
+				hashes = APIHelper.getHashes(c, true);
 			}
-			else if (uid.startsWith("FEED:")) {
-				if (!handler.excludedStreams().contains(uid))
-					parseItemList(handler.stream().replace("FEED:", ""), feeds , handler);
-			}
-			else if (uid.startsWith(ReaderExtension.STATE_STARRED)) {
-				parseItemList(APICall.API_URL_STARRED_ITEMS, feeds, handler);
+			else if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
+				List<String> unread_hashes = APIHelper.getHashes(c, false);
+				hashes = new ArrayList<String>();
+				for (String h : unread_hashes)
+					if (!handler.excludedStreams().contains(APIHelper.getFeedUrlFromFeedId(h.split(":")[0])))
+						hashes.add(h);
 			}
 			else
 				throw new ReaderException("Data parse error");
+			
+			for (int i=0; i<hashes.size(); i++) {
+				if ((i > 0) && (i % 100 == 0)) {
+					if (!ac.sync()) 
+						throw new ReaderException("Remote connection error");
+					parseItemList(ac.Json, handler);
+					ac = new APICall(APICall.API_URL_RIVER, c);
+				}
+				else
+					ac.addGetParam("h", hashes.get(i));
+			}
 		}
 		catch (JSONException e) {
 			throw new ReaderException("Data parse error", e);
@@ -143,65 +151,43 @@ public class NewsBlurPlus extends ReaderExtension {
 	}
 	
 	/*
-	 * Get the content of a single feed 
-	 * 
-	 * API call: https://www.newsblur.com/reader/feeds
-	 * Result: 
-	 *   feeds/[ID]/feed_address (http://feeds.feedburner.com/codinghorror - rss file)
-	 *   feeds/[ID]/feed_title ("Coding Horror")
-	 *   feeds/[ID]/feed_link (http://www.codinghorror.com/blog/ - site's link)
+	 * Parse an array of items that are in the NewsBlur JSON format.
 	 */
-	public void parseItemList(String url, List<String> feeds, IItemListHandler handler) throws IOException, ReaderException {
-		Integer page = 1;
-		while (page > 0) {
-			APICall ac = new APICall(url, c);		
-			for (String f : feeds)
-				ac.addGetParam("feeds", f);
-			ac.addGetParam("page", page.toString());
-			
-			if (!ac.sync())
-				throw new ReaderException("Remote connection error");
-			else {			
-				try {
-					List<IItem> items = new ArrayList<IItem>();
-					JSONArray arr = ac.Json.getJSONArray("stories");
-					int length = 0;
-					for (int i=0; i<arr.length(); i++) {
-						JSONObject story = arr.getJSONObject(i);
-						IItem item = new IItem();
-						item.subUid = "FEED:" + APIHelper.getFeedUrlFromFeedId(story.getString("story_feed_id"));
-						item.title = story.getString("story_title");
-						item.link = story.getString("story_permalink");
-						item.uid = story.getString("id");
-						item.author = story.getString("story_authors");
-						item.updatedTime = story.getLong("story_timestamp");
-						item.publishedTime = story.getLong("story_timestamp");
-						item.read = ((story.getInt("read_status") == 1) && (APIHelper.getIntelligence(story) >= 0));
-						item.content = story.getString("story_content");
-						if (story.has("starred") && story.getString("starred") == "true") {
-							item.starred = true;
-							item.addCategory(StarredTag.get().uid);
-						}
-						items.add(item);
-						
-						// Handle TransactionTooLargeException, based on Noin's recommendation
-						length += item.getLength();
-						if (items.size() % 200 == 0 || length > 300000) {
-							handler.items(items, 0);
-							items.clear();
-							length = 0;
-						}
-					}
-					page = (arr.length() > 0) ? (page + 1) : -1; 
+	public void parseItemList(JSONObject json, IItemListHandler handler) throws IOException, ReaderException {
+		try {
+			int length = 0;
+			List<IItem> items = new ArrayList<IItem>();
+			JSONArray arr = json.getJSONArray("stories");		
+			for (int i=0; i<arr.length(); i++) {
+				JSONObject story = arr.getJSONObject(i);
+				IItem item = new IItem();
+				item.subUid = "FEED:" + APIHelper.getFeedUrlFromFeedId(story.getString("story_feed_id"));
+				item.title = story.getString("story_title");
+				item.link = story.getString("story_permalink");
+				item.uid = story.getString("id");
+				item.author = story.getString("story_authors");
+				item.updatedTime = story.getLong("story_timestamp");
+				item.publishedTime = story.getLong("story_timestamp");
+				item.read = ((story.getInt("read_status") == 1) && (APIHelper.getIntelligence(story) >= 0));
+				item.content = story.getString("story_content");
+				item.starred = (story.has("starred") && story.getString("starred") == "true");
+				if (item.starred) item.addCategory(StarredTag.get().uid);
+				items.add(item);
+				
+				length += item.getLength();
+				if (items.size() % 200 == 0 || length > 300000) {
 					handler.items(items, 0);
-				}
-				catch (JSONException e) {
-					throw new ReaderException("Data parse error", e);
-				}
-				catch (RemoteException e) {
-					throw new ReaderException("Remote connection error", e);
+					items.clear();
+					length = 0;
 				}
 			}
+			handler.items(items, 0);
+		}
+		catch (JSONException e) {
+			throw new ReaderException("Data parse error", e);
+		}
+		catch (RemoteException e) {
+			throw new ReaderException("Remote connection error", e);
 		}
 	}
 	
