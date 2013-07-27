@@ -46,8 +46,8 @@ public class NewsBlurPlus extends ReaderExtension {
 			if (SubsStruct.Instance(c).Subs.size() == 0)
 				throw new ReaderException("No subscriptions available");
 			else {
-				tagHandler.tags(SubsStruct.Instance(c).Tags);
 				subHandler.subscriptions(SubsStruct.Instance(c).Subs);
+				tagHandler.tags(SubsStruct.Instance(c).Tags);
 			}
 		}
 		catch (JSONException e) {
