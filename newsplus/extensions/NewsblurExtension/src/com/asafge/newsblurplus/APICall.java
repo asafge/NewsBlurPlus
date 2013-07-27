@@ -104,7 +104,7 @@ public class APICall {
 	
 	public static String API_URL_FOLDERS_AND_FEEDS = API_URL_BASE + "reader/feeds?flat=true";
 	public static String API_URL_UNREAD_HASHES = API_URL_BASE + "reader/unread_story_hashes/";
-	public static String API_URL_RIVER = API_URL_BASE + "reader/river_stories?";
+	public static String API_URL_RIVER = API_URL_BASE + "reader/river_stories";
 	public static String API_URL_REFRESH_FEEDS = API_URL_BASE + "reader/refresh_feeds/";
 	
 	public static String API_URL_MARK_STORY_AS_READ = API_URL_BASE + "reader/mark_story_as_read/";
