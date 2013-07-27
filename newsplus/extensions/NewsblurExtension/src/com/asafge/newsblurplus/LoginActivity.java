@@ -3,6 +3,7 @@ package com.asafge.newsblurplus;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -72,13 +73,45 @@ public class LoginActivity extends Activity implements OnClickListener {
 			    
 				final EditText user = (EditText)findViewById(R.id.username_text);
 				final EditText pass = (EditText)findViewById(R.id.password_text);
-				new Thread(new Runnable() {
-					@Override
-					public void run() {
-						login(user.getText().toString(), pass.getText().toString()); 
-					}
-				}).start();
+				new LoginTask().execute(user.getText().toString(), pass.getText().toString());
 				break;
+		}
+	}
+	
+	private class LoginTask extends AsyncTask<String, Void, Boolean> {
+
+		protected void onPreExecute() {
+			mBusy = ProgressDialog.show(LoginActivity.this, null, getText(R.string.msg_login_running), true, true);
+		}
+
+		protected Boolean doInBackground(String... params) {
+			String user = params[0];
+			String pass = params[1];
+			
+			final Context c = getApplicationContext();
+			APICall ac = new APICall(APICall.API_URL_LOGIN, c);
+			ac.addPostParam("username", user);
+			ac.addPostParam("password", pass);
+			if (ac.sync()) {
+				Prefs.setSessionID(c, ac.Status.getCookies().get(0).getName(), ac.Status.getCookies().get(0).getValue());
+				Prefs.setLoggedIn(c, true);
+				setResult(ReaderExtension.RESULT_LOGIN);
+				return true;
+			}
+			else {
+				Prefs.setLoggedIn(c, false);
+				return false;
+			}
+		}
+		
+		protected void onPostExecute(Boolean result) {
+			final Context c = getApplicationContext();
+			if (mBusy != null && mBusy.isShowing()) 
+				mBusy.dismiss();
+			if (result)
+				finish();
+			else
+				Toast.makeText(c, getText(R.string.msg_login_fail), Toast.LENGTH_LONG).show();
 		}
 	}
 }
