@@ -27,7 +27,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 			logout();
 		}
 		if (Prefs.isLoggedIn(c)) {
-			setResult(RESULT_OK);
+			setResult(ReaderExtension.RESULT_LOGIN);
 			finish();
 		}
 		else {

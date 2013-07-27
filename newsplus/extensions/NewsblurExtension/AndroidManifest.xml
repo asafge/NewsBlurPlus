@@ -3,7 +3,7 @@
 	package="com.asafge.newsblurplus" android:installLocation="auto"
 	android:versionCode="1" android:versionName="1.0.0">
 
-	<uses-sdk android:minSdkVersion="8" android:targetSdkVersion="16" />
+	<uses-sdk android:minSdkVersion="8" android:targetSdkVersion="20" />
 
 	<supports-screens android:xlargeScreens="true"
 		android:largeScreens="true" android:normalScreens="true"
