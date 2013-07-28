@@ -1,5 +1,9 @@
 package com.asafge.newsblurplus;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -11,6 +15,18 @@ import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
 
 public class APICall {
+	
+	private class Param {
+		public Param(String key, String value) {
+			Key = key;
+			Value = value;
+		}
+		public String Key;
+		public String Value;
+	}
+
+	private List<Param> params_get = new ArrayList<Param>();
+	private List<Param> params_post = new ArrayList<Param>();
 	
 	public JSONObject Json;
 	public AjaxStatus Status;
@@ -35,30 +51,40 @@ public class APICall {
 		callback.url(callbackUrl).type(JSONObject.class);
 	}
 	
-	// Add a post parameter to the call
+	// Add a Post parameter to this call
 	public boolean addPostParam(String key, String value) {
 		if (callback == null)
 			return false;
-		callback.param(key, value);
+		params_post.add(new Param(key, value));
 		return true;
 	}
 	
-	// Add a post (Url) parameter to the call
+	// Add a Get parameter to this call
 	public boolean addGetParam(String key, String value) {
 		if (callback == null)
 			return false;
-		Uri.Builder b = Uri.parse(callbackUrl).buildUpon();
-		b.appendQueryParameter(key, value);
+		params_get.add(new Param(key, value));
+		return true;
+	}
+	
+	// Add the Get and Post params to the callback before executing
+	private void addAllParams() {
+		for (Param p: params_post)
+			callback.param(p.Key, p.Value);
+		
+		Uri.Builder b = Uri.parse(callbackUrl).buildUpon();		
+		for (Param p : params_get)
+			b.appendQueryParameter(p.Key, p.Value);	
 		callbackUrl = b.build().toString();
 		callback.url(callbackUrl);
-		return true;
 	}
 	
 	// Run synchronous HTTP request and check for valid response
 	public boolean sync() {
 		if (callback == null)
 			return false;
-		try {
+		try {		
+			addAllParams();
 			aquery.sync(callback);
 			Json = callback.getResult();
 			Status = callback.getStatus();
