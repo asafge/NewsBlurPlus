@@ -65,19 +65,16 @@ public class NewsBlurPlus extends ReaderExtension {
 	@Override
 	public void handleItemIdList(IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
 		try {
-			APICall ac = new APICall(APICall.API_URL_RIVER, c);
 			List<String> story_ids = new ArrayList<String>();
-			List<String> hashes = (handler.stream().startsWith(ReaderExtension.STATE_STARRED)) ? APIHelper.getStarredHashes(c)
-																							   : APIHelper.getUnreadHashes(c);		
-			for (int i=0; i<hashes.size(); i++) {
-				if ((i > 0) && ((i % 100 == 0) || i == hashes.size()-1)) {
-					if (!ac.sync()) 
-						throw new ReaderException("Remote connection error");
-					story_ids.addAll(APIHelper.extractStoryIDs(ac.Json));
-					ac = new APICall(APICall.API_URL_RIVER, c);
-				}
-				else
-					ac.addGetParam("h", hashes.get(i));
+			List<String> hashes = (handler.stream().startsWith(ReaderExtension.STATE_STARRED)) ? APIHelper.getStarredHashes(c) 
+																							   : APIHelper.getUnreadHashes(c);
+			for (int start=0; start < hashes.size(); start += 100) {
+				APICall ac = new APICall(APICall.API_URL_RIVER, c);
+				int end = (start+100 < hashes.size()) ? start + 100 : hashes.size();
+				ac.addGetParams("h", hashes.subList(start, end));
+				if (!ac.sync())
+					throw new ReaderException("Remote connection error");
+				story_ids.addAll(APIHelper.extractStoryIDs(ac.Json));
 			}
 			handler.items(story_ids);
 		}
@@ -98,30 +95,27 @@ public class NewsBlurPlus extends ReaderExtension {
 		try {
 			List<String> hashes;
 			String uid = handler.stream();
-			APICall ac = new APICall(APICall.API_URL_RIVER, c);
 			
 			if (uid.startsWith(ReaderExtension.STATE_STARRED)) {
 				hashes = APIHelper.getStarredHashes(c);
 			}
 			else if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
 				List<String> unread_hashes = APIHelper.getUnreadHashes(c);
-				hashes = new ArrayList<String>();
+				hashes = new ArrayList<String>();				
 				for (String h : unread_hashes)
 					if (!handler.excludedStreams().contains(APIHelper.getFeedUrlFromFeedId(h.split(":")[0])))
 						hashes.add(h);
 			}
 			else
-				throw new ReaderException("Unknown readind state");
-			
-			for (int i=0; i<hashes.size(); i++) {
-				if ((i > 0) && ((i % 100 == 0) || i == hashes.size()-1)) {
-					if (!ac.sync()) 
-						throw new ReaderException("Remote connection error");
-					parseItemList(ac.Json, handler);
-					ac = new APICall(APICall.API_URL_RIVER, c);
-				}
-				else
-					ac.addGetParam("h", hashes.get(i));
+				throw new ReaderException("Unknown reading state");
+
+			for (int start=0; start < hashes.size(); start += 100) {
+				APICall ac = new APICall(APICall.API_URL_RIVER, c);
+				int end = (start+100 < hashes.size()) ? start + 100 : hashes.size();
+				ac.addGetParams("h", hashes.subList(start, end));
+				if (!ac.sync())
+					throw new ReaderException("Remote connection error");
+				parseItemList(ac.Json, handler);					
 			}
 		}
 		catch (JSONException e) {

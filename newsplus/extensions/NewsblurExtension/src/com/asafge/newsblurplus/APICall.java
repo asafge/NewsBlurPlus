@@ -66,6 +66,15 @@ public class APICall {
 		return true;
 	}
 	
+	// Add Get parameters (list) to this call
+	public boolean addGetParams(String key, List<String> values) {
+		if (callback == null)
+			return false;
+		for (String v : values)
+			params_get.add(new Param(key, v));
+		return true;
+	}
+	
 	// Add the Get and Post params to the callback before executing
 	private void addAllParams() {
 		for (Param p: params_post)
