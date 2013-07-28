@@ -66,6 +66,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	public void handleItemIdList(IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
 		try {
 			if (handler.stream().startsWith(ReaderExtension.STATE_STARRED)) {
+				// TODO
 				Integer page = 1;
 				while (page > 0) {
 					APICall ac = new APICall(APICall.API_URL_STARRED_ITEMS, c);
@@ -80,7 +81,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				}
 			}
 			else {
-				List<String> unread_hashes = APIHelper.getHashes(c, false);
+				List<String> unread_hashes = APIHelper.getUnreadHashes(c);
 				APICall ac = new APICall(APICall.API_URL_RIVER, c);
 				int count = 0;
 				for (int i=0; i<unread_hashes.size(); i++ , count++) {
@@ -114,25 +115,25 @@ public class NewsBlurPlus extends ReaderExtension {
 	@Override
 	public void handleItemList(IItemListHandler handler, long syncTime) throws IOException, ReaderException {
 		try {
-			String uid = handler.stream();
 			List<String> hashes;
+			String uid = handler.stream();
 			APICall ac = new APICall(APICall.API_URL_RIVER, c);
 			
 			if (uid.startsWith(ReaderExtension.STATE_STARRED)) {
-				hashes = APIHelper.getHashes(c, true);
+				hashes = APIHelper.getStarredHashes(c);
 			}
 			else if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
-				List<String> unread_hashes = APIHelper.getHashes(c, false);
+				List<String> unread_hashes = APIHelper.getUnreadHashes(c);
 				hashes = new ArrayList<String>();
 				for (String h : unread_hashes)
 					if (!handler.excludedStreams().contains(APIHelper.getFeedUrlFromFeedId(h.split(":")[0])))
 						hashes.add(h);
 			}
 			else
-				throw new ReaderException("Data parse error");
+				throw new ReaderException("Unknown readind state");
 			
 			for (int i=0; i<hashes.size(); i++) {
-				if ((i > 0) && (i % 100 == 0)) {
+				if ((i > 0) && ((i % 100 == 0) || i == hashes.size()-1)) {
 					if (!ac.sync()) 
 						throw new ReaderException("Remote connection error");
 					parseItemList(ac.Json, handler);
