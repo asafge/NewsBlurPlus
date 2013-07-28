@@ -23,34 +23,31 @@ public class SubsStruct {
 	
 	// Constructor
 	protected SubsStruct(Context c) throws JSONException {
-	   Tags = new ArrayList<ITag>();
-	   Subs = new ArrayList<ISubscription>();
 	   _context = c;
 	   this.Refresh();
 	}
 	
 	// Singleton instance
 	public static SubsStruct Instance(Context c) throws JSONException {
-		if(_instance == null) {
+		if(_instance == null)
 			_instance = new SubsStruct(c);
-		}
 		return _instance;
 	}
 	
 	// Singleton instance
-		public static SubsStruct InstanceRefresh(Context c) throws JSONException {
-			if(_instance == null) {
-				_instance = new SubsStruct(c);
-			}
-			else {
-				_instance.Refresh();
-			}
-			return _instance;
-		}
+	public static SubsStruct InstanceRefresh(Context c) throws JSONException {
+		if(_instance == null)
+			_instance = new SubsStruct(c);
+		else
+			_instance.Refresh();
+		return _instance;
+	}
 	
 	// Get all the folders and feeds in a flat structure
 	public synchronized boolean Refresh() throws JSONException {
-		APICall ac = new APICall(APICall.API_URL_FOLDERS_AND_FEEDS, _context);	
+		APICall ac = new APICall(APICall.API_URL_FOLDERS_AND_FEEDS, _context);
+		Tags = new ArrayList<ITag>();
+		Subs = new ArrayList<ISubscription>();
 		if (ac.sync()) {
 			JSONObject json_feeds = ac.Json.getJSONObject("feeds");
 			JSONObject json_folders = ac.Json.getJSONObject("flat_folders");

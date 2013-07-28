@@ -61,8 +61,13 @@ public class APIHelper {
 		if (ac.sync()) {
 			JSONObject json_feeds = ac.Json.getJSONObject("feeds");
 			for (ISubscription sub : subs) {
-				JSONObject f = json_feeds.getJSONObject(APIHelper.getFeedIdFromFeedUrl(sub.uid));
-				sub.unreadCount = f.getInt("ps") + f.getInt("nt");
+				try {
+					JSONObject f = json_feeds.getJSONObject(APIHelper.getFeedIdFromFeedUrl(sub.uid));
+					sub.unreadCount = f.getInt("ps") + f.getInt("nt");
+				}
+				catch (JSONException e) {
+					sub.unreadCount = 0;
+				}
 			}
 		}
 	}
