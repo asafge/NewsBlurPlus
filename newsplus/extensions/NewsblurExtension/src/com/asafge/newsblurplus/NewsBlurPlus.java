@@ -66,18 +66,20 @@ public class NewsBlurPlus extends ReaderExtension {
 	public void handleItemIdList(IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
 		try {
 			APICall ac = new APICall(APICall.API_URL_RIVER, c);
+			List<String> story_ids = new ArrayList<String>();
 			List<String> hashes = (handler.stream().startsWith(ReaderExtension.STATE_STARRED)) ? APIHelper.getStarredHashes(c)
-																							   : APIHelper.getUnreadHashes(c);
+																							   : APIHelper.getUnreadHashes(c);		
 			for (int i=0; i<hashes.size(); i++) {
 				if ((i > 0) && ((i % 100 == 0) || i == hashes.size()-1)) {
 					if (!ac.sync()) 
 						throw new ReaderException("Remote connection error");
-					handler.items(APIHelper.extractStoryIDs(ac.Json));
+					story_ids.addAll(APIHelper.extractStoryIDs(ac.Json));
 					ac = new APICall(APICall.API_URL_RIVER, c);
 				}
 				else
 					ac.addGetParam("h", hashes.get(i));
 			}
+			handler.items(story_ids);
 		}
 		catch (JSONException e) {
 			throw new ReaderException("Data parse error", e);
