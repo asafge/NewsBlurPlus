@@ -65,9 +65,10 @@ public class NewsBlurPlus extends ReaderExtension {
 	@Override
 	public void handleItemIdList(IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
 		try {
+			int limit = handler.limit();
 			List<String> story_ids = new ArrayList<String>();
-			List<String> hashes = (handler.stream().startsWith(ReaderExtension.STATE_STARRED)) ? APIHelper.getStarredHashes(c) 
-																							   : APIHelper.getUnreadHashes(c);
+			List<String> hashes = (handler.stream().startsWith(ReaderExtension.STATE_STARRED)) ? APIHelper.getStarredHashes(c, limit) 
+																							   : APIHelper.getUnreadHashes(c, limit);
 			for (int start=0; start < hashes.size(); start += 100) {
 				APICall ac = new APICall(APICall.API_URL_RIVER, c);
 				int end = (start+100 < hashes.size()) ? start + 100 : hashes.size();
@@ -95,12 +96,13 @@ public class NewsBlurPlus extends ReaderExtension {
 		try {
 			List<String> hashes;
 			String uid = handler.stream();
+			int limit = handler.limit();
 			
 			if (uid.startsWith(ReaderExtension.STATE_STARRED)) {
-				hashes = APIHelper.getStarredHashes(c);
+				hashes = APIHelper.getStarredHashes(c, limit);
 			}
 			else if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
-				List<String> unread_hashes = APIHelper.getUnreadHashes(c);
+				List<String> unread_hashes = APIHelper.getUnreadHashes(c, limit);
 				hashes = new ArrayList<String>();				
 				for (String h : unread_hashes)
 					if (!handler.excludedStreams().contains(APIHelper.getFeedUrlFromFeedId(h.split(":")[0])))
@@ -115,7 +117,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				ac.addGetParams("h", hashes.subList(start, end));
 				if (!ac.sync())
 					throw new ReaderException("Remote connection error");
-				parseItemList(ac.Json, handler);					
+				parseItemList(ac.Json, handler);	
 			}
 		}
 		catch (JSONException e) {

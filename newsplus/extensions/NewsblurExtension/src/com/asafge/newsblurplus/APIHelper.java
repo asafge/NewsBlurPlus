@@ -28,7 +28,7 @@ public class APIHelper {
 	}
 	
 	// Get all the unread story hashes at once
-	public static List<String> getUnreadHashes(Context c) throws JSONException {
+	public static List<String> getUnreadHashes(Context c, int limit) throws JSONException {
 		List<String> hashes = new ArrayList<String>();
 		APICall ac = new APICall(APICall.API_URL_UNREAD_HASHES, c);
 		if (ac.sync()) {
@@ -36,7 +36,7 @@ public class APIHelper {
 			Iterator<?> keys = json_folders.keys();
 			while (keys.hasNext()) {
 				JSONArray items = json_folders.getJSONArray((String)keys.next());
-				for (int i=0; i<items.length(); i++)
+				for (int i=0; i<items.length() && i<limit; i++)
 					hashes.add(items.getString(i));
 			}
 		}
@@ -44,12 +44,12 @@ public class APIHelper {
 	}
 	
 	// Get all the starred story hashes at once
-	public static List<String> getStarredHashes(Context c) throws JSONException {
+	public static List<String> getStarredHashes(Context c, int limit) throws JSONException {
 		List<String> hashes = new ArrayList<String>();
 		APICall ac = new APICall(APICall.API_URL_STARRED_HASHES, c);
 		if (ac.sync()) {
 			JSONArray items = ac.Json.getJSONArray("starred_story_hashes");
-			for (int i=0; i<items.length(); i++)
+			for (int i=0; i<items.length() && i<limit; i++)
 				hashes.add(items.getString(i));
 		}
 		return hashes;
