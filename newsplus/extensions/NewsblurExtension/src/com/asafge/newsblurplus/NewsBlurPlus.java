@@ -65,39 +65,18 @@ public class NewsBlurPlus extends ReaderExtension {
 	@Override
 	public void handleItemIdList(IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
 		try {
-			if (handler.stream().startsWith(ReaderExtension.STATE_STARRED)) {
-				// TODO
-				Integer page = 1;
-				while (page > 0) {
-					APICall ac = new APICall(APICall.API_URL_STARRED_ITEMS, c);
-					ac.addGetParam("page", page.toString());
-					if (!ac.sync())
+			APICall ac = new APICall(APICall.API_URL_RIVER, c);
+			List<String> hashes = (handler.stream().startsWith(ReaderExtension.STATE_STARRED)) ? APIHelper.getStarredHashes(c)
+																							   : APIHelper.getUnreadHashes(c);
+			for (int i=0; i<hashes.size(); i++) {
+				if ((i > 0) && ((i % 100 == 0) || i == hashes.size()-1)) {
+					if (!ac.sync()) 
 						throw new ReaderException("Remote connection error");
-					else {
-						List<String> hashes = APIHelper.extractStoryIDs(ac.Json);
-						handler.items(hashes);
-						page = (hashes.size() > 0) ? (page + 1) : -1;
-					}
+					handler.items(APIHelper.extractStoryIDs(ac.Json));
+					ac = new APICall(APICall.API_URL_RIVER, c);
 				}
-			}
-			else {
-				List<String> unread_hashes = APIHelper.getUnreadHashes(c);
-				APICall ac = new APICall(APICall.API_URL_RIVER, c);
-				int count = 0;
-				for (int i=0; i<unread_hashes.size(); i++ , count++) {
-					if (count < 100)
-						ac.addGetParam("h", unread_hashes.get(i));
-					else {
-						if (!ac.sync()) 
-							throw new ReaderException("Remote connection error");
-						handler.items(APIHelper.extractStoryIDs(ac.Json));
-						ac = new APICall(APICall.API_URL_RIVER, c);
-						count = 0;
-					}
-				}
-				if (!ac.sync())
-					throw new ReaderException("Remote connection error");
-				handler.items(APIHelper.extractStoryIDs(ac.Json));
+				else
+					ac.addGetParam("h", hashes.get(i));
 			}
 		}
 		catch (JSONException e) {
