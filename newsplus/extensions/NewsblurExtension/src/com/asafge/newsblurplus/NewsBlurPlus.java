@@ -256,7 +256,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			}
 			else {
 				result = false;
-				break;
+				throw new ReaderException("This type of tag is not supported");
 			}
 			APICall ac = new APICall(url, c);
 			ac.addPostParam("story_id", itemUids[i]);
@@ -294,9 +294,9 @@ public class NewsBlurPlus extends ReaderExtension {
 		else {
 			try {
 				for (ISubscription sub : SubsStruct.Instance(c).Subs)
-					if (sub.getCategories().contains(label))
-						if (!APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(sub.uid), label, ""))
-							return false;
+					if ((sub.getCategories().contains(label) 
+						&& !APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(sub.uid), label, "")))
+						return false;
 			}
 			catch (JSONException e) {
 				return false;
@@ -336,7 +336,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				break;
 			}
 			// Feed's parent folder - new_folder/add_to_folder/delete_from_folder
-			case 6: {
+			case ReaderExtension.SUBSCRIPTION_ACTION_NEW_LABEL: {
 				APICall ac = new APICall(APICall.API_URL_FOLDER_ADD, c);
 				String newTag = tags[0].replace("FOL:", "");
 				ac.addPostParam("folder", newTag);
