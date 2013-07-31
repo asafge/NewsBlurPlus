@@ -39,6 +39,7 @@ public class SubsStruct {
 		if(_instance == null)
 			_instance = new SubsStruct(c);
 		else
+			// TODO: Add check if refreshed in last x sec
 			_instance.Refresh();
 		return _instance;
 	}

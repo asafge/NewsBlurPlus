@@ -31,6 +31,12 @@ public class APIHelper {
 	public static List<String> getUnreadHashes(Context c, int limit) throws JSONException {
 		List<String> hashes = new ArrayList<String>();
 		APICall ac = new APICall(APICall.API_URL_UNREAD_HASHES, c);
+		
+		List<String> feeds = new ArrayList<String>();
+		for (ISubscription sub : SubsStruct.InstanceRefresh(c).Subs)
+			feeds.add(APIHelper.getFeedIdFromFeedUrl(sub.uid));
+		ac.addGetParams("feed_id", feeds);
+		
 		if (ac.sync()) {
 			JSONObject json_folders = ac.Json.getJSONObject("unread_feed_story_hashes");
 			Iterator<?> keys = json_folders.keys();
