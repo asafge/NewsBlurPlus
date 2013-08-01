@@ -34,7 +34,8 @@ public class APIHelper {
 		
 		List<String> feeds = new ArrayList<String>();
 		for (ISubscription sub : SubsStruct.InstanceRefresh(c).Subs)
-			feeds.add(APIHelper.getFeedIdFromFeedUrl(sub.uid));
+			if (sub.unreadCount > 0)
+				feeds.add(APIHelper.getFeedIdFromFeedUrl(sub.uid));
 		ac.addGetParams("feed_id", feeds);
 		
 		if (ac.sync()) {
