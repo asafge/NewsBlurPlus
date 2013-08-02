@@ -100,7 +100,7 @@ public class APIHelper {
 	
 	// Construct a single feed's URL from it's integer ID
 	public static String getFeedUrlFromFeedId(String feedID) {
-		return APICall.API_URL_RIVER + "feeds=" + feedID;
+		return APICall.API_URL_RIVER + "?feeds=" + feedID;
 	}
 	
 	// Get the feed ID from a given URL
