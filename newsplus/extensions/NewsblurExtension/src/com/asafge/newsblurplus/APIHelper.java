@@ -107,7 +107,7 @@ public class APIHelper {
 	public static String getFeedIdFromFeedUrl(String feedURL) {
 		String feedID = feedURL.replace("FEED:", "");
 		feedID = feedID.replace(APICall.API_URL_RIVER, "");
-		feedID = feedID.replace("feeds=", "");
+		feedID = feedID.replace("?feeds=", "");
 		return feedID;
 	}
 	
