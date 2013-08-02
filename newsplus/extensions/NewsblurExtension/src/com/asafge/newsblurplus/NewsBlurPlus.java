@@ -199,16 +199,20 @@ public class NewsBlurPlus extends ReaderExtension {
 	 * Mark a list of stories (and their feeds) as read
 	 */
 	@Override
-	public boolean markAsRead(String[]  itemUids, String[]  subUIds) {
-		return this.markAs(true, itemUids, subUIds);
+	public boolean markAsRead(String[]  itemUids, String[]  subUIds) throws ReaderException {
+		if (!this.markAs(true, itemUids, subUIds))
+			throw new ReaderException("Can't mark as read");
+		return true;
 	}
 
 	/* 
 	 * Mark a list of stories (and their feeds) as unread
 	 */
 	@Override
-	public boolean markAsUnread(String[]  itemUids, String[]  subUids, boolean keepUnread) {
-		return this.markAs(false, itemUids, subUids);
+	public boolean markAsUnread(String[]  itemUids, String[]  subUids, boolean keepUnread) throws ReaderException {
+		if (!this.markAs(false, itemUids, subUids))
+			throw new ReaderException("Can't mark as unread");
+		return true;
 	}
 
 	/*
@@ -216,9 +220,9 @@ public class NewsBlurPlus extends ReaderExtension {
 	 * Note: S = subscription (feed), t = tag
 	 */
 	@Override
-	public boolean markAllAsRead(String s, String t, long syncTime) {
+	public boolean markAllAsRead(String s, String t, long syncTime) throws ReaderException {
+		boolean result = true;
 		try {
-			boolean result = true;
 			if (s != null && s.startsWith("FEED:")) {
 				String[] feed = { APIHelper.getFeedIdFromFeedUrl(s) };
 				result = this.markAs(true, null, feed);
@@ -233,11 +237,13 @@ public class NewsBlurPlus extends ReaderExtension {
 			else {
 				result = false;
 			}
-			return result;
 		}
 		catch (JSONException e) {
-			return false;
+			result = false;
 		}
+		if (!result)
+			throw new ReaderException("Can't mark all as read");
+		return result;
 	}
 
 	/*
