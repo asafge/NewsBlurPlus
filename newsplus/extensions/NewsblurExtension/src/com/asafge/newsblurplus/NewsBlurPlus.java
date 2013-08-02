@@ -113,6 +113,7 @@ public class NewsBlurPlus extends ReaderExtension {
 
 			for (int start=0; start < hashes.size(); start += 100) {
 				APICall ac = new APICall(APICall.API_URL_RIVER, c);
+				ac.addPostParam("read_filter", "all");
 				int end = (start+100 < hashes.size()) ? start + 100 : hashes.size();
 				ac.addGetParams("h", hashes.subList(start, end));
 				if (!ac.sync())
