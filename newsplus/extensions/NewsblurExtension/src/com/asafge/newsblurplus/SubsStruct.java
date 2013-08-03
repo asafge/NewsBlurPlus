@@ -18,6 +18,7 @@ import com.noinnion.android.reader.api.provider.ITag;
 public class SubsStruct {
 	private static SubsStruct _instance = null;
 	private Context _context;
+	private Calendar _lastSync;
 	public List<ISubscription> Subs;
 	public List<ITag> Tags;
 	
@@ -39,13 +40,19 @@ public class SubsStruct {
 		if(_instance == null)
 			_instance = new SubsStruct(c);
 		else
-			// TODO: Add check if refreshed in last x sec
 			_instance.Refresh();
 		return _instance;
 	}
 	
 	// Get all the folders and feeds in a flat structure
 	public synchronized boolean Refresh() throws JSONException {
+		if (_lastSync != null) {
+			Calendar tmp = Calendar.getInstance();
+			tmp.setTimeInMillis(_lastSync.getTimeInMillis());
+			tmp.add(Calendar.SECOND, 10);
+			if (tmp.after(Calendar.getInstance()))
+				return true;
+		}
 		APICall ac = new APICall(APICall.API_URL_FOLDERS_AND_FEEDS, _context);
 		Tags = new ArrayList<ITag>();
 		Subs = new ArrayList<ISubscription>();
@@ -80,6 +87,7 @@ public class SubsStruct {
 				}
 			}
 		}
+		_lastSync = Calendar.getInstance();
 		return (Subs.size() > 0);
 	}
 	
