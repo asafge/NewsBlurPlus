@@ -38,7 +38,7 @@ public class APIHelper {
 				feeds.add(APIHelper.getFeedIdFromFeedUrl(sub.uid));
 		ac.addGetParams("feed_id", feeds);
 		
-		if (ac.sync()) {
+		if ((feeds.size() > 0) && ac.sync()) {
 			JSONObject json_folders = ac.Json.getJSONObject("unread_feed_story_hashes");
 			Iterator<?> keys = json_folders.keys();
 			while (keys.hasNext()) {
