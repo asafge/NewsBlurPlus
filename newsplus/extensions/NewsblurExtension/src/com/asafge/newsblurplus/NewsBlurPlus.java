@@ -67,8 +67,8 @@ public class NewsBlurPlus extends ReaderExtension {
 		try {
 			int limit = handler.limit();
 			List<String> story_ids = new ArrayList<String>();
-			List<String> hashes = (handler.stream().startsWith(ReaderExtension.STATE_STARRED)) ? APIHelper.getStarredHashes(c, limit) 
-																							   : APIHelper.getUnreadHashes(c, limit);
+			List<String> hashes = (handler.stream().startsWith(ReaderExtension.STATE_STARRED)) ? APIHelper.getStarredHashes(c, limit, Long.MIN_VALUE) 
+																							   : APIHelper.getUnreadHashes(c, limit, Long.MIN_VALUE);
 			for (int start=0; start < hashes.size(); start += 100) {
 				APICall ac = new APICall(APICall.API_URL_RIVER, c);
 				int end = (start+100 < hashes.size()) ? start + 100 : hashes.size();
@@ -99,10 +99,10 @@ public class NewsBlurPlus extends ReaderExtension {
 			int limit = handler.limit();
 			
 			if (uid.startsWith(ReaderExtension.STATE_STARRED)) {
-				hashes = APIHelper.getStarredHashes(c, limit);
+				hashes = APIHelper.getStarredHashes(c, limit, syncTime);
 			}
 			else if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
-				List<String> unread_hashes = APIHelper.getUnreadHashes(c, limit);
+				List<String> unread_hashes = APIHelper.getUnreadHashes(c, limit, syncTime);
 				hashes = new ArrayList<String>();				
 				for (String h : unread_hashes)
 					if (!handler.excludedStreams().contains(APIHelper.getFeedUrlFromFeedId(h.split(":")[0])))

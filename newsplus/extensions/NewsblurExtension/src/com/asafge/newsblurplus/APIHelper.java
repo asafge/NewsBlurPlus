@@ -28,9 +28,10 @@ public class APIHelper {
 	}
 	
 	// Get all the unread story hashes at once
-	public static List<String> getUnreadHashes(Context c, int limit) throws JSONException {
+	public static List<String> getUnreadHashes(Context c, int limit, long syncTime) throws JSONException {
 		List<String> hashes = new ArrayList<String>();
 		APICall ac = new APICall(APICall.API_URL_UNREAD_HASHES, c);
+		ac.addGetParam("include_timestamps", "true");
 		
 		List<String> feeds = new ArrayList<String>();
 		for (ISubscription sub : SubsStruct.InstanceRefresh(c).Subs)
@@ -39,25 +40,30 @@ public class APIHelper {
 		ac.addGetParams("feed_id", feeds);
 		
 		if ((feeds.size() > 0) && ac.sync()) {
-			JSONObject json_folders = ac.Json.getJSONObject("unread_feed_story_hashes");
-			Iterator<?> keys = json_folders.keys();
+			JSONObject json_feeds = ac.Json.getJSONObject("unread_feed_story_hashes");
+			Iterator<?> keys = json_feeds.keys();
 			while (keys.hasNext()) {
-				JSONArray items = json_folders.getJSONArray((String)keys.next());
-				for (int i=0; i<items.length() && i<limit; i++)
-					hashes.add(items.getString(i));
+				JSONArray items = json_feeds.getJSONArray((String)keys.next());
+				for (int i=0; i<items.length() && i<limit; i++) {
+					if (Long.parseLong(items.getJSONArray(i).getString(1)) > syncTime)
+						hashes.add( items.getJSONArray(i).getString(0));
+				}
 			}
 		}
 		return hashes;
 	}
 	
 	// Get all the starred story hashes at once
-	public static List<String> getStarredHashes(Context c, int limit) throws JSONException {
+	public static List<String> getStarredHashes(Context c, int limit, long syncTime) throws JSONException {
 		List<String> hashes = new ArrayList<String>();
 		APICall ac = new APICall(APICall.API_URL_STARRED_HASHES, c);
+		ac.addGetParam("include_timestamps", "true");
+		
 		if (ac.sync()) {
 			JSONArray items = ac.Json.getJSONArray("starred_story_hashes");
 			for (int i=0; i<items.length() && i<limit; i++)
-				hashes.add(items.getString(i));
+				if (Long.parseLong(items.getJSONArray(i).getString(1)) > syncTime)
+					hashes.add( items.getJSONArray(i).getString(0));
 		}
 		return hashes;
 	}
