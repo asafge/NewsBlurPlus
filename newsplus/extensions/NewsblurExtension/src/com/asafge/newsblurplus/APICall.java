@@ -105,11 +105,7 @@ public class APICall {
 					return this.sync();
 				}
 			}
-			if (Json.getString("authenticated") != "true") {
-				// TODO: LoginActivity.logout();
-				return false;
-			}
-			return (Status.getCode() == 200);
+			return ((Json.getString("authenticated").startsWith("true")) && (Status.getCode() == 200));
 		}
 		catch (JSONException e) {
 			return false;
