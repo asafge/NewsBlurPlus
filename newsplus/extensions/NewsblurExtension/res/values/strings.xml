@@ -4,7 +4,7 @@
     <string name="app_name">NewsBlur+</string>
     
     <!-- Extension -->
-    <string name="extention_name">NewsBlur+</string>
+    <string name="extension_name">NewsBlur+</string>
     <string name="extension_description">News+ extension for the NewsBlur reader service.</string>
     <string name="extension_settings_title">Settings</string>
     <string name="extension_login_title">Login</string>
@@ -14,9 +14,12 @@
     <string name="msg_login_running">Login…</string>
     <string name="msg_login_fail">Login failed. Please try again.</string>
     
+    <!-- Startup -->
 	<string name="login_welcome">Please login to NewsBlur to continue:</string>
+	<string name="txt_start_app">Start News+</string>
+    <string name="txt_download_app">Download News+</string>
     
-    <!-- err -->
+    <!-- Errors -->
     <string name="err_io">Network error</string>
     
 </resources>
