@@ -140,7 +140,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			for (int i=0; i<arr.length(); i++) {
 				JSONObject story = arr.getJSONObject(i);
 				IItem item = new IItem();
-				item.subUid = "FEED:" + APIHelper.getFeedUrlFromFeedId(story.getString("story_feed_id"));
+				item.subUid = APIHelper.getFeedUrlFromFeedId(story.getString("story_feed_id"));
 				item.title = story.getString("story_title");
 				item.link = story.getString("story_permalink");
 				item.uid = story.getString("id");
