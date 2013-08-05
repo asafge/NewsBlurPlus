@@ -33,7 +33,7 @@ public class APIHelper {
 			while (keys.hasNext()) {
 				JSONArray items = json_feeds.getJSONArray((String)keys.next());
 				for (int i=0; i<items.length() && i<limit; i++) {
-					if ((items.getJSONArray(i).getLong(1) * 1000) > syncTime)
+					if ((items.getJSONArray(i).getLong(1)) > syncTime)
 						hashes.add( items.getJSONArray(i).getString(0));
 				}
 			}
@@ -50,7 +50,7 @@ public class APIHelper {
 		if (ac.sync()) {
 			JSONArray items = ac.Json.getJSONArray("starred_story_hashes");
 			for (int i=0; i<items.length() && i<limit; i++)
-				if ((items.getJSONArray(i).getLong(1) * 1000) > syncTime)
+				if ((items.getJSONArray(i).getLong(1)) > syncTime)
 					hashes.add( items.getJSONArray(i).getString(0));
 		}
 		return hashes;
