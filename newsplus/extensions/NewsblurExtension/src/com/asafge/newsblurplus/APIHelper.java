@@ -16,7 +16,7 @@ import com.noinnion.android.reader.api.provider.ITag;
 
 public class APIHelper {
 	
-	// Get a list of story hashes that have a non negative intelligence
+	// Filter a list of story hashes to those who have non-negative intelligence
 	public static List<String> filterLowIntelligence(List<String> hashes, Context c) throws JSONException, ReaderException {
 		List<String> filtered = new ArrayList<String>();
 		for (int start=0; start < hashes.size(); start += 100) {
