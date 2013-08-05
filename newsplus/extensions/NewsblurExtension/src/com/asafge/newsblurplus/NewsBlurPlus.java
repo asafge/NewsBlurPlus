@@ -338,19 +338,9 @@ public class NewsBlurPlus extends ReaderExtension {
 				break;
 			}
 			case ReaderExtension.SUBSCRIPTION_ACTION_UNSUBCRIBE: {
-				try {
-					APICall ac = new APICall(APICall.API_URL_FEED_DEL, c);
-					ac.addPostParam("feed_id", APIHelper.getFeedIdFromFeedUrl(uid));
-					for (ISubscription sub : SubsStruct.Instance(c).Subs)
-						if (sub.uid.contains(uid))
-							for (String tag : sub.getCategories())
-								ac.addPostParam("in_folder", tag.replace("FOL:", ""));
-					result = ac.syncGetBool();
-							
-				}
-				catch (JSONException e) {
-					result = false;
-				}
+				APICall ac = new APICall(APICall.API_URL_FEED_DEL, c);
+				ac.addPostParam("feed_id", APIHelper.getFeedIdFromFeedUrl(uid));
+				result = ac.syncGetBool();
 				break;
 			}
 			case ReaderExtension.SUBSCRIPTION_ACTION_EDIT: {
