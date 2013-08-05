@@ -102,11 +102,11 @@ public class NewsBlurPlus extends ReaderExtension {
 				for (String h : unread_hashes)
 					if (!handler.excludedStreams().contains(APIHelper.getFeedUrlFromFeedId(h.split(":")[0])))
 						hashes.add(h);
+				hidden_hashes =  new ArrayList<String>();
 			}
 			else
 				throw new ReaderException("Unknown reading state");
 
-			hidden_hashes =  new ArrayList<String>();
 			for (int start=0; start < hashes.size(); start += 100) {
 				APICall ac = new APICall(APICall.API_URL_RIVER, c);
 				ac.addPostParam("read_filter", "all");
@@ -149,7 +149,7 @@ public class NewsBlurPlus extends ReaderExtension {
 					item.starred = true;
 					item.addCategory(StarredTag.get().uid);
 				}
-				if (APIHelper.getIntelligence(story) < 0) {
+				if ((APIHelper.getIntelligence(story) < 0) && (hidden_hashes != null)) {
 					item.read = true;
 					hidden_hashes.add(item.uid);
 				}			
