@@ -38,6 +38,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 		else {
 			setContentView(R.layout.login_newsblur);
 			findViewById(R.id.btn_login).setOnClickListener(this);
+			findViewById(R.id.btn_cancel).setOnClickListener(this);
 		}
 	}
 	
@@ -45,14 +46,21 @@ public class LoginActivity extends Activity implements OnClickListener {
 	public void onClick(View v) {
 		switch (v.getId()) {
 			case R.id.btn_login:
-				InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
-			    imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
-			    
+				hideKeyboard();
 				final EditText user = (EditText)findViewById(R.id.edit_login_id);
 				final EditText pass = (EditText)findViewById(R.id.edit_password);
 				new LoginTask().execute(user.getText().toString(), pass.getText().toString());
 				break;
+			case R.id.btn_cancel:
+				hideKeyboard();
+				finish();
+				break;
 		}
+	}
+	
+	private void hideKeyboard() {
+		InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+	    imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
 	}
 	
 	private class LoginTask extends AsyncTask<String, Void, Boolean> {
