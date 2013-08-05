@@ -37,19 +37,19 @@ public class LoginActivity extends Activity implements OnClickListener {
 		}
 		else {
 			setContentView(R.layout.login_newsblur);
-			findViewById(R.id.ok_button).setOnClickListener(this);
+			findViewById(R.id.btn_login).setOnClickListener(this);
 		}
 	}
 	
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
-			case R.id.ok_button:
+			case R.id.btn_login:
 				InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
 			    imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
 			    
-				final EditText user = (EditText)findViewById(R.id.username_text);
-				final EditText pass = (EditText)findViewById(R.id.password_text);
+				final EditText user = (EditText)findViewById(R.id.edit_login_id);
+				final EditText pass = (EditText)findViewById(R.id.edit_password);
 				new LoginTask().execute(user.getText().toString(), pass.getText().toString());
 				break;
 		}

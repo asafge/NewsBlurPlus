@@ -11,8 +11,12 @@
     <string name="Extension_login_username">Username</string>
     <string name="Extension_login_password">Password</string>
     
+    <!-- Login -->
     <string name="msg_login_running">Login…</string>
     <string name="msg_login_fail">Login failed. Please try again.</string>
+    <string name="login_id">Username</string>
+    <string name="login_password">Password</string>
+    <string name="txt_login">Login</string>
     
     <!-- Startup -->
 	<string name="login_welcome">Please login to NewsBlur to continue:</string>
