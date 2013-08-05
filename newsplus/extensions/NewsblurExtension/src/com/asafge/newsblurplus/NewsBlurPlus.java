@@ -88,13 +88,14 @@ public class NewsBlurPlus extends ReaderExtension {
 		try {
 			List<String> hashes;
 			String uid = handler.stream();
+			long startTime = handler.startTime();
 			int limit = handler.limit();
 			
 			if (uid.startsWith(ReaderExtension.STATE_STARRED)) {
-				hashes = APIHelper.getStarredHashes(c, limit, handler.startTime());
+				hashes = APIHelper.getStarredHashes(c, limit, startTime);
 			}
 			else if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
-				List<String> unread_hashes = APIHelper.getUnreadHashes(c, limit, handler.startTime());
+				List<String> unread_hashes = APIHelper.getUnreadHashes(c, limit, startTime);
 				hashes = new ArrayList<String>();
 				for (String h : unread_hashes)
 					if (!handler.excludedStreams().contains(APIHelper.getFeedUrlFromFeedId(h.split(":")[0])))
