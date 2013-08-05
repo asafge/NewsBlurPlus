@@ -66,9 +66,10 @@ public class NewsBlurPlus extends ReaderExtension {
 	public void handleItemIdList(IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
 		try {
 			int limit = handler.limit();
-			List<String> hashes = (handler.stream().startsWith(ReaderExtension.STATE_STARRED)) ? APIHelper.getStarredHashes(c, limit, Long.MIN_VALUE) 
-																							   : APIHelper.getUnreadHashes(c, limit, Long.MIN_VALUE);
-			handler.items(APIHelper.filterLowIntelligence(hashes, c));
+			if (handler.stream().startsWith(ReaderExtension.STATE_STARRED))
+				handler.items(APIHelper.getStarredHashes(c, limit, Long.MIN_VALUE));
+			else
+				handler.items(APIHelper.filterLowIntelligence(APIHelper.getUnreadHashes(c, limit, Long.MIN_VALUE), c));
 		}
 		catch (JSONException e) {
 			throw new ReaderException("Data parse error", e);
