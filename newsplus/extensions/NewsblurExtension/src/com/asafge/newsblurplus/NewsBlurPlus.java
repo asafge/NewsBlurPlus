@@ -22,7 +22,6 @@ import com.noinnion.android.reader.api.provider.ISubscription;
 
 public class NewsBlurPlus extends ReaderExtension {
 	private Context c;
-	private List<String> hidden_hashes;
 	
 	/*
 	 * Constructor
@@ -69,10 +68,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			int limit = handler.limit();
 			List<String> hashes = (handler.stream().startsWith(ReaderExtension.STATE_STARRED)) ? APIHelper.getStarredHashes(c, limit, Long.MIN_VALUE) 
 																							   : APIHelper.getUnreadHashes(c, limit, Long.MIN_VALUE);
-			if (hidden_hashes != null)
-				hashes.removeAll(hidden_hashes);
-			handler.items(hashes);
-			
+			handler.items(APIHelper.filterLowIntelligence(hashes, c));
 		}
 		catch (JSONException e) {
 			throw new ReaderException("Data parse error", e);
@@ -102,7 +98,6 @@ public class NewsBlurPlus extends ReaderExtension {
 				for (String h : unread_hashes)
 					if (!handler.excludedStreams().contains(APIHelper.getFeedUrlFromFeedId(h.split(":")[0])))
 						hashes.add(h);
-				hidden_hashes =  new ArrayList<String>();
 			}
 			else
 				throw new ReaderException("Unknown reading state");
@@ -143,16 +138,12 @@ public class NewsBlurPlus extends ReaderExtension {
 				item.author = story.getString("story_authors");
 				item.updatedTime = story.getLong("story_timestamp");
 				item.publishedTime = story.getLong("story_timestamp");
-				item.read = (story.getInt("read_status") == 1);
+				item.read = (story.getInt("read_status") == 1) || (APIHelper.getIntelligence(story) < 0);
 				item.content = story.getString("story_content");
 				if ((story.has("starred") && story.getString("starred") == "true")) {
 					item.starred = true;
 					item.addCategory(StarredTag.get().uid);
 				}
-				if ((APIHelper.getIntelligence(story) < 0) && (hidden_hashes != null)) {
-					item.read = true;
-					hidden_hashes.add(item.uid);
-				}			
 				items.add(item);
 				
 				length += item.getLength();

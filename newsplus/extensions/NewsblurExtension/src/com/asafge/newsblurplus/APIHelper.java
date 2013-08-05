@@ -10,10 +10,31 @@ import org.json.JSONObject;
 
 import android.content.Context;
 
+import com.noinnion.android.reader.api.ReaderException;
 import com.noinnion.android.reader.api.provider.ISubscription;
 import com.noinnion.android.reader.api.provider.ITag;
 
 public class APIHelper {
+	
+	// Get a list of story hashes that have a non negative intelligence
+	public static List<String> filterLowIntelligence(List<String> hashes, Context c) throws JSONException, ReaderException {
+		List<String> filtered = new ArrayList<String>();
+		for (int start=0; start < hashes.size(); start += 100) {
+			APICall ac = new APICall(APICall.API_URL_RIVER, c);
+			int end = (start+100 < hashes.size()) ? start + 100 : hashes.size();
+			ac.addGetParams("h", hashes.subList(start, end));
+			if (!ac.sync())
+				throw new ReaderException("Remote connection error");
+			
+			JSONArray arr = ac.Json.getJSONArray("stories");
+			for (int i=0; i<arr.length(); i++) {
+				JSONObject story = arr.getJSONObject(i);
+				if (APIHelper.getIntelligence(story) >= 0)
+					filtered.add(story.getString("story_hash"));
+			}
+		}
+		return filtered;
+	}
 	
 	// Get all the unread story hashes at once
 	public static List<String> getUnreadHashes(Context c, int limit, long syncTime) throws JSONException {
