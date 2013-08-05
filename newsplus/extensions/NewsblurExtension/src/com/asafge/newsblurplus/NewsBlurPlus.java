@@ -2,6 +2,7 @@ package com.asafge.newsblurplus;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -165,6 +166,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		}
 	}
 	
+	
 	/*
 	 * Main function for marking stories (and their feeds) as read/unread.
 	 */
@@ -180,16 +182,22 @@ public class NewsBlurPlus extends ReaderExtension {
 					ac.addGetParam("feed_id", APIHelper.getFeedIdFromFeedUrl(sub));
 			}
 			else {
-				String url = read ? APICall.API_URL_MARK_STORY_AS_READ : APICall.API_URL_MARK_STORY_AS_UNREAD;
-				ac = new APICall(url, c);
-				for (int i=0; i<itemUids.length; i++) {
-					ac.addPostParam("story_id", itemUids[i]);
-					ac.addPostParam("feed_id", APIHelper.getFeedIdFromFeedUrl(subUIds[i]));
+				if (read) {
+					ac = new APICall(APICall.API_URL_MARK_STORY_AS_READ, c);
+					ac.addGetParams("story_hash", Arrays.asList(itemUids));
+				}
+				else {
+					ac = new APICall(APICall.API_URL_MARK_STORY_AS_UNREAD, c);
+					for (int i=0; i<itemUids.length; i++) {
+						ac.addPostParam("story_id", itemUids[i]);
+						ac.addPostParam("feed_id", APIHelper.getFeedIdFromFeedUrl(subUIds[i]));
+					}
 				}
 			}
 		}
 		return ac.syncGetBool();
 	}
+	
 
 	/* 
 	 * Mark a list of stories (and their feeds) as read
@@ -200,6 +208,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			throw new ReaderException("Can't mark as read");
 		return true;
 	}
+	
 
 	/* 
 	 * Mark a list of stories (and their feeds) as unread
@@ -210,6 +219,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			throw new ReaderException("Can't mark as unread");
 		return true;
 	}
+	
 
 	/*
 	 * Mark all stories on all feeds as read. Iterate all feeds in order to avoid marking excluded feeds as read. 
@@ -241,6 +251,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			throw new ReaderException("Can't mark all as read");
 		return result;
 	}
+	
 
 	/*
 	 * Edit an item's tag - currently supports only starring/unstarring items
@@ -268,6 +279,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		}
 		return result;
 	}
+	
 
 	/*
 	 * Rename a top level folder both in News+ and in NewsBlur server
@@ -284,6 +296,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			return ac.syncGetBool();
 		}
 	}
+	
 	
 	/*
 	 * Delete a top level folder both in News+ and in NewsBlur server
@@ -308,6 +321,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			return ac.syncGetBool();
 		}
 	}
+	
 	
 	/*
 	 * Main function for editing subscriptions - add/delete/rename/change-folder
