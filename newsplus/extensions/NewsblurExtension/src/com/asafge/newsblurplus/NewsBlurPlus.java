@@ -66,18 +66,9 @@ public class NewsBlurPlus extends ReaderExtension {
 	public void handleItemIdList(IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
 		try {
 			int limit = handler.limit();
-			List<String> story_ids = new ArrayList<String>();
 			List<String> hashes = (handler.stream().startsWith(ReaderExtension.STATE_STARRED)) ? APIHelper.getStarredHashes(c, limit, Long.MIN_VALUE) 
 																							   : APIHelper.getUnreadHashes(c, limit, Long.MIN_VALUE);
-			for (int start=0; start < hashes.size(); start += 100) {
-				APICall ac = new APICall(APICall.API_URL_RIVER, c);
-				int end = (start+100 < hashes.size()) ? start + 100 : hashes.size();
-				ac.addGetParams("h", hashes.subList(start, end));
-				if (!ac.sync())
-					throw new ReaderException("Remote connection error");
-				story_ids.addAll(APIHelper.extractStoryIDs(ac.Json));
-			}
-			handler.items(story_ids);
+			handler.items(hashes);
 		}
 		catch (JSONException e) {
 			throw new ReaderException("Data parse error", e);
@@ -143,7 +134,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				item.subUid = APIHelper.getFeedUrlFromFeedId(story.getString("story_feed_id"));
 				item.title = story.getString("story_title");
 				item.link = story.getString("story_permalink");
-				item.uid = story.getString("id");
+				item.uid = story.getString("story_hash");
 				item.author = story.getString("story_authors");
 				item.updatedTime = story.getLong("story_timestamp");
 				item.publishedTime = story.getLong("story_timestamp");

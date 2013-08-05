@@ -15,18 +15,6 @@ import com.noinnion.android.reader.api.provider.ITag;
 
 public class APIHelper {
 	
-	// Get a list of story IDs from a JSON object. Used for unread refresh.
-	public static List<String> extractStoryIDs(JSONObject json) throws JSONException { 
-		List<String> list = new ArrayList<String>();
-		JSONArray arr = json.getJSONArray("stories");
-		for (int i=0; i<arr.length(); i++) {
-			JSONObject story = arr.getJSONObject(i);
-			if (APIHelper.getIntelligence(story) >= 0)
-				list.add(story.getString("id"));
-		}
-		return list;
-	}
-	
 	// Get all the unread story hashes at once
 	public static List<String> getUnreadHashes(Context c, int limit, long syncTime) throws JSONException {
 		List<String> hashes = new ArrayList<String>();
