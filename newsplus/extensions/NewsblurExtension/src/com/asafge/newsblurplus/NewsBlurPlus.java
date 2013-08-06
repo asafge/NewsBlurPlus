@@ -157,16 +157,12 @@ public class NewsBlurPlus extends ReaderExtension {
 				}
 			}
 			handler.items(items, 0);
-			Thread.sleep(200);
 		}
 		catch (JSONException e) {
 			throw new ReaderException("Data parse error", e);
 		}
 		catch (RemoteException e) {
 			throw new ReaderException("Remote connection error", e);
-		}
-		catch (InterruptedException e) {
-			throw new ReaderException("Sleep interrupted error", e);
 		}
 	}
 	
