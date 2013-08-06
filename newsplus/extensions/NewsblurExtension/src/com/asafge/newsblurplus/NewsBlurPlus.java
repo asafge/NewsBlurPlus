@@ -91,6 +91,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			String uid = handler.stream();
 			long startTime = handler.startTime();
 			int limit = handler.limit();
+			int chunk = (APIHelper.isPremiumAccount(c) ? 100 : 5 );
 			
 			if (uid.startsWith(ReaderExtension.STATE_STARRED)) {
 				hashes = APIHelper.getStarredHashes(c, limit, startTime);
@@ -104,15 +105,14 @@ public class NewsBlurPlus extends ReaderExtension {
 			}
 			else
 				throw new ReaderException("Unknown reading state");
-
-			for (int start=0; start < hashes.size(); start += 100) {
+			
+			for (int start=0; start < hashes.size(); start += chunk) {
 				APICall ac = new APICall(APICall.API_URL_RIVER, c);
-				ac.addPostParam("read_filter", "all");
-				int end = (start+100 < hashes.size()) ? start + 100 : hashes.size();
+				int end = (start+chunk < hashes.size()) ? start + chunk : hashes.size();
 				ac.addGetParams("h", hashes.subList(start, end));
 				if (!ac.sync())
 					throw new ReaderException("Remote connection error");
-				parseItemList(ac.Json, handler);	
+				parseItemList(ac.Json, handler);
 			}
 		}
 		catch (JSONException e) {
@@ -154,15 +154,19 @@ public class NewsBlurPlus extends ReaderExtension {
 					handler.items(items, 0);
 					items.clear();
 					length = 0;
-				}				
+				}
 			}
 			handler.items(items, 0);
+			Thread.sleep(200);
 		}
 		catch (JSONException e) {
 			throw new ReaderException("Data parse error", e);
 		}
 		catch (RemoteException e) {
 			throw new ReaderException("Remote connection error", e);
+		}
+		catch (InterruptedException e) {
+			throw new ReaderException("Sleep interrupted error", e);
 		}
 	}
 	

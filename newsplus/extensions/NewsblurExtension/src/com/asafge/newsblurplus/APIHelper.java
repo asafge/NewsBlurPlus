@@ -94,6 +94,19 @@ public class APIHelper {
 		}
 	}
 	
+	// Check if this is a premium user's account
+	public static boolean isPremiumAccount(Context c) {
+		try {
+			APICall ac = new APICall(APICall.API_URL_RIVER, c);
+			if (ac.sync() && !ac.Json.getString("message").startsWith("The full River of News is a premium feature."))
+				return true;
+		}
+		catch (JSONException e) {
+			return false;
+		}
+		return false;
+	}
+	
 	// Get a story and return its total intelligence score
 	public static int getIntelligence(JSONObject story) throws JSONException {
 		JSONObject intel = story.getJSONObject("intelligence");
