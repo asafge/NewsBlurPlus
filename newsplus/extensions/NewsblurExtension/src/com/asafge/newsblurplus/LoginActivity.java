@@ -48,7 +48,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 			case R.id.btn_login:
 				hideKeyboard();
 				String user = ((EditText)findViewById(R.id.edit_login_id)).getText().toString().trim();
-				String pass = ((EditText)findViewById(R.id.edit_password)).getText().toString().trim();
+				String pass = ((EditText)findViewById(R.id.edit_password)).getText().toString();
 				new LoginTask().execute(user, pass);
 				break;
 			case R.id.btn_cancel:
