@@ -108,7 +108,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				hashes = APIHelper.getUnreadHashes(c, limit, startTime, feeds);
 			}
 			else
-				throw new ReaderException("Unknown reading state");
+				throw new ReaderException.UnexpectedException("Unknown reading state");
 			
 			for (int start=0; start < hashes.size(); start += chunk) {
 				APICall ac = new APICall(APICall.API_URL_RIVER, c);
