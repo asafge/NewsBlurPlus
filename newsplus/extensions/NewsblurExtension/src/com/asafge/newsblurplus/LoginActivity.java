@@ -12,6 +12,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.asafge.newsblurplus.R;
+import com.noinnion.android.reader.api.ReaderException;
 import com.noinnion.android.reader.api.ReaderExtension;
 
 public class LoginActivity extends Activity implements OnClickListener {
@@ -79,13 +80,19 @@ public class LoginActivity extends Activity implements OnClickListener {
 			APICall ac = new APICall(APICall.API_URL_LOGIN, c);
 			ac.addPostParam("username", user);
 			ac.addPostParam("password", pass);
-			if (ac.sync()) {
-				Prefs.setSessionID(c, ac.Status.getCookies().get(0).getName(), ac.Status.getCookies().get(0).getValue());
-				Prefs.setLoggedIn(c, true);
-				setResult(ReaderExtension.RESULT_LOGIN);
-				return true;
+			try {
+				if (ac.sync()) {
+					Prefs.setSessionID(c, ac.Status.getCookies().get(0).getName(), ac.Status.getCookies().get(0).getValue());
+					Prefs.setLoggedIn(c, true);
+					setResult(ReaderExtension.RESULT_LOGIN);
+					return true;
+				}
+				else {
+					Prefs.setLoggedIn(c, false);
+					return false;
+				}
 			}
-			else {
+			catch (ReaderException e) {
 				Prefs.setLoggedIn(c, false);
 				return false;
 			}

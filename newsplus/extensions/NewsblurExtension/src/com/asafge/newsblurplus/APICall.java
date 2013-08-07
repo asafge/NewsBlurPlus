@@ -12,6 +12,7 @@ import android.net.Uri;
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
+import com.noinnion.android.reader.api.ReaderException;
 
 public class APICall {
 	
@@ -89,7 +90,7 @@ public class APICall {
 	}
 	
 	// Run synchronous HTTP request and check for valid response
-	public boolean sync() {
+	public boolean sync() throws ReaderException {
 		if (callback == null)
 			return false;
 		try {		
@@ -99,17 +100,19 @@ public class APICall {
 			Status = callback.getStatus();
 			if (Json == null) {
 				if (retries == 0)
-					return false;
+					throw new ReaderException("Remote connection error");
 				else {
 					Thread.sleep(500);
 					retries--;
 					return this.sync();
 				}
 			}
-			return ((Json.getString("authenticated").startsWith("true")) && (Status.getCode() == 200));
+			if ((!Json.getString("authenticated").startsWith("true")) || (Status.getCode() != 200))
+				throw new ReaderException.ReaderLoginException("User not authenticated");
+			return true;
 		}
 		catch (JSONException e) {
-			return false;
+			throw new ReaderException.UnexpectedException("Unknown API response");
 		}
 		catch (InterruptedException e) {
 			return false;
@@ -117,15 +120,13 @@ public class APICall {
 	}
 	
 	// Run synchronous HTTP request, check valid response + successful operation 
-	public boolean syncGetResultOk() {
-		boolean result = true;
+	public boolean syncGetResultOk() throws ReaderException {
 		try {
-			result = (this.sync() && this.Json.getString("result").startsWith("ok"));
+			return (this.sync() && this.Json.getString("result").startsWith("ok"));
 		} 
 		catch (JSONException e) {
-			result = false;
-		}
-		return result;		
+			throw new ReaderException.UnexpectedException("Unknown API response");
+		}		
 	}
 	
 	// API constants

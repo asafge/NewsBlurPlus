@@ -41,18 +41,13 @@ public class NewsBlurPlus extends ReaderExtension {
 	 */
 	@Override
 	public void handleReaderList(ITagListHandler tagHandler, ISubscriptionListHandler subHandler, long syncTime) throws ReaderException {
+		SubsStruct.InstanceRefresh(c);
+		APIHelper.updateFeedCounts(c, SubsStruct.Instance(c).Subs);
+		if (SubsStruct.Instance(c).Subs.size() == 0)
+			throw new ReaderException("No subscriptions available");
 		try {
-			SubsStruct.InstanceRefresh(c);
-			APIHelper.updateFeedCounts(c, SubsStruct.Instance(c).Subs);
-			if (SubsStruct.Instance(c).Subs.size() == 0)
-				throw new ReaderException("No subscriptions available");
-			else {
-				subHandler.subscriptions(SubsStruct.Instance(c).Subs);
-				tagHandler.tags(SubsStruct.Instance(c).Tags);
-			}
-		}
-		catch (JSONException e) {
-			throw new ReaderException("Data parse error", e);
+			subHandler.subscriptions(SubsStruct.Instance(c).Subs);
+			tagHandler.tags(SubsStruct.Instance(c).Tags);
 		}
 		catch (RemoteException e) {
 			throw new ReaderException("Remote connection error", e);
@@ -64,7 +59,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	 * This really speeds up the sync process. 
 	 */
 	@Override
-	public void handleItemIdList(IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
+	public void handleItemIdList(IItemIdListHandler handler, long syncTime) throws ReaderException {
 		try {
 			int limit = handler.limit();
 			String uid = handler.stream(); 
@@ -80,9 +75,6 @@ public class NewsBlurPlus extends ReaderExtension {
 			else
 				throw new ReaderException("Unknown reading state");
 		}
-		catch (JSONException e) {
-			throw new ReaderException("Data parse error", e);
-		}
 		catch (RemoteException e) {
 			throw new ReaderException("Remote connection error", e);
 		}
@@ -93,7 +85,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	 * This functions calls the parseItemList function.
 	 */
 	@Override
-	public void handleItemList(IItemListHandler handler, long syncTime) throws IOException, ReaderException {
+	public void handleItemList(IItemListHandler handler, long syncTime) throws ReaderException {
 		try {
 			List<String> hashes;
 			String uid = handler.stream();
@@ -127,9 +119,6 @@ public class NewsBlurPlus extends ReaderExtension {
 				parseItemList(ac.Json, handler);
 			}
 		}
-		catch (JSONException e) {
-			throw new ReaderException("Data parse error", e);
-		}
 		catch (RemoteException e) {
 			throw new ReaderException("Remote connection error", e);
 		}
@@ -138,7 +127,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	/*
 	 * Parse an array of items that are in the NewsBlur JSON format.
 	 */
-	public void parseItemList(JSONObject json, IItemListHandler handler) throws IOException, ReaderException {
+	public void parseItemList(JSONObject json, IItemListHandler handler) throws ReaderException {
 		try {
 			int length = 0;
 			List<IItem> items = new ArrayList<IItem>();
@@ -171,7 +160,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			handler.items(items, 0);
 		}
 		catch (JSONException e) {
-			throw new ReaderException("Data parse error", e);
+			throw new ReaderException("ParseItemList parse error", e);
 		}
 		catch (RemoteException e) {
 			throw new ReaderException("Remote connection error", e);
@@ -182,7 +171,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	/*
 	 * Main function for marking stories (and their feeds) as read/unread.
 	 */
-	private boolean markAs(boolean read, String[]  itemUids, String[]  subUIds)	{	
+	private boolean markAs(boolean read, String[]  itemUids, String[]  subUIds) throws ReaderException	{	
 		APICall ac;
 		if (itemUids == null && subUIds == null) {
 			ac = new APICall(APICall.API_URL_MARK_ALL_AS_READ, c);
@@ -216,9 +205,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	 */
 	@Override
 	public boolean markAsRead(String[]  itemUids, String[]  subUIds) throws ReaderException {
-		if (!this.markAs(true, itemUids, subUIds))
-			throw new ReaderException("Can't mark as read");
-		return true;
+		return markAs(true, itemUids, subUIds);
 	}
 	
 
@@ -227,9 +214,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	 */
 	@Override
 	public boolean markAsUnread(String[]  itemUids, String[]  subUids, boolean keepUnread) throws ReaderException {
-		if (!this.markAs(false, itemUids, subUids))
-			throw new ReaderException("Can't mark as unread");
-		return true;
+		return markAs(false, itemUids, subUids);
 	}
 	
 
@@ -239,29 +224,18 @@ public class NewsBlurPlus extends ReaderExtension {
 	 */
 	@Override
 	public boolean markAllAsRead(String s, String t, long syncTime) throws ReaderException {
-		boolean result = true;
-		try {
-			if (s != null && s.startsWith("FEED:")) {
-				String[] feed = { APIHelper.getFeedIdFromFeedUrl(s) };
-				result = this.markAs(true, null, feed);
-			}
-			else if (((s == null && t == null) || s.startsWith("FOL:"))) {
-				List<String> subUIDs = new ArrayList<String>();
-				for (ISubscription sub : SubsStruct.Instance(c).Subs)
-					if (s == null || sub.getCategories().contains(s))
-						subUIDs.add(sub.uid);
-				result = subUIDs.isEmpty() ? false : this.markAs(true, null, subUIDs.toArray(new String[0]));
-			}
-			else {
-				result = false;
-			}
+		if (s != null && s.startsWith("FEED:")) {
+			String[] feed = { APIHelper.getFeedIdFromFeedUrl(s) };
+			return this.markAs(true, null, feed);
 		}
-		catch (JSONException e) {
-			result = false;
+		else if (((s == null && t == null) || s.startsWith("FOL:"))) {
+			List<String> subUIDs = new ArrayList<String>();
+			for (ISubscription sub : SubsStruct.Instance(c).Subs)
+				if (s == null || sub.getCategories().contains(s))
+					subUIDs.add(sub.uid);
+			return subUIDs.isEmpty() ? false : this.markAs(true, null, subUIDs.toArray(new String[0]));
 		}
-		if (!result)
-			throw new ReaderException("Can't mark all as read");
-		return result;
+		return false;
 	}
 	
 
@@ -269,7 +243,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	 * Edit an item's tag - currently supports only starring/unstarring items
 	 */
 	@Override
-	public boolean editItemTag(String[] itemUids, String[] subUids, String[] addTags, String[] removeTags) throws IOException, ReaderException {
+	public boolean editItemTag(String[] itemUids, String[] subUids, String[] addTags, String[] removeTags) throws ReaderException {
 		boolean result = true;
 		for (int i=0; i<itemUids.length; i++) {
 			String url;
@@ -281,13 +255,15 @@ public class NewsBlurPlus extends ReaderExtension {
 			}
 			else {
 				result = false;
-				throw new ReaderException("This type of tag is not supported");
+				throw new ReaderException("Unsupported tag type");
 			}
 			APICall ac = new APICall(url, c);
 			ac.addPostParam("story_id", itemUids[i]);
 			ac.addPostParam("feed_id", APIHelper.getFeedIdFromFeedUrl(subUids[i]));
-			if (!ac.syncGetResultOk())
+			if (!ac.syncGetResultOk()) {
+				result = false;
 				break;
+			}
 		}
 		return result;
 	}
@@ -319,15 +295,9 @@ public class NewsBlurPlus extends ReaderExtension {
 		if (tagUid.startsWith("STAR:"))
 			return false;
 		else {
-			try {
-				for (ISubscription sub : SubsStruct.Instance(c).Subs)
-					if ((sub.getCategories().contains(label) 
-						&& !APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(sub.uid), label, "")))
-						return false;
-			}
-			catch (JSONException e) {
-				return false;
-			}
+			for (ISubscription sub : SubsStruct.Instance(c).Subs)
+				if ((sub.getCategories().contains(label) && !APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(sub.uid), label, "")))
+					return false;
 			APICall ac = new APICall(APICall.API_URL_FOLDER_DEL, c);
 			ac.addPostParam("folder_to_delete", label);
 			return ac.syncGetResultOk();
@@ -339,7 +309,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	 * Main function for editing subscriptions - add/delete/rename/change-folder
 	 */	
 	@Override
-	public boolean editSubscription(String uid, String title, String feed_url, String[] tags, int action, long syncTime) throws IOException, ReaderException {
+	public boolean editSubscription(String uid, String title, String feed_url, String[] tags, int action, long syncTime) throws ReaderException {
 		boolean result = false;
 		switch (action) {
 			// Feed - add/delete/rename

@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.text.TextUtils;
 
+import com.noinnion.android.reader.api.ReaderException;
 import com.noinnion.android.reader.api.provider.ISubscription;
 import com.noinnion.android.reader.api.provider.ITag;
 
@@ -23,20 +24,20 @@ public class SubsStruct {
 	public List<ITag> Tags;
 	
 	// Constructor
-	protected SubsStruct(Context c) throws JSONException {
+	protected SubsStruct(Context c) throws ReaderException {
 	   _context = c;
 	   this.Refresh();
 	}
 	
 	// Singleton instance
-	public static SubsStruct Instance(Context c) throws JSONException {
+	public static SubsStruct Instance(Context c) throws ReaderException {
 		if(_instance == null)
 			_instance = new SubsStruct(c);
 		return _instance;
 	}
 	
 	// Singleton instance
-	public static SubsStruct InstanceRefresh(Context c) throws JSONException {
+	public static SubsStruct InstanceRefresh(Context c) throws ReaderException {
 		if(_instance == null)
 			_instance = new SubsStruct(c);
 		else
@@ -45,7 +46,8 @@ public class SubsStruct {
 	}
 	
 	// Get all the folders and feeds in a flat structure
-	public synchronized boolean Refresh() throws JSONException {
+	public synchronized boolean Refresh() throws ReaderException {
+		try {
 		if (_lastSync != null) {
 			Calendar tmp = Calendar.getInstance();
 			tmp.setTimeInMillis(_lastSync.getTimeInMillis());
@@ -89,6 +91,10 @@ public class SubsStruct {
 		}
 		_lastSync = Calendar.getInstance();
 		return (Subs.size() > 0);
+		}
+		catch (JSONException e) {
+			throw new ReaderException("Feeds structure parse error", e);
+		}
 	}
 	
 }
