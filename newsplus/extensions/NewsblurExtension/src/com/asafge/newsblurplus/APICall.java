@@ -33,7 +33,6 @@ public class APICall {
 	private AjaxCallback<JSONObject> callback;
 	private AQuery aquery;
 	private String callbackUrl;
-	private int retries = 2;
 	
 	// Constructor
 	public APICall(String url,  Context c) {
@@ -49,7 +48,8 @@ public class APICall {
 		String[] sessionID = Prefs.getSessionID(c);
 		callback.cookie(sessionID[0], sessionID[1]);
 		callback.url(callbackUrl).type(JSONObject.class);
-		callback.timeout(10000);
+		callback.timeout(5000);
+		callback.retry(3);
 	}
 	
 	// Add a Post parameter to this call
@@ -98,23 +98,13 @@ public class APICall {
 			aquery.sync(callback);
 			Json = callback.getResult();
 			Status = callback.getStatus();
-			if (Json == null) {
-				if (retries == 0)
-					throw new ReaderException("NewsBlur server unreachable");
-				else {
-					Thread.sleep(500);
-					retries--;
-					this.sync();
-				}
-			}
+			if (Json == null)
+				throw new ReaderException("NewsBlur server unreachable");
 			if ((!Json.getString("authenticated").startsWith("true")) || (Status.getCode() != 200))
 				throw new ReaderException.ReaderLoginException("User not authenticated");
 		}
 		catch (JSONException e) {
 			throw new ReaderException.UnexpectedException("Unknown API response");
-		}
-		catch (InterruptedException e) {
-			return;
 		}
 	}
 	
