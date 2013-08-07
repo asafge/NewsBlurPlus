@@ -67,14 +67,18 @@ public class NewsBlurPlus extends ReaderExtension {
 	public void handleItemIdList(IItemIdListHandler handler, long syncTime) throws IOException, ReaderException {
 		try {
 			int limit = handler.limit();
-			if (handler.stream().startsWith(ReaderExtension.STATE_STARRED))
+			String uid = handler.stream(); 
+			
+			if (uid.startsWith(ReaderExtension.STATE_STARRED))
 				handler.items(APIHelper.getStarredHashes(c, limit, Long.MIN_VALUE));
-			else {
-				List<String> hashes = APIHelper.getUnreadHashes(c, limit, Long.MIN_VALUE);
+			else if (uid.startsWith(ReaderExtension.STATE_READING_LIST)) {
+				List<String> hashes = APIHelper.getUnreadHashes(c, limit, Long.MIN_VALUE, null);
 				if (APIHelper.isPremiumAccount(c))
 					hashes = APIHelper.filterLowIntelligence(hashes, c);
 				handler.items(hashes);
 			}
+			else
+				throw new ReaderException("Unknown reading state");
 		}
 		catch (JSONException e) {
 			throw new ReaderException("Data parse error", e);
@@ -101,11 +105,15 @@ public class NewsBlurPlus extends ReaderExtension {
 				hashes = APIHelper.getStarredHashes(c, limit, startTime);
 			}
 			else if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
-				List<String> unread_hashes = APIHelper.getUnreadHashes(c, limit, startTime);
+				List<String> unread_hashes = APIHelper.getUnreadHashes(c, limit, startTime, null);
 				hashes = new ArrayList<String>();
 				for (String h : unread_hashes)
 					if (!handler.excludedStreams().contains(APIHelper.getFeedUrlFromFeedId(h.split(":")[0])))
 						hashes.add(h);
+			}
+			else if (uid.startsWith("FEED:")) {
+				List<String> feeds = Arrays.asList(APIHelper.getFeedIdFromFeedUrl(uid));
+				hashes = APIHelper.getUnreadHashes(c, limit, startTime, feeds);
 			}
 			else
 				throw new ReaderException("Unknown reading state");

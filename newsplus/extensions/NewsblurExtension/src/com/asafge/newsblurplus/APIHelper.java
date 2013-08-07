@@ -37,14 +37,16 @@ public class APIHelper {
 	}
 	
 	// Get all the unread story hashes at once
-	public static List<String> getUnreadHashes(Context c, int limit, long syncTime) throws JSONException {
+	public static List<String> getUnreadHashes(Context c, int limit, long syncTime, List<String> feeds) throws JSONException {
 		List<String> hashes = new ArrayList<String>();
 		APICall ac = new APICall(APICall.API_URL_UNREAD_HASHES, c);
 		ac.addGetParam("include_timestamps", "true");
 		
-		List<String> feeds = new ArrayList<String>();
-		for (ISubscription sub : SubsStruct.InstanceRefresh(c).Subs)
-			feeds.add(APIHelper.getFeedIdFromFeedUrl(sub.uid));
+		if (feeds == null) {
+			feeds = new ArrayList<String>();
+			for (ISubscription sub : SubsStruct.InstanceRefresh(c).Subs)
+				feeds.add(APIHelper.getFeedIdFromFeedUrl(sub.uid));
+		}
 		ac.addGetParams("feed_id", feeds);
 		
 		if ((feeds.size() > 0) && ac.sync()) {
