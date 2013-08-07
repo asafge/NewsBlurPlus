@@ -123,7 +123,7 @@ public class APIHelper {
 		ac.addPostParam("feed_id", feed_id);
 		ac.addPostParam("in_folder", in_folder);
 		ac.addPostParam("to_folder", to_folder);
-		return ac.syncGetBool();
+		return ac.syncGetResultOk();
 	}
 	
 	// Construct a single feed's URL from it's integer ID

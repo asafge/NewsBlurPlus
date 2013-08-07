@@ -195,7 +195,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				}
 			}
 		}
-		return ac.syncGetBool();
+		return ac.syncGetResultOk();
 	}
 	
 
@@ -274,7 +274,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			APICall ac = new APICall(url, c);
 			ac.addPostParam("story_id", itemUids[i]);
 			ac.addPostParam("feed_id", APIHelper.getFeedIdFromFeedUrl(subUids[i]));
-			if (!ac.syncGetBool())
+			if (!ac.syncGetResultOk())
 				break;
 		}
 		return result;
@@ -293,7 +293,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			ac.addPostParam("folder_to_rename", oldLabel);
 			ac.addPostParam("new_folder_name", newLabel);
 			ac.addPostParam("in_folder", "");
-			return ac.syncGetBool();
+			return ac.syncGetResultOk();
 		}
 	}
 	
@@ -318,7 +318,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			}
 			APICall ac = new APICall(APICall.API_URL_FOLDER_DEL, c);
 			ac.addPostParam("folder_to_delete", label);
-			return ac.syncGetBool();
+			return ac.syncGetResultOk();
 		}
 	}
 	
@@ -334,20 +334,20 @@ public class NewsBlurPlus extends ReaderExtension {
 			case ReaderExtension.SUBSCRIPTION_ACTION_SUBCRIBE: {
 				APICall ac = new APICall(APICall.API_URL_FEED_ADD, c);
 				ac.addPostParam("url", feed_url);
-				result = ac.syncGetBool();
+				result = ac.syncGetResultOk();
 				break;
 			}
 			case ReaderExtension.SUBSCRIPTION_ACTION_UNSUBCRIBE: {
 				APICall ac = new APICall(APICall.API_URL_FEED_DEL, c);
 				ac.addPostParam("feed_id", APIHelper.getFeedIdFromFeedUrl(uid));
-				result = ac.syncGetBool();
+				result = ac.syncGetResultOk();
 				break;
 			}
 			case ReaderExtension.SUBSCRIPTION_ACTION_EDIT: {
 				APICall ac = new APICall(APICall.API_URL_FEED_RENAME, c);
 				ac.addPostParam("feed_id", APIHelper.getFeedIdFromFeedUrl(uid));
 				ac.addPostParam("feed_title", title);
-				result = ac.syncGetBool();
+				result = ac.syncGetResultOk();
 				break;
 			}
 			// Feed's parent folder - new_folder/add_to_folder/delete_from_folder
@@ -355,7 +355,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				APICall ac = new APICall(APICall.API_URL_FOLDER_ADD, c);
 				String newTag = tags[0].replace("FOL:", "");
 				ac.addPostParam("folder", newTag);
-				result = ac.syncGetBool();
+				result = ac.syncGetResultOk();
 				break;
 			}
 			case ReaderExtension.SUBSCRIPTION_ACTION_ADD_LABEL: {

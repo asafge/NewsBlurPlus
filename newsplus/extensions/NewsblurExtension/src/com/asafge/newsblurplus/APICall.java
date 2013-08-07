@@ -116,7 +116,7 @@ public class APICall {
 	}
 	
 	// Run synchronous HTTP request, check valid response + successful operation 
-	public boolean syncGetBool() {
+	public boolean syncGetResultOk() {
 		boolean result = true;
 		try {
 			result = (this.sync() && this.Json.getString("result").startsWith("ok"));
