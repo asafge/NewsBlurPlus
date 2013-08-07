@@ -69,8 +69,12 @@ public class NewsBlurPlus extends ReaderExtension {
 			int limit = handler.limit();
 			if (handler.stream().startsWith(ReaderExtension.STATE_STARRED))
 				handler.items(APIHelper.getStarredHashes(c, limit, Long.MIN_VALUE));
-			else
-				handler.items(APIHelper.filterLowIntelligence(APIHelper.getUnreadHashes(c, limit, Long.MIN_VALUE), c));
+			else {
+				List<String> hashes = APIHelper.getUnreadHashes(c, limit, Long.MIN_VALUE);
+				if (APIHelper.isPremiumAccount(c))
+					hashes = APIHelper.filterLowIntelligence(hashes, c);
+				handler.items(hashes);
+			}
 		}
 		catch (JSONException e) {
 			throw new ReaderException("Data parse error", e);
