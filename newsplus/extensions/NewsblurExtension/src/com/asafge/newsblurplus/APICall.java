@@ -48,6 +48,7 @@ public class APICall {
 		String[] sessionID = Prefs.getSessionID(c);
 		callback.cookie(sessionID[0], sessionID[1]);
 		callback.url(callbackUrl).type(JSONObject.class);
+		callback.timeout(10000);
 	}
 	
 	// Add a Post parameter to this call
