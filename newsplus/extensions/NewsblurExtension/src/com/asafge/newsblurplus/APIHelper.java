@@ -24,8 +24,7 @@ public class APIHelper {
 				APICall ac = new APICall(APICall.API_URL_RIVER, c);
 				int end = (start+100 < hashes.size()) ? start + 100 : hashes.size();
 				ac.addGetParams("h", hashes.subList(start, end));
-				if (!ac.sync())
-					throw new ReaderException("Remote connection error");
+				ac.sync();
 				
 				JSONArray arr = ac.Json.getJSONArray("stories");
 				for (int i=0; i<arr.length(); i++) {
@@ -55,8 +54,7 @@ public class APIHelper {
 			ac.addGetParams("feed_id", feeds);
 			
 			if (feeds.size() > 0) { 
-				if (!ac.sync())
-					throw new ReaderException("Remote connection error");
+				ac.sync();
 				JSONObject json_feeds = ac.Json.getJSONObject("unread_feed_story_hashes");
 				Iterator<?> keys = json_feeds.keys();
 				while (keys.hasNext()) {
@@ -81,12 +79,11 @@ public class APIHelper {
 			APICall ac = new APICall(APICall.API_URL_STARRED_HASHES, c);
 			ac.addGetParam("include_timestamps", "true");
 			
-			if (ac.sync()) {
-				JSONArray items = ac.Json.getJSONArray("starred_story_hashes");
-				for (int i=0; i<items.length() && i<limit; i++)
-					if ((items.getJSONArray(i).getLong(1)) > syncTime)
-						hashes.add( items.getJSONArray(i).getString(0));
-			}
+			ac.sync();
+			JSONArray items = ac.Json.getJSONArray("starred_story_hashes");
+			for (int i=0; i<items.length() && i<limit; i++)
+				if ((items.getJSONArray(i).getLong(1)) > syncTime)
+					hashes.add( items.getJSONArray(i).getString(0));
 			return hashes;
 		}
 		catch (JSONException e) {
@@ -98,12 +95,11 @@ public class APIHelper {
 	public static void updateFeedCounts(Context c, List<ISubscription> subs) throws ReaderException {
 		try {
 			APICall ac = new APICall(APICall.API_URL_REFRESH_FEEDS, c);
-			if (ac.sync()) {
-				JSONObject json_feeds = ac.Json.getJSONObject("feeds");
-				for (ISubscription sub : subs) {
-					JSONObject f = json_feeds.getJSONObject(APIHelper.getFeedIdFromFeedUrl(sub.uid));
-					sub.unreadCount = f.getInt("ps") + f.getInt("nt");
-				}
+			ac.sync();
+			JSONObject json_feeds = ac.Json.getJSONObject("feeds");
+			for (ISubscription sub : subs) {
+				JSONObject f = json_feeds.getJSONObject(APIHelper.getFeedIdFromFeedUrl(sub.uid));
+				sub.unreadCount = f.getInt("ps") + f.getInt("nt");
 			}
 		}
 		catch (JSONException e) {
@@ -115,7 +111,8 @@ public class APIHelper {
 	public static boolean isPremiumAccount(Context c) throws ReaderException {
 		try {
 			APICall ac = new APICall(APICall.API_URL_RIVER, c);
-			return (ac.sync() && !ac.Json.getString("message").startsWith("The full River of News is a premium feature."));
+			ac.sync();
+			return (!ac.Json.getString("message").startsWith("The full River of News is a premium feature."));
 		}
 		catch (JSONException e) {
 			throw new ReaderException.UnexpectedException("IsPremiumAccount parse error", e);

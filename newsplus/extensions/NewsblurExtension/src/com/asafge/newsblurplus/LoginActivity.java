@@ -81,16 +81,11 @@ public class LoginActivity extends Activity implements OnClickListener {
 			ac.addPostParam("username", user);
 			ac.addPostParam("password", pass);
 			try {
-				if (ac.sync()) {
-					Prefs.setSessionID(c, ac.Status.getCookies().get(0).getName(), ac.Status.getCookies().get(0).getValue());
-					Prefs.setLoggedIn(c, true);
-					setResult(ReaderExtension.RESULT_LOGIN);
-					return true;
-				}
-				else {
-					Prefs.setLoggedIn(c, false);
-					return false;
-				}
+				ac.sync();
+				Prefs.setSessionID(c, ac.Status.getCookies().get(0).getName(), ac.Status.getCookies().get(0).getValue());
+				Prefs.setLoggedIn(c, true);
+				setResult(ReaderExtension.RESULT_LOGIN);
+				return true;
 			}
 			catch (ReaderException e) {
 				Prefs.setLoggedIn(c, false);

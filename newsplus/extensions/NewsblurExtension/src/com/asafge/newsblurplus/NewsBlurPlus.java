@@ -114,8 +114,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				APICall ac = new APICall(APICall.API_URL_RIVER, c);
 				int end = (start+chunk < hashes.size()) ? start + chunk : hashes.size();
 				ac.addGetParams("h", hashes.subList(start, end));
-				if (!ac.sync())
-					throw new ReaderException("Remote connection error");
+				ac.sync();
 				parseItemList(ac.Json, handler);
 			}
 		}

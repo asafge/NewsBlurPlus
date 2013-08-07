@@ -58,35 +58,35 @@ public class SubsStruct {
 		APICall ac = new APICall(APICall.API_URL_FOLDERS_AND_FEEDS, _context);
 		Tags = new ArrayList<ITag>();
 		Subs = new ArrayList<ISubscription>();
-		if (ac.sync()) {
-			JSONObject json_feeds = ac.Json.getJSONObject("feeds");
-			JSONObject json_folders = ac.Json.getJSONObject("flat_folders");
-			Iterator<?> keys = json_folders.keys();
-			if (keys.hasNext())
-				Tags.add(StarredTag.get());
-			while (keys.hasNext()) {
-				String catName = ((String)keys.next());
-				JSONArray feedsPerFolder = json_folders.getJSONArray(catName);
-				catName = catName.trim();
-				ITag cat = APIHelper.createTag(catName, false);
+		
+		ac.sync();
+		JSONObject json_feeds = ac.Json.getJSONObject("feeds");
+		JSONObject json_folders = ac.Json.getJSONObject("flat_folders");
+		Iterator<?> keys = json_folders.keys();
+		if (keys.hasNext())
+			Tags.add(StarredTag.get());
+		while (keys.hasNext()) {
+			String catName = ((String)keys.next());
+			JSONArray feedsPerFolder = json_folders.getJSONArray(catName);
+			catName = catName.trim();
+			ITag cat = APIHelper.createTag(catName, false);
+			if (!TextUtils.isEmpty(catName))
+				Tags.add(cat);
+			// Add all feeds in this category
+			for (int i=0; i<feedsPerFolder.length(); i++) {
+				ISubscription sub = new ISubscription();
+				String feedID = feedsPerFolder.getString(i);
+				JSONObject f = json_feeds.getJSONObject(feedID);
+				Calendar updateTime = Calendar.getInstance();
+				updateTime.add(Calendar.SECOND, (-1) * f.getInt("updated_seconds_ago"));
+				sub.newestItemTime = updateTime.getTimeInMillis() / 1000;
+				sub.uid = APIHelper.getFeedUrlFromFeedId(feedID);
+				sub.title = f.getString("feed_title");
+				sub.htmlUrl = f.getString("feed_link");
+				sub.unreadCount = f.getInt("nt") + f.getInt("ps");
 				if (!TextUtils.isEmpty(catName))
-					Tags.add(cat);
-				// Add all feeds in this category
-				for (int i=0; i<feedsPerFolder.length(); i++) {
-					ISubscription sub = new ISubscription();
-					String feedID = feedsPerFolder.getString(i);
-					JSONObject f = json_feeds.getJSONObject(feedID);
-					Calendar updateTime = Calendar.getInstance();
-					updateTime.add(Calendar.SECOND, (-1) * f.getInt("updated_seconds_ago"));
-					sub.newestItemTime = updateTime.getTimeInMillis() / 1000;
-					sub.uid = APIHelper.getFeedUrlFromFeedId(feedID);
-					sub.title = f.getString("feed_title");
-					sub.htmlUrl = f.getString("feed_link");
-					sub.unreadCount = f.getInt("nt") + f.getInt("ps");
-					if (!TextUtils.isEmpty(catName))
-						sub.addCategory(cat.uid);
-					Subs.add(sub);
-				}
+					sub.addCategory(cat.uid);
+				Subs.add(sub);
 			}
 		}
 		_lastSync = Calendar.getInstance();

@@ -90,9 +90,9 @@ public class APICall {
 	}
 	
 	// Run synchronous HTTP request and check for valid response
-	public boolean sync() throws ReaderException {
+	public void sync() throws ReaderException {
 		if (callback == null)
-			return false;
+			return;
 		try {		
 			addAllParams();
 			aquery.sync(callback);
@@ -104,25 +104,25 @@ public class APICall {
 				else {
 					Thread.sleep(500);
 					retries--;
-					return this.sync();
+					this.sync();
 				}
 			}
 			if ((!Json.getString("authenticated").startsWith("true")) || (Status.getCode() != 200))
 				throw new ReaderException.ReaderLoginException("User not authenticated");
-			return true;
 		}
 		catch (JSONException e) {
 			throw new ReaderException.UnexpectedException("Unknown API response");
 		}
 		catch (InterruptedException e) {
-			return false;
+			return;
 		}
 	}
 	
 	// Run synchronous HTTP request, check valid response + successful operation 
 	public boolean syncGetResultOk() throws ReaderException {
 		try {
-			return (this.sync() && this.Json.getString("result").startsWith("ok"));
+			sync();
+			return this.Json.getString("result").startsWith("ok");
 		} 
 		catch (JSONException e) {
 			throw new ReaderException.UnexpectedException("Unknown API response");
