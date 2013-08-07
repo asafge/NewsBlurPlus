@@ -100,7 +100,7 @@ public class APICall {
 			Status = callback.getStatus();
 			if (Json == null) {
 				if (retries == 0)
-					throw new ReaderException("Remote connection error");
+					throw new ReaderException("NewsBlur server unreachable");
 				else {
 					Thread.sleep(500);
 					retries--;

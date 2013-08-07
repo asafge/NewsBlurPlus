@@ -49,7 +49,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			tagHandler.tags(SubsStruct.Instance(c).Tags);
 		}
 		catch (RemoteException e) {
-			throw new ReaderException("Remote connection error", e);
+			throw new ReaderException("Sub/tag handler error", e);
 		}
 	}
 
@@ -75,7 +75,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				throw new ReaderException("Unknown reading state");
 		}
 		catch (RemoteException e) {
-			throw new ReaderException("Remote connection error", e);
+			throw new ReaderException("ItemID handler error", e);
 		}
 	}
 	
@@ -118,7 +118,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			}
 		}
 		catch (RemoteException e) {
-			throw new ReaderException("Remote connection error", e);
+			throw new ReaderException("ItemList handler error", e);
 		}
 	}
 	
@@ -161,7 +161,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			throw new ReaderException("ParseItemList parse error", e);
 		}
 		catch (RemoteException e) {
-			throw new ReaderException("Remote connection error", e);
+			throw new ReaderException("SingleItem handler error", e);
 		}
 	}
 	
