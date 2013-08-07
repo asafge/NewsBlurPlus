@@ -47,7 +47,6 @@ public class APIHelper {
 			List<String> hashes = new ArrayList<String>();
 			APICall ac = new APICall(APICall.API_URL_UNREAD_HASHES, c);
 			ac.addGetParam("include_timestamps", "true");
-			
 			if (feeds == null) {
 				feeds = new ArrayList<String>();
 				for (ISubscription sub : SubsStruct.InstanceRefresh(c).Subs)
@@ -102,13 +101,8 @@ public class APIHelper {
 			if (ac.sync()) {
 				JSONObject json_feeds = ac.Json.getJSONObject("feeds");
 				for (ISubscription sub : subs) {
-					try {
-						JSONObject f = json_feeds.getJSONObject(APIHelper.getFeedIdFromFeedUrl(sub.uid));
-						sub.unreadCount = f.getInt("ps") + f.getInt("nt");
-					}
-					catch (JSONException e) {
-						sub.unreadCount = 0;
-					}
+					JSONObject f = json_feeds.getJSONObject(APIHelper.getFeedIdFromFeedUrl(sub.uid));
+					sub.unreadCount = f.getInt("ps") + f.getInt("nt");
 				}
 			}
 		}
