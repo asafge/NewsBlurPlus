@@ -1,6 +1,5 @@
 package com.asafge.newsblurplus;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -272,7 +271,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	 * Rename a top level folder both in News+ and in NewsBlur server
 	 */
 	@Override
-	public boolean renameTag(String tagUid, String oldLabel, String newLabel) throws IOException, ReaderException {
+	public boolean renameTag(String tagUid, String oldLabel, String newLabel) throws ReaderException {
 		if (!tagUid.startsWith("FOL:"))
 			return false;
 		else {
@@ -290,7 +289,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	 * This just removes the folder, not the feeds in it
 	 */
 	@Override
-	public boolean disableTag(String tagUid, String label) throws IOException, ReaderException {
+	public boolean disableTag(String tagUid, String label) throws ReaderException {
 		if (tagUid.startsWith("STAR:"))
 			return false;
 		else {
