@@ -160,4 +160,6 @@ public class APIHelper {
 		tag.type = isStar ? ITag.TYPE_TAG_STARRED : ITag.TYPE_FOLDER;
 		return tag;
 	}
+	
+	public static long TimespanGrace = 24*3600;
 }

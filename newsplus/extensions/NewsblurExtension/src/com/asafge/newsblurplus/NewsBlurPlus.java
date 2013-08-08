@@ -88,7 +88,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		try {
 			List<String> hashes;
 			String uid = handler.stream();
-			long startTime = handler.startTime();
+			long startTime = handler.startTime() - APIHelper.TimespanGrace;
 			int limit = handler.limit();
 			int chunk = (APIHelper.isPremiumAccount(c) ? 100 : 5 );
 			
