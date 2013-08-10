@@ -63,6 +63,7 @@ public class APIHelper {
 						if ((items.getJSONArray(i).getLong(1)) > syncTime)
 							hashes.add( items.getJSONArray(i).getString(0));
 					}
+					limit -= items.length();
 				}
 			}
 			return hashes;
