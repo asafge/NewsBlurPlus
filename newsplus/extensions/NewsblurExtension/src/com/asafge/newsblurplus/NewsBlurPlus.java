@@ -86,36 +86,54 @@ public class NewsBlurPlus extends ReaderExtension {
 	@Override
 	public void handleItemList(IItemListHandler handler, long syncTime) throws ReaderException {
 		try {
-			List<String> hashes;
 			String uid = handler.stream();
-			long startTime = handler.startTime();
 			int limit = handler.limit();
-			int chunk = (SubsStruct.Instance(c).IsPremium ? 100 : 5 );
 			
 			if (uid.startsWith(ReaderExtension.STATE_STARRED)) {
-				hashes = APIHelper.getStarredHashes(c, limit, startTime);
+				Integer page = 1;
+				while (limit > 0) {
+					APICall ac = new APICall(APICall.API_URL_STARRED_STORIES, c);
+					ac.addGetParam("page", page.toString());
+					ac.sync();
+					int story_count = ac.Json.getJSONArray("stories").length();
+					if (story_count > 0) {
+						parseItemList(ac.Json, handler);
+						limit -= story_count;
+						page++;
+					}
+					else
+						return;
+				}
 			}
-			else if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
-				List<String> unread_hashes = APIHelper.getUnreadHashes(c, limit, startTime, null);
-				hashes = new ArrayList<String>();
-				for (String h : unread_hashes)
-					if (!handler.excludedStreams().contains(APIHelper.getFeedUrlFromFeedId(h)))
-						hashes.add(h);
+			else {
+				List<String> hashes = new ArrayList<String>();
+				long startTime = handler.startTime();
+				int chunk = (SubsStruct.Instance(c).IsPremium ? 100 : 5 );
+				if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
+					
+					List<String> unread_hashes = APIHelper.getUnreadHashes(c, limit, startTime, null);
+					for (String h : unread_hashes)
+						if (!handler.excludedStreams().contains(APIHelper.getFeedUrlFromFeedId(h)))
+							hashes.add(h);
+				}
+				else if (uid.startsWith("FEED:")) {
+					List<String> feeds = Arrays.asList(APIHelper.getFeedIdFromFeedUrl(uid));
+					hashes = APIHelper.getUnreadHashes(c, limit, startTime, feeds);
+				}
+				else
+					throw new ReaderException.UnexpectedException("Unknown reading state");
+				
+				for (int start=0; start < hashes.size(); start += chunk) {
+					APICall ac = new APICall(APICall.API_URL_RIVER, c);
+					int end = (start+chunk < hashes.size()) ? start + chunk : hashes.size();
+					ac.addGetParams("h", hashes.subList(start, end));
+					ac.sync();
+					parseItemList(ac.Json, handler);
+				}
 			}
-			else if (uid.startsWith("FEED:")) {
-				List<String> feeds = Arrays.asList(APIHelper.getFeedIdFromFeedUrl(uid));
-				hashes = APIHelper.getUnreadHashes(c, limit, startTime, feeds);
-			}
-			else
-				throw new ReaderException.UnexpectedException("Unknown reading state");
-			
-			for (int start=0; start < hashes.size(); start += chunk) {
-				APICall ac = new APICall(APICall.API_URL_RIVER, c);
-				int end = (start+chunk < hashes.size()) ? start + chunk : hashes.size();
-				ac.addGetParams("h", hashes.subList(start, end));
-				ac.sync();
-				parseItemList(ac.Json, handler);
-			}
+		}
+		catch (JSONException e) {
+			throw new ReaderException("ItemList handler error", e);
 		}
 		catch (RemoteException e) {
 			throw new ReaderException("ItemList handler error", e);
@@ -129,7 +147,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		try {
 			int length = 0;
 			List<IItem> items = new ArrayList<IItem>();
-			JSONArray arr = json.getJSONArray("stories");		
+			JSONArray arr = json.getJSONArray("stories");
 			for (int i=0; i<arr.length(); i++) {
 				JSONObject story = arr.getJSONObject(i);
 				IItem item = new IItem();
