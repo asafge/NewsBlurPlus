@@ -88,21 +88,20 @@ public class NewsBlurPlus extends ReaderExtension {
 		try {
 			String uid = handler.stream();
 			int limit = handler.limit();
+			int story_count = 1;
 			
 			if (uid.startsWith(ReaderExtension.STATE_STARRED)) {
 				Integer page = 1;
-				while (limit > 0) {
+				while ((limit > 0) && story_count > 0) {
 					APICall ac = new APICall(APICall.API_URL_STARRED_STORIES, c);
 					ac.addGetParam("page", page.toString());
 					ac.sync();
-					int story_count = ac.Json.getJSONArray("stories").length();
+					story_count = ac.Json.getJSONArray("stories").length();
 					if (story_count > 0) {
 						parseItemList(ac.Json, handler);
 						limit -= story_count;
 						page++;
 					}
-					else
-						return;
 				}
 			}
 			else {
