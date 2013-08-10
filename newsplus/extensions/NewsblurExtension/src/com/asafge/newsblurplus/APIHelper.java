@@ -128,6 +128,8 @@ public class APIHelper {
 	
 	// Construct a single feed's URL from it's integer ID
 	public static String getFeedUrlFromFeedId(String feedID) {
+		if (feedID.contains(":"))
+			feedID = feedID.split(":")[0];
 		return "FEED:" + APICall.API_URL_RIVER + "?feeds=" + feedID;
 	}
 	

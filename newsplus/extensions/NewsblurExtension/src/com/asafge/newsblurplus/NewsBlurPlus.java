@@ -99,7 +99,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				List<String> unread_hashes = APIHelper.getUnreadHashes(c, limit, startTime, null);
 				hashes = new ArrayList<String>();
 				for (String h : unread_hashes)
-					if (!handler.excludedStreams().contains(APIHelper.getFeedUrlFromFeedId(h.split(":")[0])))
+					if (!handler.excludedStreams().contains(APIHelper.getFeedUrlFromFeedId(h)))
 						hashes.add(h);
 			}
 			else if (uid.startsWith("FEED:")) {
