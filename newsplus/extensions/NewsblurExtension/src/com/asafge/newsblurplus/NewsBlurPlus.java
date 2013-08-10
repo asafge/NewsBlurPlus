@@ -64,9 +64,9 @@ public class NewsBlurPlus extends ReaderExtension {
 			String uid = handler.stream(); 
 			
 			if (uid.startsWith(ReaderExtension.STATE_STARRED))
-				handler.items(APIHelper.getStarredHashes(c, limit, Long.MIN_VALUE));
+				handler.items(APIHelper.getStarredHashes(c, limit, -60));
 			else if (uid.startsWith(ReaderExtension.STATE_READING_LIST)) {
-				List<String> hashes = APIHelper.getUnreadHashes(c, limit, Long.MIN_VALUE, null);
+				List<String> hashes = APIHelper.getUnreadHashes(c, limit, -60, null);
 				if (SubsStruct.Instance(c).IsPremium)
 					hashes = APIHelper.filterLowIntelligence(hashes, c);
 				handler.items(hashes);
@@ -88,7 +88,7 @@ public class NewsBlurPlus extends ReaderExtension {
 		try {
 			List<String> hashes;
 			String uid = handler.stream();
-			long startTime = handler.startTime() - SubsStruct.Instance(c).TimespanGrace;
+			long startTime = handler.startTime();
 			int limit = handler.limit();
 			int chunk = (SubsStruct.Instance(c).IsPremium ? 100 : 5 );
 			

@@ -51,18 +51,17 @@ public class APIHelper {
 				for (ISubscription sub : SubsStruct.InstanceRefresh(c).Subs)
 					feeds.add(APIHelper.getFeedIdFromFeedUrl(sub.uid));
 			}
-			ac.addGetParams("feed_id", feeds);
-			
-			if (feeds.size() > 0) { 
+			if (feeds.size() > 0) {
+				ac.addGetParams("feed_id", feeds);
 				ac.sync();
 				JSONObject json_feeds = ac.Json.getJSONObject("unread_feed_story_hashes");
 				Iterator<?> keys = json_feeds.keys();
 				while (keys.hasNext()) {
-					JSONArray items = json_feeds.getJSONArray((String)keys.next());
-					for (int i=0; i<items.length() && i<limit; i++) {
-						if ((items.getJSONArray(i).getLong(1)) > syncTime)
-							hashes.add( items.getJSONArray(i).getString(0));
-					}
+					String feedID = (String)keys.next();
+					JSONArray items = json_feeds.getJSONArray(feedID);
+					for (int i=0; i<items.length() && i<limit; i++)
+						if ((items.getJSONArray(i).getLong(1)) > (syncTime - SubsStruct.Instance(c).GracePerFeed.get(feedID)))
+							hashes.add(items.getJSONArray(i).getString(0));
 					limit -= items.length();
 				}
 			}
