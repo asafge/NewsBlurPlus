@@ -49,7 +49,7 @@ public class SubsStruct {
 	
 	// Call for a structure refresh
 	public synchronized boolean Refresh() throws ReaderException {
-		_instance.IsPremium = getIsPremiumAccount();
+		IsPremium = getIsPremiumAccount();
 		return getFoldersAndFeeds();
 	}
 
