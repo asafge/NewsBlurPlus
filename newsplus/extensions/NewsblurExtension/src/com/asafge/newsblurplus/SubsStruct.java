@@ -85,20 +85,22 @@ public class SubsStruct {
 					Tags.add(cat);
 				// Add all feeds in this category
 				for (int i=0; i<feedsPerFolder.length(); i++) {
-					ISubscription sub = new ISubscription();
 					String feedID = feedsPerFolder.getString(i);
 					JSONObject f = json_feeds.getJSONObject(feedID);
-					Calendar updateTime = Calendar.getInstance();
-					updateTime.add(Calendar.SECOND, (-1) * f.getInt("updated_seconds_ago"));
-					sub.newestItemTime = updateTime.getTimeInMillis() / 1000;
-					sub.uid = APIHelper.getFeedUrlFromFeedId(feedID);
-					sub.title = f.getString("feed_title");
-					sub.htmlUrl = f.getString("feed_link");
-					sub.unreadCount = f.getInt("nt") + f.getInt("ps");
-					if (!TextUtils.isEmpty(catName))
-						sub.addCategory(cat.uid);
-					GracePerFeed.put(feedID, (Long)(f.getLong("min_to_decay") * 60));
-					Subs.add(sub);
+					if (f.getBoolean("active")) {
+						ISubscription sub = new ISubscription();
+						Calendar updateTime = Calendar.getInstance();
+						updateTime.add(Calendar.SECOND, (-1) * f.getInt("updated_seconds_ago"));
+						sub.newestItemTime = updateTime.getTimeInMillis() / 1000;
+						sub.uid = APIHelper.getFeedUrlFromFeedId(feedID);
+						sub.title = f.getString("feed_title");
+						sub.htmlUrl = f.getString("feed_link");
+						sub.unreadCount = f.getInt("nt") + f.getInt("ps");
+						if (!TextUtils.isEmpty(catName))
+							sub.addCategory(cat.uid);
+						GracePerFeed.put(feedID, (Long)(f.getLong("min_to_decay") * 60));
+						Subs.add(sub);
+					}
 				}
 			}
 			_lastSync = Calendar.getInstance();
