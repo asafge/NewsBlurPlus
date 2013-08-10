@@ -109,7 +109,6 @@ public class NewsBlurPlus extends ReaderExtension {
 				long startTime = handler.startTime();
 				int chunk = (SubsStruct.Instance(c).IsPremium ? 100 : 5 );
 				if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
-					
 					List<String> unread_hashes = APIHelper.getUnreadHashes(c, limit, startTime, null);
 					for (String h : unread_hashes)
 						if (!handler.excludedStreams().contains(APIHelper.getFeedUrlFromFeedId(h)))
@@ -159,10 +158,9 @@ public class NewsBlurPlus extends ReaderExtension {
 				item.publishedTime = story.getLong("story_timestamp");
 				item.read = (story.getInt("read_status") == 1) || (APIHelper.getIntelligence(story) < 0);
 				item.content = story.getString("story_content");
-				if ((story.has("starred") && story.getString("starred") == "true")) {
-					item.starred = true;
+				item.starred = (story.has("starred") && story.getString("starred") == "true");
+				if (item.starred)
 					item.addCategory(StarredTag.get().uid);
-				}
 				items.add(item);
 				
 				length += item.getLength();
