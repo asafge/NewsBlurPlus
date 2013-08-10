@@ -22,6 +22,8 @@ public class SubsStruct {
 	private Calendar _lastSync;
 	public List<ISubscription> Subs;
 	public List<ITag> Tags;
+	public boolean IsPremium;
+	public long TimespanGrace = 1*3600;
 	
 	// Constructor
 	protected SubsStruct(Context c) throws ReaderException {
@@ -45,8 +47,14 @@ public class SubsStruct {
 		return _instance;
 	}
 	
-	// Get all the folders and feeds in a flat structure
+	// Call for a structure refresh
 	public synchronized boolean Refresh() throws ReaderException {
+		_instance.IsPremium = getIsPremiumAccount();
+		return getFoldersAndFeeds();
+	}
+
+	// Get all the folders and feeds in a flat structure
+	private boolean getFoldersAndFeeds() throws ReaderException {
 		try {
 			if (_lastSync != null) {
 				Calendar tmp = Calendar.getInstance();
@@ -86,6 +94,7 @@ public class SubsStruct {
 					sub.unreadCount = f.getInt("nt") + f.getInt("ps");
 					if (!TextUtils.isEmpty(catName))
 						sub.addCategory(cat.uid);
+					updateTimespanGrace(f.getInt("min_to_decay") * 60);
 					Subs.add(sub);
 				}
 			}
@@ -97,4 +106,21 @@ public class SubsStruct {
 		}
 	}
 	
+	// Update the time span grace period if needed
+	private void updateTimespanGrace(int spanInSec) {
+		if (TimespanGrace < spanInSec)
+			TimespanGrace = spanInSec;
+	}
+	
+	// Check if this is a premium user's account
+	private boolean getIsPremiumAccount() throws ReaderException {
+		try {
+			APICall ac = new APICall(APICall.API_URL_RIVER, _context);
+			ac.sync();
+			return (!ac.Json.getString("message").startsWith("The full River of News is a premium feature."));
+		}
+		catch (JSONException e) {
+			throw new ReaderException.UnexpectedException("IsPremiumAccount parse error", e);
+		}
+	}
 }

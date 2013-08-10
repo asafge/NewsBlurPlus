@@ -107,18 +107,6 @@ public class APIHelper {
 		}
 	}
 	
-	// Check if this is a premium user's account
-	public static boolean isPremiumAccount(Context c) throws ReaderException {
-		try {
-			APICall ac = new APICall(APICall.API_URL_RIVER, c);
-			ac.sync();
-			return (!ac.Json.getString("message").startsWith("The full River of News is a premium feature."));
-		}
-		catch (JSONException e) {
-			throw new ReaderException.UnexpectedException("IsPremiumAccount parse error", e);
-		}
-	}
-	
 	// Get a story and return its total intelligence score
 	public static int getIntelligence(JSONObject story) throws JSONException {
 		JSONObject intel = story.getJSONObject("intelligence");
@@ -160,6 +148,4 @@ public class APIHelper {
 		tag.type = isStar ? ITag.TYPE_TAG_STARRED : ITag.TYPE_FOLDER;
 		return tag;
 	}
-	
-	public static long TimespanGrace = 24*3600;
 }
