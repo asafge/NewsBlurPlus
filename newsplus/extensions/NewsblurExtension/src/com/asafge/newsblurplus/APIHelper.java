@@ -36,7 +36,7 @@ public class APIHelper {
 			return filtered;
 		}
 		catch (JSONException e) {
-			throw new ReaderException.UnexpectedException("Intelligence parse error", e);
+			throw new ReaderException("Intelligence parse error", e);
 		}
 	}
 	
@@ -68,7 +68,7 @@ public class APIHelper {
 			return hashes;
 		}
 		catch (JSONException e) {
-			throw new ReaderException.UnexpectedException("GetUnreadHashes parse error", e);
+			throw new ReaderException("GetUnreadHashes parse error", e);
 		}
 	}
 	
@@ -87,7 +87,7 @@ public class APIHelper {
 			return hashes;
 		}
 		catch (JSONException e) {
-			throw new ReaderException.UnexpectedException("GetStarredHashes parse error", e);
+			throw new ReaderException("GetStarredHashes parse error", e);
 		}
 	}
 	
@@ -103,7 +103,7 @@ public class APIHelper {
 			}
 		}
 		catch (JSONException e) {
-			throw new ReaderException.UnexpectedException("UpdateFeedCount parse error", e);
+			throw new ReaderException("UpdateFeedCount parse error", e);
 		}
 	}
 	

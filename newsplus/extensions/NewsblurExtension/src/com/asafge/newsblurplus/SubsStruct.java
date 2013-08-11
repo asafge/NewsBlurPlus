@@ -119,7 +119,7 @@ public class SubsStruct {
 			return (!ac.Json.getString("message").startsWith("The full River of News is a premium feature."));
 		}
 		catch (JSONException e) {
-			throw new ReaderException.UnexpectedException("IsPremiumAccount parse error", e);
+			throw new ReaderException("IsPremiumAccount parse error", e);
 		}
 	}
 }

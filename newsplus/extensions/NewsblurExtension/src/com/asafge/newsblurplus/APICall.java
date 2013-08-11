@@ -101,10 +101,10 @@ public class APICall {
 			if (Json == null)
 				throw new ReaderException("NewsBlur server unreachable");
 			if ((!Json.getString("authenticated").startsWith("true")) || (Status.getCode() != 200))
-				throw new ReaderException.ReaderLoginException("User not authenticated");
+				throw new ReaderException("User not authenticated");
 		}
 		catch (JSONException e) {
-			throw new ReaderException.UnexpectedException("Unknown API response");
+			throw new ReaderException("Unknown API response");
 		}
 	}
 	
@@ -115,7 +115,7 @@ public class APICall {
 			return this.Json.getString("result").startsWith("ok");
 		} 
 		catch (JSONException e) {
-			throw new ReaderException.UnexpectedException("Unknown API response");
+			throw new ReaderException("Unknown API response");
 		}		
 	}
 	
