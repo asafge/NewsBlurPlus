@@ -12,7 +12,7 @@
 		    android:layout_height="96dp"
 		    android:layout_gravity="center_horizontal"
 		    android:contentDescription="@string/extension_name"
-		    android:src="@drawable/icon" />
+		    android:src="@drawable/logo" />
 
 		<TextView android:layout_height="wrap_content"
 			android:layout_width="wrap_content" android:layout_gravity="center_horizontal"
