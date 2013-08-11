@@ -19,6 +19,8 @@
     <string name="txt_login">Login</string>
     
     <!-- Startup -->
+    <string name="welcome_title">Welcome to NewsBlur+</string>
+    <string name="welcome_text">Note: This extension is designed with NewsBlur premium accounts in mind. This type of account will enable much faster updates, so please consider upgrading if you're not already premium.</string>
 	<string name="login_welcome">Please login to NewsBlur to continue:</string>
 	<string name="txt_start_app">Start News+</string>
     <string name="txt_download_app">Download News+</string>
