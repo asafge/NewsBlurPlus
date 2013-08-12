@@ -230,25 +230,33 @@ public class NewsBlurPlus extends ReaderExtension {
 		return markAs(false, itemUids, subUids);
 	}
 	
-
 	/*
 	 * Mark all stories on all feeds as read. Iterate all feeds in order to avoid marking excluded feeds as read. 
-	 * Note: S = subscription (feed), t = tag
+	 * Note: s = subscription (feed), t = tag
 	 */
 	@Override
-	public boolean markAllAsRead(String s, String t, long syncTime) throws ReaderException {
+	public boolean markAllAsRead(String s, String t, String[] excluded_subs, long syncTime) throws ReaderException {
 		if (s != null && s.startsWith("FEED:")) {
 			String[] feed = { APIHelper.getFeedIdFromFeedUrl(s) };
 			return this.markAs(true, null, feed);
 		}
-		else if (((s == null && t == null) || s.startsWith("FOL:"))) {
+		else {
+			List<String> excluded = (excluded_subs != null) ? Arrays.asList(excluded_subs) : new ArrayList<String>();
 			List<String> subUIDs = new ArrayList<String>();
-			for (ISubscription sub : SubsStruct.Instance(c).Subs)
-				if (s == null || sub.getCategories().contains(s))
-					subUIDs.add(sub.uid);
-			return subUIDs.isEmpty() ? false : this.markAs(true, null, subUIDs.toArray(new String[0]));
+			if (s == null && t == null) {
+				for (ISubscription sub : SubsStruct.Instance(c).Subs)
+					if (!excluded.contains(sub.uid))
+						subUIDs.add(sub.uid);
+				return subUIDs.isEmpty() ? false : this.markAs(true, null, subUIDs.toArray(new String[0]));
+			}
+			else if (s.startsWith("FOL:")) {
+				for (ISubscription sub : SubsStruct.Instance(c).Subs)
+					if (!excluded.contains(sub.uid) && sub.getCategories().contains(s))
+						subUIDs.add(sub.uid);
+				return subUIDs.isEmpty() ? false : this.markAs(true, null, subUIDs.toArray(new String[0]));
+			}
+			return false;
 		}
-		return false;
 	}
 	
 
