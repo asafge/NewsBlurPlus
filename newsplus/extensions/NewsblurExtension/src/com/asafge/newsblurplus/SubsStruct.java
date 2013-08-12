@@ -98,7 +98,8 @@ public class SubsStruct {
 						sub.unreadCount = f.getInt("nt") + f.getInt("ps");
 						if (!TextUtils.isEmpty(catName))
 							sub.addCategory(cat.uid);
-						GracePerFeed.put(feedID, (Long)(f.getLong("min_to_decay") * 60));
+						Long grace_in_sec = (Long)(f.getLong("min_to_decay") * 60 + f.getInt("updated_seconds_ago"));
+						GracePerFeed.put(feedID, grace_in_sec);
 						Subs.add(sub);
 					}
 				}
