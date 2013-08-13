@@ -45,6 +45,7 @@ public class APICall {
 		callbackUrl = url;
 		callback = new AjaxCallback<JSONObject>();
 		callback.header("User-Agent", Prefs.USER_AGENT);
+		callback.header("Accept-Encoding", "gzip");
 		String[] sessionID = Prefs.getSessionID(c);
 		callback.cookie(sessionID[0], sessionID[1]);
 		callback.url(callbackUrl).type(JSONObject.class);
