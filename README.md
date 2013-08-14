@@ -18,3 +18,4 @@ References
 -------------------------------
 * News+ - https://github.com/noinnion/newsplus
 * NewsBlur API - http://www.newsblur.com/api
+* ActionBarSherlock - http://actionbarsherlock.com/
