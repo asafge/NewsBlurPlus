@@ -61,7 +61,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	public void handleItemIdList(IItemIdListHandler handler, long syncTime) throws ReaderException {
 		try {
 			int limit = handler.limit();
-			String uid = handler.stream(); 
+			String uid = handler.stream();
 			
 			if (uid.startsWith(ReaderExtension.STATE_STARRED))
 				handler.items(APIHelper.getStarredHashes(c, limit, -60));
