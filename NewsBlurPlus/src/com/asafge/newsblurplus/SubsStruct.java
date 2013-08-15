@@ -2,10 +2,8 @@ package com.asafge.newsblurplus;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,7 +23,6 @@ public class SubsStruct {
 	public List<ISubscription> Subs;
 	public List<ITag> Tags;
 	public boolean IsPremium;
-	public Map<String,Long> GracePerFeed;
 	
 	// Constructor
 	protected SubsStruct(Context c) throws ReaderException {
@@ -68,7 +65,6 @@ public class SubsStruct {
 			APICall ac = new APICall(APICall.API_URL_FOLDERS_AND_FEEDS, _context);
 			Tags = new ArrayList<ITag>();
 			Subs = new ArrayList<ISubscription>();
-			GracePerFeed = new HashMap<String,Long>();
 			
 			ac.sync();
 			JSONObject json_feeds = ac.Json.getJSONObject("feeds");
@@ -98,8 +94,6 @@ public class SubsStruct {
 						sub.unreadCount = f.getInt("nt") + f.getInt("ps");
 						if (!TextUtils.isEmpty(catName))
 							sub.addCategory(cat.uid);
-						Long grace_in_sec = (Long)(f.getLong("min_to_decay") * 60 + f.getInt("updated_seconds_ago")) + 60*60*12;
-						GracePerFeed.put(feedID, grace_in_sec);
 						Subs.add(sub);
 					}
 				}

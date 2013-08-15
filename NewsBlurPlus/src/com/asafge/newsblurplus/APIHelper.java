@@ -60,7 +60,7 @@ public class APIHelper {
 					String feedID = (String)keys.next();
 					JSONArray items = json_feeds.getJSONArray(feedID);
 					for (int i=0; i<items.length() && i<limit; i++)
-						if ((items.getJSONArray(i).getLong(1)) > (syncTime - SubsStruct.Instance(c).GracePerFeed.get(feedID)))
+						if ((items.getJSONArray(i).getLong(1)) > (syncTime - 60*60*24))
 							hashes.add(items.getJSONArray(i).getString(0));
 					limit -= items.length();
 				}
