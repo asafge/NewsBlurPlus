@@ -10,6 +10,7 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.os.RemoteException;
+import android.util.Log;
 
 import com.noinnion.android.reader.api.ReaderException;
 import com.noinnion.android.reader.api.ReaderExtension;
@@ -218,7 +219,10 @@ public class NewsBlurPlus extends ReaderExtension {
 	 */
 	@Override
 	public boolean markAsRead(String[]  itemUids, String[]  subUIds) throws ReaderException {
-		return markAs(true, itemUids, subUIds);
+		boolean result = markAs(true, itemUids, subUIds);
+		if (!result)
+			Log.d("NewsBlurPlus", Arrays.toString(itemUids));
+		return result;
 	}
 	
 
