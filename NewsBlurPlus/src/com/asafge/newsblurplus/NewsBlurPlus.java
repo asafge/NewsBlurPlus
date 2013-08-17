@@ -336,12 +336,12 @@ public class NewsBlurPlus extends ReaderExtension {
 			case ReaderExtension.SUBSCRIPTION_ACTION_SUBCRIBE: {
 				APICall ac = new APICall(APICall.API_URL_FEED_ADD, c);
 				ac.addPostParam("url", feed_url);
-				return ac.syncGetResultOk();
+				return ac.syncGetResultOk() && SubsStruct.Instance(c).Refresh();
 			}
 			case ReaderExtension.SUBSCRIPTION_ACTION_UNSUBCRIBE: {
 				APICall ac = new APICall(APICall.API_URL_FEED_DEL, c);
 				ac.addPostParam("feed_id", APIHelper.getFeedIdFromFeedUrl(uid));
-				return ac.syncGetResultOk();
+				return ac.syncGetResultOk() && SubsStruct.Instance(c).Refresh();
 			}
 			case ReaderExtension.SUBSCRIPTION_ACTION_EDIT: {
 				APICall ac = new APICall(APICall.API_URL_FEED_RENAME, c);
