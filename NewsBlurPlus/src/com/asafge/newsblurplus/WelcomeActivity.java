@@ -11,15 +11,14 @@ import com.noinnion.android.reader.api.util.Utils;
 
 public class WelcomeActivity extends Activity implements OnClickListener {
 
-	public static final String	TAG						= "WelcomeActivity";
-
-	public static final String	NEWSPLUS_PACKAGE		= "com.noinnion.android.newsplus";
-	public static final String	NEWSPLUS_PRO_PACKAGE	= "com.noinnion.android.newspluspro";
+	public static final String	TAG = "WelcomeActivity";
+	public static final String	NEWSPLUS_PACKAGE = "com.noinnion.android.newsplus";
+	public static final String	NEWSPLUS_PRO_PACKAGE = "com.noinnion.android.newspluspro";
+	private String mAppPackage = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
 		setContentView(R.layout.welcome);
 		initButton();
 	}
@@ -30,15 +29,14 @@ public class WelcomeActivity extends Activity implements OnClickListener {
 			case R.id.btn_ok:
 				if (TextUtils.isEmpty(mAppPackage)) {
 					Utils.startMarketApp(this, NEWSPLUS_PACKAGE);
-				} else {
+				}
+				else {
 					Utils.startAppPackage(this, mAppPackage);
 					finish();
 				}
 				break;
 		}
 	}
-
-	private String	mAppPackage	= null;
 
 	public void initButton() {
 		boolean installed = Utils.appInstalledOrNot(this, NEWSPLUS_PACKAGE);
@@ -47,11 +45,9 @@ public class WelcomeActivity extends Activity implements OnClickListener {
 			installed = Utils.appInstalledOrNot(this, NEWSPLUS_PRO_PACKAGE);
 			if (installed) mAppPackage = NEWSPLUS_PRO_PACKAGE;
 		}
-
 		Button button = (Button) findViewById(R.id.btn_ok);
 		button.setText(installed ? R.string.txt_start_app : R.string.txt_download_app);
 		button.setEnabled(true);
 		button.setOnClickListener(this);
 	}
-
 }
