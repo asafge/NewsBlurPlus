@@ -193,7 +193,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			if (itemUids == null) {
 				ac = new APICall(APICall.API_URL_MARK_FEED_AS_READ, c);		
 				for (String sub : subUIds)
-					ac.addGetParam("feed_id", APIHelper.getFeedIdFromFeedUrl(sub));
+					ac.addGetParam("feed_id", sub);
 			}
 			else {
 				if (read) {
