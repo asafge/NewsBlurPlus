@@ -252,7 +252,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			else if (s.startsWith("FOL:")) {
 				for (ISubscription sub : SubsStruct.Instance(c).Subs)
 					if (!excluded.contains(sub.uid) && sub.getCategories().contains(s))
-						subUIDs.add(sub.uid);
+						subUIDs.add(APIHelper.getFeedIdFromFeedUrl(sub.uid));
 				return subUIDs.isEmpty() ? false : this.markAs(true, null, subUIDs.toArray(new String[0]));
 			}
 			return false;
