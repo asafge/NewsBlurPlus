@@ -66,7 +66,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			if (uid.startsWith(ReaderExtension.STATE_STARRED))
 				handler.items(APIHelper.getStarredHashes(c, limit, -60));
 			else if (uid.startsWith(ReaderExtension.STATE_READING_LIST)) {
-				List<String> hashes = APIHelper.getUnreadHashes(c, limit, -60, null);
+				List<String> hashes = APIHelper.getUnreadHashes(c, limit, null);
 				if (SubsStruct.Instance(c).IsPremium)
 					hashes = APIHelper.filterLowIntelligence(hashes, c);
 				handler.items(hashes);
@@ -106,17 +106,16 @@ public class NewsBlurPlus extends ReaderExtension {
 			}
 			else {
 				List<String> hashes = new ArrayList<String>();
-				long startTime = handler.startTime();
 				int chunk = (SubsStruct.Instance(c).IsPremium ? 100 : 5 );
 				if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
-					List<String> unread_hashes = APIHelper.getUnreadHashes(c, limit, startTime, null);
+					List<String> unread_hashes = APIHelper.getUnreadHashes(c, limit, null);
 					for (String h : unread_hashes)
 						if (!handler.excludedStreams().contains(APIHelper.getFeedUrlFromFeedId(h)))
 							hashes.add(h);
 				}
 				else if (uid.startsWith("FEED:")) {
 					List<String> feeds = Arrays.asList(APIHelper.getFeedIdFromFeedUrl(uid));
-					hashes = APIHelper.getUnreadHashes(c, limit, startTime, feeds);
+					hashes = APIHelper.getUnreadHashes(c, limit, feeds);
 				}
 				else
 					throw new ReaderException("Unknown reading state");

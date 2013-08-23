@@ -26,6 +26,7 @@ public class RotateQueue<E> {
 	
 	public void AddElement(E value) {
 		if (Taken == Elements.size())
+			// TODO: Elements.size()-1?
 			Elements.remove(Elements.size());
 		Elements.add(value);
 	}

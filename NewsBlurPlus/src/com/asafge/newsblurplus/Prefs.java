@@ -30,7 +30,7 @@ public class Prefs extends ExtensionPrefs {
 		putString(c, KEY_SESSION_ID_VALUE, value);
 	}
 	
-	public static String getHashesList(Context c, String hashes) {
+	public static String getHashesList(Context c) {
 		return getString(c, KEY_HASHES_LIST);
 	}
 	
