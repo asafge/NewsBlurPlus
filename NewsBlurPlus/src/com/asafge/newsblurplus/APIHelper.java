@@ -44,28 +44,25 @@ public class APIHelper {
 	public static List<String> getUnreadHashes(Context c, int limit, List<String> feeds, RotateQueue<String> seenHashes) throws ReaderException {
 		try {
 			List<String> hashes = new ArrayList<String>();
-			APICall ac = new APICall(APICall.API_URL_UNREAD_HASHES, c);
-			//ac.addGetParam("include_timestamps", "true");
 			if (feeds == null) {
 				feeds = new ArrayList<String>();
 				for (ISubscription sub : SubsStruct.InstanceRefresh(c).Subs)
 					feeds.add(APIHelper.getFeedIdFromFeedUrl(sub.uid));
 			}
-			if (feeds.size() > 0) {
-				ac.addGetParams("feed_id", feeds);
-				ac.sync();
-				JSONObject json_feeds = ac.Json.getJSONObject("unread_feed_story_hashes");
-				Iterator<?> keys = json_feeds.keys();
-				while (keys.hasNext()) {
-					String feedID = (String)keys.next();
-					JSONArray items = json_feeds.getJSONArray(feedID);
-					for (int i=0; i<items.length() && i<limit; i++) {
-						String hash = items.getString(i);
-						if (seenHashes == null || !seenHashes.SearchElement(hash))
-							hashes.add(hash);
-					}
-					limit -= items.length();
-				}
+			APICall ac = new APICall(APICall.API_URL_UNREAD_HASHES, c);
+			ac.addGetParams("feed_id", feeds);
+			ac.sync();
+			JSONObject json_feeds = ac.Json.getJSONObject("unread_feed_story_hashes");
+			Iterator<?> keys = json_feeds.keys();
+			while (keys.hasNext()) {
+				String feedID = (String)keys.next();
+				JSONArray items = json_feeds.getJSONArray(feedID);
+				for (int i=0; i<items.length() && i<limit; i++) {
+					String hash = items.getString(i);
+					if (seenHashes == null || !seenHashes.SearchElement(hash))
+						hashes.add(hash);
+			}
+			limit -= items.length();
 			}
 			return hashes;
 		}
@@ -79,7 +76,6 @@ public class APIHelper {
 		try {
 			List<String> hashes = new ArrayList<String>();
 			APICall ac = new APICall(APICall.API_URL_STARRED_HASHES, c);
-			
 			ac.sync();
 			JSONArray items = ac.Json.getJSONArray("starred_story_hashes");
 			for (int i=0; i<items.length() && i<limit; i++) {

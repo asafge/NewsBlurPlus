@@ -89,17 +89,16 @@ public class NewsBlurPlus extends ReaderExtension {
 			String uid = handler.stream();
 			int limit = handler.limit();
 			int chunk = (SubsStruct.Instance(c).IsPremium ? 100 : 5 );
+			List<String> hashes;
 			
 			// Load the seen hashes from prefs
 			RotateQueue<String> seenHashes = new RotateQueue<String>(1000, Prefs.getHashesList(c));
-			List<String> hashes;
 			
 			if (uid.startsWith(ReaderExtension.STATE_STARRED)) {
 				hashes = APIHelper.getStarredHashes(c, limit, seenHashes);
 			}
 			else if (uid.startsWith("FEED:")) {
-				List<String> feeds = Arrays.asList(APIHelper.getFeedIdFromFeedUrl(uid));
-				hashes = APIHelper.getUnreadHashes(c, limit, feeds, seenHashes);
+				hashes = APIHelper.getUnreadHashes(c, limit, Arrays.asList(APIHelper.getFeedIdFromFeedUrl(uid)), seenHashes);
 			}
 			else if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
 				List<String> unread_hashes = APIHelper.getUnreadHashes(c, limit, null, seenHashes);
@@ -118,7 +117,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				ac.sync();
 				parseItemList(ac.Json, handler, seenHashes);
 			}
-			// Save the seen hashes as a large String
+			// Save the seen hashes as a serialized String
 			Prefs.setHashesList(c, seenHashes.toString());
 		}
 		catch (RemoteException e) {
