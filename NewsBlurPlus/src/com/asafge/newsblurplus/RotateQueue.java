@@ -20,7 +20,8 @@ public class RotateQueue<E> {
 		if (!TextUtils.isEmpty(serialized)) {
 			String[] values = serialized.split(",", capacity);
 			for (String v : values)
-				this.AddElement((E)v);
+				if (!TextUtils.isEmpty(v))
+					this.AddElement((E)v);
 		}
 		return;
 	}
