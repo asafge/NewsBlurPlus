@@ -90,6 +90,9 @@ public class NewsBlurPlus extends ReaderExtension {
 			int limit = handler.limit();
 			int story_count = 1;
 			
+			// Load the seen hashes from prefs
+			RotateQueue<String> seenHashes = new RotateQueue<String>(10, Prefs.getHashesList(c));
+			
 			if (uid.startsWith(ReaderExtension.STATE_STARRED)) {
 				Integer page = 1;
 				while ((limit > 0) && story_count > 0) {
@@ -98,16 +101,13 @@ public class NewsBlurPlus extends ReaderExtension {
 					ac.sync();
 					story_count = ac.Json.getJSONArray("stories").length();
 					if (story_count > 0) {
-						parseItemList(ac.Json, handler);
+						parseItemList(ac.Json, handler, seenHashes);
 						limit -= story_count;
 						page++;
 					}
 				}
 			}
-			else {
-				// Load the seen hashes from prefs
-				RotateQueue<String> seenHashes = new RotateQueue<String>(1000, Prefs.getHashesList(c));
-				
+			else {			
 				List<String> hashes = new ArrayList<String>();
 				int chunk = (SubsStruct.Instance(c).IsPremium ? 100 : 5 );
 				if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
@@ -128,11 +128,11 @@ public class NewsBlurPlus extends ReaderExtension {
 					int end = (start+chunk < hashes.size()) ? start + chunk : hashes.size();
 					ac.addGetParams("h", hashes.subList(start, end));
 					ac.sync();
-					parseItemList(ac.Json, handler);
+					parseItemList(ac.Json, handler, seenHashes);
 				}
-				// Save the seen hashes as a large String
-				Prefs.setHashesList(c, seenHashes.toString());
 			}
+			// Save the seen hashes as a large String
+			Prefs.setHashesList(c, seenHashes.toString());
 		}
 		catch (JSONException e) {
 			throw new ReaderException("ItemList handler error", e);
@@ -145,7 +145,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	/*
 	 * Parse an array of items that are in the NewsBlur JSON format.
 	 */
-	public void parseItemList(JSONObject json, IItemListHandler handler) throws ReaderException {
+	public void parseItemList(JSONObject json, IItemListHandler handler, RotateQueue<String> seenHashes) throws ReaderException {
 		try {
 			int length = 0;
 			List<IItem> items = new ArrayList<IItem>();
@@ -166,6 +166,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				if (item.starred)
 					item.addCategory(StarredTag.get().uid);
 				items.add(item);
+				seenHashes.AddElement(item.uid);
 				
 				length += item.getLength();
 				if (items.size() % 200 == 0 || length > 300000) {

@@ -45,7 +45,7 @@ public class APIHelper {
 		try {
 			List<String> hashes = new ArrayList<String>();
 			APICall ac = new APICall(APICall.API_URL_UNREAD_HASHES, c);
-			ac.addGetParam("include_timestamps", "true");
+			//ac.addGetParam("include_timestamps", "true");
 			if (feeds == null) {
 				feeds = new ArrayList<String>();
 				for (ISubscription sub : SubsStruct.InstanceRefresh(c).Subs)
@@ -60,11 +60,9 @@ public class APIHelper {
 					String feedID = (String)keys.next();
 					JSONArray items = json_feeds.getJSONArray(feedID);
 					for (int i=0; i<items.length() && i<limit; i++) {
-						String hash = items.getJSONArray(i).getString(1);
-						if (seenHashes != null && !seenHashes.SearchElement(hash)) {
-							hashes.add(items.getJSONArray(i).getString(0));
-							seenHashes.AddElement(hash);
-						}
+						String hash = items.getString(i);
+						if (seenHashes != null && !seenHashes.SearchElement(hash))
+							hashes.add(hash);
 					}
 					limit -= items.length();
 				}
