@@ -25,10 +25,10 @@ public class RotateQueue<E> {
 	}
 	
 	public void AddElement(E value) {
-		if (Taken == Elements.size())
-			// TODO: Elements.size()-1?
-			Elements.remove(Elements.size());
+		if (Taken > 0 && Taken == Elements.size())
+			Elements.remove(Elements.size()-1);
 		Elements.add(value);
+		Taken++;
 	}
 	
 	public boolean SearchElement(E value) {
