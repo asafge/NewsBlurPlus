@@ -113,11 +113,37 @@ public class APIHelper {
 	// Get a story and return its total intelligence score
 	public static int getIntelligence(JSONObject story) throws JSONException {
 		JSONObject intel = story.getJSONObject("intelligence");
-		int feed = intel.getInt("feed");
+		int score = 0;
 		int tags = intel.getInt("tags");
 		int author = intel.getInt("author");
 		int title = intel.getInt("title");
-		return feed + tags + author + title;
+		
+		int max = getMax(tags, author, title);
+		int min = getMin(tags, author, title);
+		if (max > 0) score = max;
+		else if (min < 0) score = min;
+		
+		if (score == 0) 
+			score = intel.getInt("feed");
+		return score;
+	}
+	
+	// Get the maximum value of a list
+	private static int getMax(int... vals) {
+		int max = Integer.MIN_VALUE;
+		for (int i : vals)
+			if (i > max)
+				max = i;
+		return max;
+	}
+	
+	// Get the minimum value of a list
+	private static int getMin(int... vals) {
+		int min = Integer.MAX_VALUE;
+		for (int i : vals)
+			if (i > min)
+				min = i;
+		return min;
 	}
 	
 	// Move a feed from one folder to the other
