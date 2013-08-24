@@ -11,11 +11,12 @@ import android.text.TextUtils;
  */
 public class RotateQueue<E> {
 	public List<E> Elements;
-	public int Taken;
+	public int Capacity;
 	
 	@SuppressWarnings("unchecked")
 	public RotateQueue(int capacity, String serialized) {
 		Elements = new ArrayList<E>(capacity);
+		Capacity = capacity;
 		if (!TextUtils.isEmpty(serialized)) {
 			String[] values = serialized.split(",", capacity);
 			for (String v : values)
@@ -25,10 +26,10 @@ public class RotateQueue<E> {
 	}
 	
 	public void AddElement(E value) {
-		if (Taken > 0 && Taken == Elements.size())
+		if (Capacity == Elements.size())
 			Elements.remove(Elements.size()-1);
-		Elements.add(value);
-		Taken++;
+		if (!this.SearchElement(value))
+			Elements.add(value);
 	}
 	
 	public boolean SearchElement(E value) {
