@@ -141,7 +141,7 @@ public class APIHelper {
 	private static int getMin(int... vals) {
 		int min = Integer.MAX_VALUE;
 		for (int i : vals)
-			if (i > min)
+			if (i < min)
 				min = i;
 		return min;
 	}
