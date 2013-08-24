@@ -23,12 +23,10 @@ public class SubsStruct {
 	public List<ISubscription> Subs;
 	public List<ITag> Tags;
 	public boolean IsPremium;
-	public RotateQueue<String> SeenHashes;
 	
 	// Constructor
 	protected SubsStruct(Context c) throws ReaderException {
 	   _context = c;
-	   SeenHashes = new RotateQueue<String>(1000, Prefs.getHashesList(c));
 	   this.Refresh();
 	}
 	

@@ -41,7 +41,7 @@ public class APIHelper {
 	}
 	
 	// Get all the unread story hashes at once
-	public static List<String> getUnreadHashes(Context c, int limit, List<String> feeds) throws ReaderException {
+	public static List<String> getUnreadHashes(Context c, int limit, List<String> feeds, RotateQueue<String> seenHashes) throws ReaderException {
 		try {
 			List<String> hashes = new ArrayList<String>();
 			APICall ac = new APICall(APICall.API_URL_UNREAD_HASHES, c);
@@ -61,9 +61,9 @@ public class APIHelper {
 					JSONArray items = json_feeds.getJSONArray(feedID);
 					for (int i=0; i<items.length() && i<limit; i++) {
 						String hash = items.getJSONArray(i).getString(1);
-						if (!SubsStruct.Instance(c).SeenHashes.SearchElement(hash)) {
+						if (seenHashes != null && !seenHashes.SearchElement(hash)) {
 							hashes.add(items.getJSONArray(i).getString(0));
-							SubsStruct.Instance(c).SeenHashes.AddElement(hash);
+							seenHashes.AddElement(hash);
 						}
 					}
 					limit -= items.length();

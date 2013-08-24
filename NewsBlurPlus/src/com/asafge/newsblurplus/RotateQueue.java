@@ -35,7 +35,8 @@ public class RotateQueue<E> {
 		return Elements.contains(value);
 	}
 	
-	public String ToString() {
+	@Override
+	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		for (E element : Elements)
 			sb.append(element.toString()).append(",");
