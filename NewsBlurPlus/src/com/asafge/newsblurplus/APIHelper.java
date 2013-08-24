@@ -75,17 +75,18 @@ public class APIHelper {
 	}
 	
 	// Get all the starred story hashes at once
-	public static List<String> getStarredHashes(Context c, int limit, long syncTime) throws ReaderException {
+	public static List<String> getStarredHashes(Context c, int limit, RotateQueue<String> seenHashes) throws ReaderException {
 		try {
 			List<String> hashes = new ArrayList<String>();
 			APICall ac = new APICall(APICall.API_URL_STARRED_HASHES, c);
-			ac.addGetParam("include_timestamps", "true");
 			
 			ac.sync();
 			JSONArray items = ac.Json.getJSONArray("starred_story_hashes");
-			for (int i=0; i<items.length() && i<limit; i++)
-				if ((items.getJSONArray(i).getLong(1)) > syncTime)
-					hashes.add( items.getJSONArray(i).getString(0));
+			for (int i=0; i<items.length() && i<limit; i++) {
+				String hash = items.getString(i);
+				if (seenHashes == null || !seenHashes.SearchElement(hash))
+					hashes.add(hash);
+			}
 			return hashes;
 		}
 		catch (JSONException e) {

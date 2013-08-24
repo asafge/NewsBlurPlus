@@ -64,7 +64,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			String uid = handler.stream();
 			
 			if (uid.startsWith(ReaderExtension.STATE_STARRED))
-				handler.items(APIHelper.getStarredHashes(c, limit, -60));
+				handler.items(APIHelper.getStarredHashes(c, limit, null));
 			else if (uid.startsWith(ReaderExtension.STATE_READING_LIST)) {
 				List<String> hashes = APIHelper.getUnreadHashes(c, limit, null, null);
 				if (SubsStruct.Instance(c).IsPremium)
@@ -88,54 +88,38 @@ public class NewsBlurPlus extends ReaderExtension {
 		try {
 			String uid = handler.stream();
 			int limit = handler.limit();
-			int story_count = 1;
+			int chunk = (SubsStruct.Instance(c).IsPremium ? 100 : 5 );
 			
 			// Load the seen hashes from prefs
 			RotateQueue<String> seenHashes = new RotateQueue<String>(1000, Prefs.getHashesList(c));
+			List<String> hashes;
 			
 			if (uid.startsWith(ReaderExtension.STATE_STARRED)) {
-				Integer page = 1;
-				while ((limit > 0) && story_count > 0) {
-					APICall ac = new APICall(APICall.API_URL_STARRED_STORIES, c);
-					ac.addGetParam("page", page.toString());
-					ac.sync();
-					story_count = ac.Json.getJSONArray("stories").length();
-					if (story_count > 0) {
-						parseItemList(ac.Json, handler, seenHashes);
-						limit -= story_count;
-						page++;
-					}
-				}
+				hashes = APIHelper.getStarredHashes(c, limit, seenHashes);
 			}
-			else {			
-				List<String> hashes = new ArrayList<String>();
-				int chunk = (SubsStruct.Instance(c).IsPremium ? 100 : 5 );
-				if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
-					List<String> unread_hashes = APIHelper.getUnreadHashes(c, limit, null, seenHashes);
-					for (String h : unread_hashes)
-						if (!handler.excludedStreams().contains(APIHelper.getFeedUrlFromFeedId(h)))
-							hashes.add(h);
-				}
-				else if (uid.startsWith("FEED:")) {
-					List<String> feeds = Arrays.asList(APIHelper.getFeedIdFromFeedUrl(uid));
-					hashes = APIHelper.getUnreadHashes(c, limit, feeds, seenHashes);
-				}
-				else
-					throw new ReaderException("Unknown reading state");
+			else if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
+				List<String> unread_hashes = APIHelper.getUnreadHashes(c, limit, null, seenHashes);
+				hashes =  new ArrayList<String>();
+				for (String h : unread_hashes)
+					if (!handler.excludedStreams().contains(APIHelper.getFeedUrlFromFeedId(h)))
+						hashes.add(h);
+			}
+			else if (uid.startsWith("FEED:")) {
+				List<String> feeds = Arrays.asList(APIHelper.getFeedIdFromFeedUrl(uid));
+				hashes = APIHelper.getUnreadHashes(c, limit, feeds, seenHashes);
+			}
+			else
+				throw new ReaderException("Unknown reading state");
 				
-				for (int start=0; start < hashes.size(); start += chunk) {
-					APICall ac = new APICall(APICall.API_URL_RIVER, c);
-					int end = (start+chunk < hashes.size()) ? start + chunk : hashes.size();
-					ac.addGetParams("h", hashes.subList(start, end));
-					ac.sync();
-					parseItemList(ac.Json, handler, seenHashes);
-				}
+			for (int start=0; start < hashes.size(); start += chunk) {
+				APICall ac = new APICall(APICall.API_URL_RIVER, c);
+				int end = (start+chunk < hashes.size()) ? start + chunk : hashes.size();
+				ac.addGetParams("h", hashes.subList(start, end));
+				ac.sync();
+				parseItemList(ac.Json, handler, seenHashes);
 			}
 			// Save the seen hashes as a large String
 			Prefs.setHashesList(c, seenHashes.toString());
-		}
-		catch (JSONException e) {
-			throw new ReaderException("ItemList handler error", e);
 		}
 		catch (RemoteException e) {
 			throw new ReaderException("ItemList handler error", e);
