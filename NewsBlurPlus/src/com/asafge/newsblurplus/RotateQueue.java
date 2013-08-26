@@ -28,7 +28,7 @@ public class RotateQueue<E> {
 	
 	public void AddElement(E value) {
 		if (Capacity == Elements.size())
-			Elements.remove(Elements.size()-1);
+			Elements.remove(0);
 		if (!this.SearchElement(value))
 			Elements.add(value);
 	}
