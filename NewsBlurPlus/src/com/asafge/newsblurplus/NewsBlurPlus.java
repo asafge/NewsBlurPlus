@@ -253,7 +253,6 @@ public class NewsBlurPlus extends ReaderExtension {
 	 */
 	@Override
 	public boolean editItemTag(String[] itemUids, String[] subUids, String[] addTags, String[] removeTags) throws ReaderException {
-		boolean result = true;
 		for (int i=0; i<itemUids.length; i++) {
 			String url;
 			if ((addTags != null) && addTags[i].startsWith(StarredTag.get().uid)) {
@@ -263,18 +262,16 @@ public class NewsBlurPlus extends ReaderExtension {
 				url = APICall.API_URL_MARK_STORY_AS_UNSTARRED;
 			}
 			else {
-				result = false;
 				throw new ReaderException("Unsupported tag type");
 			}
 			APICall ac = new APICall(url, c);
 			ac.addPostParam("story_id", itemUids[i]);
 			ac.addPostParam("feed_id", APIHelper.getFeedIdFromFeedUrl(subUids[i]));
 			if (!ac.syncGetResultOk()) {
-				result = false;
-				break;
+				return false;
 			}
 		}
-		return result;
+		return true;
 	}
 	
 
