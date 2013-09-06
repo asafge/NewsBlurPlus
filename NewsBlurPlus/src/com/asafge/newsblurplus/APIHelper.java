@@ -61,8 +61,8 @@ public class APIHelper {
 					String hash = items.getString(i);
 					if (seenHashes == null || !seenHashes.SearchElement(hash))
 						hashes.add(hash);
-			}
-			limit -= items.length();
+				}
+				limit -= items.length();
 			}
 			return hashes;
 		}
