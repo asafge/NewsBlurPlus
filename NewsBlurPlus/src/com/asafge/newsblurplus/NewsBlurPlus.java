@@ -92,6 +92,8 @@ public class NewsBlurPlus extends ReaderExtension {
 			List<String> hashes;
 			
 			// Load the seen hashes from prefs
+			if (syncTime <= 0)
+				Prefs.setHashesList(c, "");
 			RotateQueue<String> seenHashes = new RotateQueue<String>(1000, Prefs.getHashesList(c));
 			
 			if (uid.startsWith(ReaderExtension.STATE_STARRED)) {
