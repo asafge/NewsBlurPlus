@@ -74,9 +74,11 @@ public class APIHelper {
 	// Clear the hashes list from items from a specific feed
 	public static void clearUnsubscribedHashes(Context c, String feedID) {
 		RotateQueue<String> seenHashes = new RotateQueue<String>(1000, Prefs.getHashesList(c));
+		List<String> remove = new ArrayList<String>();
 		for (String h : seenHashes.Elements)
-			if (h.contains(feedID))
-				seenHashes.Elements.remove(h);
+			if (h.startsWith(feedID))
+				remove.add(h);
+		seenHashes.Elements.removeAll(remove);
 		Prefs.setHashesList(c, seenHashes.toString());
 	}
 	
