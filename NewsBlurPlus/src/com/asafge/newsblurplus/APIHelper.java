@@ -71,6 +71,15 @@ public class APIHelper {
 		}
 	}
 	
+	// Clear the hashes list from items from a specific feed
+	public static void clearUnsubscribedHashes(Context c, String feedID) {
+		RotateQueue<String> seenHashes = new RotateQueue<String>(1000, Prefs.getHashesList(c));
+		for (String h : seenHashes.Elements)
+			if (h.contains(feedID))
+				seenHashes.Elements.remove(h);
+		Prefs.setHashesList(c, seenHashes.toString());
+	}
+	
 	// Get all the starred story hashes at once
 	public static List<String> getStarredHashes(Context c, int limit, RotateQueue<String> seenHashes) throws ReaderException {
 		try {
