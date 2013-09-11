@@ -95,7 +95,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			List<String> hashes;
 			
 			// Load the seen hashes from prefs
-			if (uid.equals(ReaderExtension.STATE_READING_LIST) && (handler.startTime() <= 0))
+			if (uid.startsWith(ReaderExtension.STATE_READING_LIST) && (handler.startTime() <= 0))
 				Prefs.setHashesList(c, "");
 			RotateQueue<String> seenHashes = new RotateQueue<String>(1000, Prefs.getHashesList(c));
 			
@@ -105,7 +105,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			else if (uid.startsWith("FEED:")) {
 				hashes = APIHelper.getUnreadHashes(c, limit, Arrays.asList(APIHelper.getFeedIdFromFeedUrl(uid)), seenHashes);
 			}
-			else if (uid.equals(ReaderExtension.STATE_READING_LIST)) {
+			else if (uid.startsWith(ReaderExtension.STATE_READING_LIST)) {
 				List<String> unread_hashes = APIHelper.getUnreadHashes(c, limit, null, seenHashes);
 				hashes =  new ArrayList<String>();
 				for (String h : unread_hashes)
