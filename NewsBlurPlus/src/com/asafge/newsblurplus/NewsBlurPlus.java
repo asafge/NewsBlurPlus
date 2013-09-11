@@ -110,7 +110,7 @@ public class NewsBlurPlus extends ReaderExtension {
 						hashes.add(h);
 			}
 			else
-				throw new ReaderException("Unknown reading state");
+				throw new ReaderException("Unknown reading state: " + uid);
 				
 			for (int start=0; start < hashes.size(); start += chunk) {
 				APICall ac = new APICall(APICall.API_URL_RIVER, c);
