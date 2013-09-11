@@ -15,7 +15,6 @@ Features
 
 Known issues
 -------------------------------
-* When mark feed/folder as read fails, News+ won't retry later.
 * When subscribing to a new feed, News+ won't trigger a special refresh for it.
 * Mark folder as read won't honor excluded feeds.
     
