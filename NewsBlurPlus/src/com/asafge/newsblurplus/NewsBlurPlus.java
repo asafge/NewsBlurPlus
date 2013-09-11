@@ -10,6 +10,7 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.os.RemoteException;
+import android.util.Log;
 
 import com.noinnion.android.reader.api.ReaderException;
 import com.noinnion.android.reader.api.ReaderExtension;
@@ -71,8 +72,10 @@ public class NewsBlurPlus extends ReaderExtension {
 					hashes = APIHelper.filterLowIntelligence(hashes, c);
 				handler.items(hashes);
 			}
-			else
+			else {
+				Log.w("NewsBlur+ Debug", "Unknown reading state: " + uid);
 				throw new ReaderException("Unknown reading state");
+			}
 		}
 		catch (RemoteException e) {
 			throw new ReaderException("ItemID handler error", e);
@@ -109,8 +112,10 @@ public class NewsBlurPlus extends ReaderExtension {
 					if (!handler.excludedStreams().contains(APIHelper.getFeedUrlFromFeedId(h)))
 						hashes.add(h);
 			}
-			else
-				throw new ReaderException("Unknown reading state: " + uid);
+			else {
+				Log.w("NewsBlur+ Debug", "Unknown reading state: " + uid);
+				throw new ReaderException("Unknown reading state");
+			}
 				
 			for (int start=0; start < hashes.size(); start += chunk) {
 				APICall ac = new APICall(APICall.API_URL_RIVER, c);
@@ -163,6 +168,8 @@ public class NewsBlurPlus extends ReaderExtension {
 			handler.items(items, 0);
 		}
 		catch (JSONException e) {
+			Log.w("NewsBlur+ Debug", "JSONExceotion: " + e.getMessage());
+			Log.w("NewsBlur+ Debug", "JSON: " + json.toString());
 			throw new ReaderException("ParseItemList parse error", e);
 		}
 		catch (RemoteException e) {
@@ -269,9 +276,8 @@ public class NewsBlurPlus extends ReaderExtension {
 			APICall ac = new APICall(url, c);
 			ac.addPostParam("story_id", itemUids[i]);
 			ac.addPostParam("feed_id", APIHelper.getFeedIdFromFeedUrl(subUids[i]));
-			if (!ac.syncGetResultOk()) {
+			if (!ac.syncGetResultOk())
 				return false;
-			}
 		}
 		return true;
 	}
@@ -353,8 +359,10 @@ public class NewsBlurPlus extends ReaderExtension {
 				String newTag = tags[0].replace("FOL:", "");
 				return APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(uid), newTag, "");
 			}
-			default:
+			default: {
+				Log.w("NewsBlur+ Debug", "Unknown action: " + String.valueOf(action));
 				return false;
+			}
 		}
 	}
 }

@@ -11,6 +11,7 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.noinnion.android.reader.api.ReaderException;
 import com.noinnion.android.reader.api.provider.ISubscription;
@@ -102,6 +103,7 @@ public class SubsStruct {
 			return (Subs.size() > 0);
 		}
 		catch (JSONException e) {
+			Log.w("NewsBlur+ Debug", "JSONException: " + e.getMessage());
 			throw new ReaderException("Feeds structure parse error", e);
 		}
 	}
@@ -114,6 +116,7 @@ public class SubsStruct {
 			return (!ac.Json.getString("message").startsWith("The full River of News is a premium feature."));
 		}
 		catch (JSONException e) {
+			Log.w("NewsBlur+ Debug", "JSONException: " + e.getMessage());
 			throw new ReaderException("IsPremiumAccount parse error", e);
 		}
 	}

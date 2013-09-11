@@ -9,6 +9,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.noinnion.android.reader.api.ReaderException;
 import com.noinnion.android.reader.api.provider.ISubscription;
@@ -36,6 +37,7 @@ public class APIHelper {
 			return filtered;
 		}
 		catch (JSONException e) {
+			Log.w("NewsBlur+ Debug", "JSONException: " + e.getMessage());
 			throw new ReaderException("Intelligence parse error", e);
 		}
 	}
@@ -67,6 +69,7 @@ public class APIHelper {
 			return hashes;
 		}
 		catch (JSONException e) {
+			Log.w("NewsBlur+ Debug", "JSONException: " + e.getMessage());
 			throw new ReaderException("GetUnreadHashes parse error", e);
 		}
 	}
@@ -97,6 +100,7 @@ public class APIHelper {
 			return hashes;
 		}
 		catch (JSONException e) {
+			Log.w("NewsBlur+ Debug", "JSONException: " + e.getMessage());
 			throw new ReaderException("GetStarredHashes parse error", e);
 		}
 	}
@@ -113,6 +117,7 @@ public class APIHelper {
 			}
 		}
 		catch (JSONException e) {
+			Log.w("NewsBlur+ Debug", "JSONException: " + e.getMessage());
 			throw new ReaderException("UpdateFeedCount parse error", e);
 		}
 	}
