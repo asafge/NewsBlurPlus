@@ -103,7 +103,7 @@ public class SubsStruct {
 			return (Subs.size() > 0);
 		}
 		catch (JSONException e) {
-			Log.w("NewsBlur+ Debug", "JSONException: " + e.getMessage());
+			Log.e("NewsBlur+ Debug", "JSONException: " + e.getMessage());
 			throw new ReaderException("Feeds structure parse error", e);
 		}
 	}
@@ -116,7 +116,7 @@ public class SubsStruct {
 			return (!ac.Json.getString("message").startsWith("The full River of News is a premium feature."));
 		}
 		catch (JSONException e) {
-			Log.w("NewsBlur+ Debug", "JSONException: " + e.getMessage());
+			Log.e("NewsBlur+ Debug", "JSONException: " + e.getMessage());
 			throw new ReaderException("IsPremiumAccount parse error", e);
 		}
 	}

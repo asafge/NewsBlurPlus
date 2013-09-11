@@ -73,7 +73,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				handler.items(hashes);
 			}
 			else {
-				Log.w("NewsBlur+ Debug", "Unknown reading state: " + uid);
+				Log.e("NewsBlur+ Debug", "Unknown reading state: " + uid);
 				throw new ReaderException("Unknown reading state");
 			}
 		}
@@ -113,7 +113,7 @@ public class NewsBlurPlus extends ReaderExtension {
 						hashes.add(h);
 			}
 			else {
-				Log.w("NewsBlur+ Debug", "Unknown reading state: " + uid);
+				Log.e("NewsBlur+ Debug", "Unknown reading state: " + uid);
 				throw new ReaderException("Unknown reading state");
 			}
 				
@@ -168,8 +168,8 @@ public class NewsBlurPlus extends ReaderExtension {
 			handler.items(items, 0);
 		}
 		catch (JSONException e) {
-			Log.w("NewsBlur+ Debug", "JSONExceotion: " + e.getMessage());
-			Log.w("NewsBlur+ Debug", "JSON: " + json.toString());
+			Log.e("NewsBlur+ Debug", "JSONExceotion: " + e.getMessage());
+			Log.e("NewsBlur+ Debug", "JSON: " + json.toString());
 			throw new ReaderException("ParseItemList parse error", e);
 		}
 		catch (RemoteException e) {
@@ -360,7 +360,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				return APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(uid), newTag, "");
 			}
 			default: {
-				Log.w("NewsBlur+ Debug", "Unknown action: " + String.valueOf(action));
+				Log.e("NewsBlur+ Debug", "Unknown action: " + String.valueOf(action));
 				return false;
 			}
 		}

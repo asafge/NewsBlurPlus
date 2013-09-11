@@ -101,16 +101,16 @@ public class APICall {
 			Json = callback.getResult();
 			Status = callback.getStatus();
 			if (Json == null) {
-				Log.w("NewsBlur+ Debug", "URL: " + callbackUrl);
-				Log.w("NewsBlur+ Debug", "Status: " + Status.toString());
-				Log.w("NewsBlur+ Debug", "JSON Object: " + Prefs.getSessionID(aquery.getContext()));
+				Log.e("NewsBlur+ Debug", "URL: " + callbackUrl);
+				Log.e("NewsBlur+ Debug", "Status: " + Status.toString());
+				Log.e("NewsBlur+ Debug", "JSON Object: " + Prefs.getSessionID(aquery.getContext()));
 				throw new ReaderException("NewsBlur server unreachable");
 			}
 			if ((!Json.getString("authenticated").startsWith("true")) || (Status.getCode() != 200))
 				throw new ReaderException("User not authenticated");
 		}
 		catch (JSONException e) {
-			Log.w("NewsBlur+ Debug", "JSON Object: " + Json.toString());
+			Log.e("NewsBlur+ Debug", "JSON Object: " + Json.toString());
 			throw new ReaderException("Unknown API response");
 		}
 	}
@@ -122,7 +122,7 @@ public class APICall {
 			return this.Json.getString("result").startsWith("ok");
 		} 
 		catch (JSONException e) {
-			Log.w("NewsBlur+ Debug", "JSON Object: " + Json.toString());
+			Log.e("NewsBlur+ Debug", "JSON Object: " + Json.toString());
 			throw new ReaderException("Unknown API response");
 		}		
 	}

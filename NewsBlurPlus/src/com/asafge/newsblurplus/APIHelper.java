@@ -37,7 +37,7 @@ public class APIHelper {
 			return filtered;
 		}
 		catch (JSONException e) {
-			Log.w("NewsBlur+ Debug", "JSONException: " + e.getMessage());
+			Log.e("NewsBlur+ Debug", "JSONException: " + e.getMessage());
 			throw new ReaderException("Intelligence parse error", e);
 		}
 	}
@@ -69,7 +69,7 @@ public class APIHelper {
 			return hashes;
 		}
 		catch (JSONException e) {
-			Log.w("NewsBlur+ Debug", "JSONException: " + e.getMessage());
+			Log.e("NewsBlur+ Debug", "JSONException: " + e.getMessage());
 			throw new ReaderException("GetUnreadHashes parse error", e);
 		}
 	}
@@ -100,7 +100,7 @@ public class APIHelper {
 			return hashes;
 		}
 		catch (JSONException e) {
-			Log.w("NewsBlur+ Debug", "JSONException: " + e.getMessage());
+			Log.e("NewsBlur+ Debug", "JSONException: " + e.getMessage());
 			throw new ReaderException("GetStarredHashes parse error", e);
 		}
 	}
@@ -117,7 +117,7 @@ public class APIHelper {
 			}
 		}
 		catch (JSONException e) {
-			Log.w("NewsBlur+ Debug", "JSONException: " + e.getMessage());
+			Log.e("NewsBlur+ Debug", "JSONException: " + e.getMessage());
 			throw new ReaderException("UpdateFeedCount parse error", e);
 		}
 	}
