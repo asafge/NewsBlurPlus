@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.net.Uri;
+import android.util.Log;
 
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
@@ -99,12 +100,17 @@ public class APICall {
 			aquery.sync(callback);
 			Json = callback.getResult();
 			Status = callback.getStatus();
-			if (Json == null)
+			if (Json == null) {
+				Log.w("NewsBlur+ Debug", "URL: " + callbackUrl);
+				Log.w("NewsBlur+ Debug", "Status: " + Status.toString());
+				Log.w("NewsBlur+ Debug", "JSON Object: " + Prefs.getSessionID(aquery.getContext()));
 				throw new ReaderException("NewsBlur server unreachable");
+			}
 			if ((!Json.getString("authenticated").startsWith("true")) || (Status.getCode() != 200))
 				throw new ReaderException("User not authenticated");
 		}
 		catch (JSONException e) {
+			Log.w("NewsBlur+ Debug", "JSON Object: " + Json.toString());
 			throw new ReaderException("Unknown API response");
 		}
 	}
@@ -116,6 +122,7 @@ public class APICall {
 			return this.Json.getString("result").startsWith("ok");
 		} 
 		catch (JSONException e) {
+			Log.w("NewsBlur+ Debug", "JSON Object: " + Json.toString());
 			throw new ReaderException("Unknown API response");
 		}		
 	}
