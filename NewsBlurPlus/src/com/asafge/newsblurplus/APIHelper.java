@@ -43,7 +43,8 @@ public class APIHelper {
 	}
 	
 	// Get all the unread story hashes at once
-	// Note: There's a limit on how many feeds you can pass, as these are get params and NewsBlur API has a limit on URL lengths. 
+	// Note: There's a limit on how many feeds you can pass (~100).
+	//		 These are GET params, and NewsBlur API has a limit on URL lengths. 
 	public static List<String> getUnreadHashes(Context c, int limit, List<String> feeds, RotateQueue<String> seenHashes) throws ReaderException {
 		try {
 			List<String> hashes = new ArrayList<String>();
