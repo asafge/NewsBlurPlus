@@ -90,6 +90,7 @@ public class NewsBlurPlus extends ReaderExtension {
 	public void handleItemList(IItemListHandler handler, long syncTime) throws ReaderException {
 		try {
 			String uid = handler.stream();
+			String url = APICall.API_URL_RIVER;
 			int limit = handler.limit();
 			int chunk = (SubsStruct.Instance(c).IsPremium ? 100 : 5 );
 			List<String> hashes;
@@ -101,6 +102,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			
 			if (uid.startsWith(ReaderExtension.STATE_STARRED)) {
 				hashes = APIHelper.getStarredHashes(c, limit, seenHashes);
+				url = APICall.API_URL_STARRED_STORIES;
 			}
 			else if (uid.startsWith("FEED:")) {
 				hashes = APIHelper.getUnreadHashes(c, limit, Arrays.asList(APIHelper.getFeedIdFromFeedUrl(uid)), seenHashes);
@@ -121,7 +123,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			Log.w("NewsBlur+ debug", "chunk: " + String.valueOf(chunk));
 				
 			for (int start=0; start < hashes.size(); start += chunk) {
-				APICall ac = new APICall(APICall.API_URL_RIVER, c);
+				APICall ac = new APICall(url, c);
 				int end = (start+chunk < hashes.size()) ? start + chunk : hashes.size();
 				ac.addGetParams("h", hashes.subList(start, end));
 				ac.sync();
