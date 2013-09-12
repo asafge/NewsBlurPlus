@@ -99,12 +99,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			if (uid.startsWith(ReaderExtension.STATE_READING_LIST) && (handler.startTime() <= 0))
 				Prefs.setHashesList(c, "");
 			RotateQueue<String> seenHashes = new RotateQueue<String>(1000, Prefs.getHashesList(c));
-			
-			Log.w("NewsBlur+ debug", "----");
-			Log.w("NewsBlur+ debug", "Reading state: " + uid);
-			Log.w("NewsBlur+ debug", "Items limit: " + limit);
-			Log.w("NewsBlur+ debug", "Seen hashes: " + Arrays.toString(seenHashes.Elements.toArray()));
-			
+					
 			if (uid.startsWith(ReaderExtension.STATE_STARRED)) {
 				hashes = APIHelper.getStarredHashes(c, limit, seenHashes);
 				url = APICall.API_URL_STARRED_STORIES;
@@ -114,7 +109,6 @@ public class NewsBlurPlus extends ReaderExtension {
 			}
 			else if (uid.startsWith(ReaderExtension.STATE_READING_LIST)) {
 				List<String> unread_hashes = APIHelper.getUnreadHashes(c, limit, null, seenHashes);
-				Log.w("NewsBlur+ debug", "Unread hashes: " + Arrays.toString(unread_hashes.toArray()));
 				hashes =  new ArrayList<String>();
 				for (String h : unread_hashes)
 					if (!handler.excludedStreams().contains(APIHelper.getFeedUrlFromFeedId(h)))
@@ -124,9 +118,6 @@ public class NewsBlurPlus extends ReaderExtension {
 				Log.e("NewsBlur+ Debug", "Unknown reading state: " + uid);
 				throw new ReaderException("Unknown reading state");
 			}
-			
-			Log.w("NewsBlur+ debug", "Hashes: " + Arrays.toString(hashes.toArray()));
-			Log.w("NewsBlur+ debug", "chunk: " + String.valueOf(chunk));
 				
 			for (int start=0; start < hashes.size(); start += chunk) {
 				APICall ac = new APICall(url, c);

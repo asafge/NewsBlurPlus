@@ -52,7 +52,7 @@ public class APIHelper {
 					feeds.add(APIHelper.getFeedIdFromFeedUrl(sub.uid));
 			}
 			APICall ac = new APICall(APICall.API_URL_UNREAD_HASHES, c);
-			ac.addGetParams("feed_id", feeds);
+			//ac.addGetParams("feed_id", feeds);
 			ac.sync();
 			JSONObject json_feeds = ac.Json.getJSONObject("unread_feed_story_hashes");
 			Iterator<?> keys = json_feeds.keys();
