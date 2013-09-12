@@ -43,17 +43,16 @@ public class APIHelper {
 	}
 	
 	// Get all the unread story hashes at once
+	// Note: There's a limit on how many feeds you can pass, as these are get params and NewsBlur API has a limit on URL lengths. 
 	public static List<String> getUnreadHashes(Context c, int limit, List<String> feeds, RotateQueue<String> seenHashes) throws ReaderException {
 		try {
 			List<String> hashes = new ArrayList<String>();
-			if (feeds == null) {
-				feeds = new ArrayList<String>();
-				for (ISubscription sub : SubsStruct.InstanceRefresh(c).Subs)
-					feeds.add(APIHelper.getFeedIdFromFeedUrl(sub.uid));
-			}
+
 			APICall ac = new APICall(APICall.API_URL_UNREAD_HASHES, c);
-			//ac.addGetParams("feed_id", feeds);
+			if (feeds != null) 
+				ac.addGetParams("feed_id", feeds);
 			ac.sync();
+			
 			JSONObject json_feeds = ac.Json.getJSONObject("unread_feed_story_hashes");
 			Iterator<?> keys = json_feeds.keys();
 			while (keys.hasNext()) {
