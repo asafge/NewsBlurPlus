@@ -24,6 +24,7 @@
 	<string name="login_welcome">Please login to NewsBlur to continue:</string>
 	<string name="txt_start_app">Start News+</string>
     <string name="txt_download_app">Download News+</string>
+    <string name="txt_feedback">Feedback</string>
     
     <!-- Errors -->
     <string name="err_io">Network error</string>

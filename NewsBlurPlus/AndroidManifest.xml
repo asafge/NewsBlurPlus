@@ -11,6 +11,8 @@
 
 	<uses-permission android:name="android.permission.INTERNET" />
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+	<uses-permission android:name="android.permission.READ_LOGS"/>
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 		
 	<application android:label="@string/app_name" android:icon="@drawable/ic_launcher" android:allowBackup="true" android:theme="@style/Theme.Sherlock.Light">
 
@@ -37,6 +39,8 @@
         <activity android:name="com.asafge.newsblurplus.LoginActivity"
             android:label="@string/extension_login_title"
             android:exported="true" android:theme="@style/Theme.Sherlock.Light.Dialog" />
+        
+        <activity android:name=".SendLogActivity" android:theme="@style/Theme.Sherlock.Light.Dialog" />
         		
 	</application>
 
