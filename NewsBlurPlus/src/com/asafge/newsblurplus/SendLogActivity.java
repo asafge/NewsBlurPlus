@@ -29,7 +29,7 @@ public class SendLogActivity extends Activity {
 	public final static String	TAG						= "SendLogActivity";												//$NON-NLS-1$
 
 	public static final String	APP_PACKAGE				= "com.noinnion.android.newsplus.extension.google_reader";			//$NON-NLS-1$
-	public static final String	APP_EMAIL				= "noinnion@gmail.com";												//$NON-NLS-1$
+	public static final String	APP_EMAIL				= "asafge@gmail.com";												//$NON-NLS-1$
 
 	// directories
 	public static final String	APP_DIRECTORY			= "/NewsPlus/";
@@ -60,17 +60,10 @@ public class SendLogActivity extends Activity {
 		super.onCreate(savedInstanceState);
 
 		mSendIntent = null;
-
 		boolean extraSendLog = false;
-		boolean extraFeatureRequest = false;
-		boolean extraBugReport = false;
-
 		Intent intent = getIntent();
-		if (null != intent){
+		if (null != intent)
 			extraSendLog = intent.getBooleanExtra(EXTRA_SEND_LOG, false);
-			extraFeatureRequest = intent.getBooleanExtra(EXTRA_FEATURE_REQUEST, false);
-			extraBugReport = intent.getBooleanExtra(EXTRA_BUG_REPORT, false);
-		}
 
 		// init
 		mFilterSpecs = new String[] { "*:W" };
@@ -94,8 +87,6 @@ public class SendLogActivity extends Activity {
 			mAdditonalInfo = "";
 			mAdditonalInfo += "\n\n";
 			mAdditonalInfo += infoFormat.format(new String[] { version , Build.MODEL, Build.VERSION.RELEASE, getFormattedKernelVersion(), Build.DISPLAY });
-//            mAdditonalInfo = getString(R.string.log_device_info_fmt, getVersionNumber(this), Build.MODEL, Build.VERSION.RELEASE, getFormattedKernelVersion(), Build.DISPLAY);
-
 			mFormat = "time";
 		}
 
