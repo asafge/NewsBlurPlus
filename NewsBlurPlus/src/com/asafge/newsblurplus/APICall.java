@@ -1,6 +1,7 @@
 package com.asafge.newsblurplus;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.json.JSONException;
@@ -102,8 +103,8 @@ public class APICall {
 			Status = callback.getStatus();
 			if (Json == null) {
 				Log.e("NewsBlur+ Debug", "URL: " + callbackUrl);
-				Log.e("NewsBlur+ Debug", "Status: " + Status.toString());
-				Log.e("NewsBlur+ Debug", "JSON Object: " + Prefs.getSessionID(aquery.getContext()));
+				Log.e("NewsBlur+ Debug", "Status: " + Status.getMessage() + " | " + String.valueOf(Status.getCode()));
+				Log.e("NewsBlur+ Debug", "Session ID: " + Arrays.toString(Prefs.getSessionID(aquery.getContext())));
 				throw new ReaderException("NewsBlur server unreachable");
 			}
 			if ((!Json.getString("authenticated").startsWith("true")) || (Status.getCode() != 200))
