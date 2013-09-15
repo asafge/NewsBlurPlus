@@ -9,7 +9,6 @@ import android.widget.Button;
 
 import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.noinnion.android.reader.api.util.Utils;
 
@@ -57,8 +56,7 @@ public class WelcomeActivity extends SherlockActivity implements OnClickListener
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		MenuInflater inflater = getSupportMenuInflater();
-	    inflater.inflate(R.menu.welcome, menu);
+		getSupportMenuInflater().inflate(R.menu.welcome, menu);
 		return true;
 	}
 
