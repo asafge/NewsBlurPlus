@@ -94,7 +94,7 @@ public class SubsStruct {
 						sub.htmlUrl = f.getString("feed_link");
 						sub.unreadCount = f.getInt("nt") + f.getInt("ps");
 						if (!TextUtils.isEmpty(catName))
-							sub.addCategory(cat.uid);
+							sub.addTag(cat.uid);
 						Subs.add(sub);
 					}
 				}

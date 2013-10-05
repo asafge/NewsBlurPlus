@@ -156,7 +156,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				item.content = story.getString("story_content");
 				item.starred = (story.has("starred") && story.getString("starred") == "true");
 				if (item.starred)
-					item.addCategory(StarredTag.get().uid);
+					item.addTag(StarredTag.get().uid);
 				items.add(item);
 				seenHashes.AddElement(item.uid);
 				
@@ -250,7 +250,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			}
 			else if (s.startsWith("FOL:")) {
 				for (ISubscription sub : SubsStruct.Instance(c).Subs)
-					if (!excluded.contains(sub.uid) && sub.getCategories().contains(s))
+					if (!excluded.contains(sub.uid) && sub.getTags().contains(s))
 						subUIDs.add(APIHelper.getFeedIdFromFeedUrl(sub.uid));
 				return subUIDs.isEmpty() ? false : this.markAs(true, null, subUIDs.toArray(new String[0]));
 			}
@@ -312,7 +312,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			return false;
 		else {
 			for (ISubscription sub : SubsStruct.Instance(c).Subs)
-				if ((sub.getCategories().contains(label) && !APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(sub.uid), label, "")))
+				if ((sub.getTags().contains(label) && !APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(sub.uid), label, "")))
 					return false;
 			APICall ac = new APICall(APICall.API_URL_FOLDER_DEL, c);
 			ac.addPostParam("folder_to_delete", label);
