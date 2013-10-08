@@ -17,6 +17,7 @@ Features
 
 References
 -------------------------------
+* Playstore listring - https://play.google.com/store/apps/details?id=com.asafge.newsblurplus
 * News+ - https://github.com/noinnion/newsplus
 * NewsBlur API - http://www.newsblur.com/api
 * ActionBarSherlock - http://actionbarsherlock.com/
