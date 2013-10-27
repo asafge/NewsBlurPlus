@@ -179,7 +179,6 @@ public class NewsBlurPlus extends ReaderExtension {
 		}
 	}
 	
-	
 	/*
 	 * Main function for marking stories (and their feeds) as read/unread.
 	 */
@@ -210,7 +209,6 @@ public class NewsBlurPlus extends ReaderExtension {
 		}
 		return ac.syncGetResultOk();
 	}
-	
 
 	/* 
 	 * Mark a list of stories (and their feeds) as read
@@ -220,7 +218,6 @@ public class NewsBlurPlus extends ReaderExtension {
 		return markAs(true, itemUids, subUIds);
 	}
 	
-
 	/* 
 	 * Mark a list of stories (and their feeds) as unread
 	 */
@@ -258,32 +255,33 @@ public class NewsBlurPlus extends ReaderExtension {
 		}
 	}
 	
-
 	/*
 	 * Edit an item's tag - currently supports only starring/unstarring items
 	 */
 	@Override
-	public boolean editItemTag(String[] itemUids, String[] subUids, String[] addTags, String[] removeTags) throws ReaderException {
+	public boolean editItemTag(String[] itemUids, String[] subUids, String[] tags, int action) throws ReaderException {
 		for (int i=0; i<itemUids.length; i++) {
-			String url;
-			if ((addTags != null) && addTags[i].startsWith(StarredTag.get().uid)) {
-				url = APICall.API_URL_MARK_STORY_AS_STARRED;
+			if (tags[i].startsWith(StarredTag.get().uid)) {
+				String url;
+				switch(action) {
+					case ReaderExtension.ACTION_ITEM_TAG_ADD_LABEL:
+						url = APICall.API_URL_MARK_STORY_AS_STARRED;
+						break;
+					case ReaderExtension.ACTION_ITEM_TAG_REMOVE_LABEL:
+						url = APICall.API_URL_MARK_STORY_AS_UNSTARRED;
+						break;
+					default:
+						throw new ReaderException("Unsupported tag type");
+				}
+				APICall ac = new APICall(url, c);
+				ac.addPostParam("story_id", itemUids[i]);
+				ac.addPostParam("feed_id", APIHelper.getFeedIdFromFeedUrl(subUids[i]));
+				if (!ac.syncGetResultOk())
+					return false;
 			}
-			else if ((removeTags != null) && removeTags[i].startsWith(StarredTag.get().uid)) {
-				url = APICall.API_URL_MARK_STORY_AS_UNSTARRED;
-			}
-			else {
-				throw new ReaderException("Unsupported tag type");
-			}
-			APICall ac = new APICall(url, c);
-			ac.addPostParam("story_id", itemUids[i]);
-			ac.addPostParam("feed_id", APIHelper.getFeedIdFromFeedUrl(subUids[i]));
-			if (!ac.syncGetResultOk())
-				return false;
 		}
 		return true;
 	}
-	
 
 	/*
 	 * Rename a top level folder both in News+ and in NewsBlur server
@@ -300,7 +298,6 @@ public class NewsBlurPlus extends ReaderExtension {
 			return ac.syncGetResultOk();
 		}
 	}
-	
 	
 	/*
 	 * Delete a top level folder both in News+ and in NewsBlur server
@@ -320,44 +317,43 @@ public class NewsBlurPlus extends ReaderExtension {
 		}
 	}
 	
-	
 	/*
 	 * Main function for editing subscriptions - add/delete/rename/change-folder
 	 */	
 	@Override
-	public boolean editSubscription(String uid, String title, String feed_url, String[] tags, int action, long syncTime) throws ReaderException {
+	public boolean editSubscription(String uid, String title, String feed_url, String[] tags, int action) throws ReaderException {
 		switch (action) {
 			// Feed - add/delete/rename
-			case ReaderExtension.SUBSCRIPTION_ACTION_SUBCRIBE: {
+			case ReaderExtension.ACTION_SUBSCRIPTION_SUBCRIBE: {
 				APICall ac = new APICall(APICall.API_URL_FEED_ADD, c);
 				ac.addPostParam("url", feed_url);
 				return ac.syncGetResultOk() && SubsStruct.Instance(c).Refresh();
 			}
-			case ReaderExtension.SUBSCRIPTION_ACTION_UNSUBCRIBE: {
+			case ReaderExtension.ACTION_SUBSCRIPTION_UNSUBCRIBE: {
 				String feedID = APIHelper.getFeedIdFromFeedUrl(uid);
 				APIHelper.clearUnsubscribedHashes(c, feedID);
 				APICall ac = new APICall(APICall.API_URL_FEED_DEL, c);
 				ac.addPostParam("feed_id", feedID);
 				return ac.syncGetResultOk() && SubsStruct.Instance(c).Refresh();
 			}
-			case ReaderExtension.SUBSCRIPTION_ACTION_EDIT: {
+			case ReaderExtension.ACTION_SUBSCRIPTION_EDIT: {
 				APICall ac = new APICall(APICall.API_URL_FEED_RENAME, c);
 				ac.addPostParam("feed_id", APIHelper.getFeedIdFromFeedUrl(uid));
 				ac.addPostParam("feed_title", title);
 				return ac.syncGetResultOk();
 			}
 			// Feed's parent folder - new_folder/add_to_folder/delete_from_folder
-			case ReaderExtension.SUBSCRIPTION_ACTION_NEW_LABEL: {
+			case ReaderExtension.ACTION_SUBSCRIPTION_NEW_LABEL: {
 				APICall ac = new APICall(APICall.API_URL_FOLDER_ADD, c);
 				String newTag = tags[0].replace("FOL:", "");
 				ac.addPostParam("folder", newTag);
 				return ac.syncGetResultOk();
 			}
-			case ReaderExtension.SUBSCRIPTION_ACTION_ADD_LABEL: {
+			case ReaderExtension.ACTION_SUBSCRIPTION_ADD_LABEL: {
 				String newTag = tags[0].replace("FOL:", "");
 				return APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(uid), "", newTag);
 			}
-			case ReaderExtension.SUBSCRIPTION_ACTION_REMOVE_LABEL: {
+			case ReaderExtension.ACTION_SUBSCRIPTION_REMOVE_LABEL: {
 				String newTag = tags[0].replace("FOL:", "");
 				return APIHelper.moveFeedToFolder(c, APIHelper.getFeedIdFromFeedUrl(uid), newTag, "");
 			}
