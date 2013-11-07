@@ -1,4 +1,4 @@
-NewsBlur+ (1.4.1)
+NewsBlur+ (1.4.3)
 =================
 
 A News+ (gReader branch) extension for the NewsBlur RSS reading service.
