@@ -83,7 +83,15 @@ public class SubsStruct {
 				// Add all feeds in this category
 				for (int i=0; i<feedsPerFolder.length(); i++) {
 					String feedID = feedsPerFolder.getString(i);
-					JSONObject f = json_feeds.getJSONObject(feedID);
+                    JSONObject f;
+                    try {
+					    f = json_feeds.getJSONObject(feedID);
+                    }
+                    catch (JSONException e) {
+                        // Sometimes NewsBlue's API returns old feeds
+                        Log.w("NewsBlur+ Debug", "JSONException: " + e.getMessage());
+                        continue;
+                    }
 					if (f.getBoolean("active")) {
 						ISubscription sub = new ISubscription();
 						Calendar updateTime = Calendar.getInstance();
