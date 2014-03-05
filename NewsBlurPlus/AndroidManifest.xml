@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 	package="com.asafge.newsblurplus" android:installLocation="auto"
-	android:versionCode="8" android:versionName="1.4.4">
+	android:versionCode="10" android:versionName="1.4.6">
 
 	<uses-sdk android:minSdkVersion="8" android:targetSdkVersion="20" />
 	
@@ -37,11 +37,14 @@
 			<meta-data android:name="protocolVersion" android:value="1" />
 			<meta-data android:name="description" android:value="@string/extension_description" />
 			<meta-data android:name="loginActivity" android:value=".LoginActivity" />
+            <meta-data android:name="settingsActivity" android:value=".SettingsActivity" />
 		</service>
         		
         <activity android:name="com.asafge.newsblurplus.LoginActivity"
             android:label="@string/extension_login_title"
             android:exported="true" android:theme="@style/Theme.Sherlock.Light.Dialog" />
+
+        <activity android:name=".SettingsActivity" android:exported="true" />
         
         <activity android:name=".SendLogActivity" android:theme="@style/Theme.Sherlock.Light.Dialog" />
         		
