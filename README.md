@@ -1,9 +1,7 @@
-NewsBlur+ (1.4.3)
+NewsBlur+ (1.4.6)
 =================
 
-A News+ (gReader branch) extension for the NewsBlur RSS reading service.
-Still in early stages - would love to hear about bugs/issues if you encounter any.
-
+A News+ extension for the NewsBlur RSS reading service.
 Note: This app is designed to work with premium NewsBlur accounts.
 
 Features
