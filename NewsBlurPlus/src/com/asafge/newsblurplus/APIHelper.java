@@ -73,10 +73,12 @@ public class APIHelper {
 			throw new ReaderException("GetUnreadHashes parse error", e);
 		}
 	}
-	
+
 	// Clear the hashes list from items from a specific feed
-	public static void clearUnsubscribedHashes(Context c, String feedID) {
-		RotateQueue<String> seenHashes = new RotateQueue<String>(1000, Prefs.getHashesList(c));
+	public static void clearUnsubscribedHashes(Context c, String feedID, RotateQueue<String> seenHashes) {
+        if (seenHashes == null) {
+            return;
+        }
 		List<String> remove = new ArrayList<String>();
 		for (String h : seenHashes.Elements)
 			if (h.startsWith(feedID))

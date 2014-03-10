@@ -9,10 +9,10 @@ import android.text.TextUtils;
  * A data structure for holding N objects in a list, discarding the last one when it fills up.
  * Elements should allow serialization to/from Strings.
  */
-public class RotateQueue<E> {
+public class  RotateQueue<E> {
 	public List<E> Elements;
 	public int Capacity;
-	
+
 	@SuppressWarnings("unchecked")
 	public RotateQueue(int capacity, String serialized) {
 		Elements = new ArrayList<E>(capacity);
@@ -23,22 +23,23 @@ public class RotateQueue<E> {
 				if (!TextUtils.isEmpty(v))
 					this.AddElement((E)v);
 		}
-		return;
 	}
 	
-	public void AddElement(E value) {
-		if (Capacity == Elements.size())
-			Elements.remove(0);
-		if (!this.SearchElement(value))
+	public synchronized void AddElement(E value) {
+		if (Capacity == Elements.size()) {
+            Elements = Elements.subList(100, Capacity);
+        }
+		if (!this.SearchElement(value)) {
 			Elements.add(value);
+        }
 	}
 	
-	public boolean SearchElement(E value) {
+	public synchronized boolean SearchElement(E value) {
 		return Elements.contains(value);
 	}
 	
 	@Override
-	public String toString() {
+	public synchronized String toString() {
 		StringBuilder sb = new StringBuilder();
 		for (E element : Elements)
 			sb.append(element.toString()).append(",");

@@ -23,6 +23,7 @@ import com.noinnion.android.reader.api.provider.ISubscription;
 
 public class NewsBlurPlus extends ReaderExtension {
 	private Context c;
+    private RotateQueue<String> seenHashes;
 	
 	/*
 	 * Constructor
@@ -98,8 +99,10 @@ public class NewsBlurPlus extends ReaderExtension {
 			// Load the seen hashes from prefs
 			if (uid.startsWith(ReaderExtension.STATE_READING_LIST) && (handler.startTime() <= 0))
 				Prefs.setHashesList(c, "");
-			RotateQueue<String> seenHashes = new RotateQueue<String>(1000, Prefs.getHashesList(c));
-					
+            if ((this.seenHashes == null) || (this.seenHashes.Capacity < limit)) {
+                this.seenHashes = new RotateQueue<String>(limit, Prefs.getHashesList(c));
+            }
+
 			if (uid.startsWith(ReaderExtension.STATE_STARRED)) {
 				hashes = APIHelper.getStarredHashes(c, limit, seenHashes);
 				url = APICall.API_URL_STARRED_STORIES;
@@ -331,7 +334,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			}
 			case ReaderExtension.ACTION_SUBSCRIPTION_UNSUBCRIBE: {
 				String feedID = APIHelper.getFeedIdFromFeedUrl(uid);
-				APIHelper.clearUnsubscribedHashes(c, feedID);
+				APIHelper.clearUnsubscribedHashes(c, feedID, this.seenHashes);
 				APICall ac = new APICall(APICall.API_URL_FEED_DEL, c);
 				ac.addPostParam("feed_id", feedID);
 				return ac.syncGetResultOk() && SubsStruct.Instance(c).Refresh();
