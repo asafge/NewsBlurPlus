@@ -105,6 +105,7 @@ public class APICall {
 				Log.e("NewsBlur+ Debug", "URL: " + callbackUrl);
 				Log.e("NewsBlur+ Debug", "Status: " + Status.getMessage() + " | " + String.valueOf(Status.getCode()));
 				Log.e("NewsBlur+ Debug", "Session ID: " + Arrays.toString(Prefs.getSessionID(aquery.getContext())));
+				Log.e("NewsBlur+ Debug", "User-Agent: " + Prefs.USER_AGENT);
 				throw new ReaderException("NewsBlur server unreachable");
 			}
 			if ((!Json.getString("authenticated").startsWith("true")) || (Status.getCode() != 200))
