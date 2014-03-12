@@ -21,17 +21,17 @@ public class  RotateQueue<E> {
 			String[] values = serialized.split(",", capacity);
 			for (String v : values)
 				if (v.trim().length() != 0)
-					this.AddElement((E)v);
+					this.addElement((E) v);
 		}
 	}
 
     // Add a new element to the queue, clean-up old elements if needed
-	public synchronized void AddElement(E value) {
+	public synchronized void addElement(E value) {
 		if (Capacity == Elements.size()) {
             int deleteUntil = (int)Math.ceil(Capacity * FREE_SIZE);
             Elements = Elements.subList(deleteUntil, Capacity);
         }
-		if (!this.SearchElement(value)) {
+		if (!this.searchElement(value)) {
 			Elements.add(value);
         }
 	}
@@ -42,7 +42,7 @@ public class  RotateQueue<E> {
     }
 
     // Search an element by value
-	public synchronized boolean SearchElement(E value) {
+	public synchronized boolean searchElement(E value) {
 		return Elements.contains(value);
 	}
 	

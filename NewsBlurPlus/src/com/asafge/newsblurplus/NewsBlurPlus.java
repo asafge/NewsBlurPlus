@@ -157,7 +157,7 @@ public class NewsBlurPlus extends ReaderExtension {
 				if (item.starred)
 					item.addTag(StarredTag.get().uid);
 				items.add(item);
-				seenHashes.AddElement(item.uid);
+				seenHashes.addElement(item.uid);
 				
 				length += item.getLength();
 				if (items.size() % 200 == 0 || length > 300000) {

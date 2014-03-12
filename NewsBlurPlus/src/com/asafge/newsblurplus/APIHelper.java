@@ -61,7 +61,7 @@ public class APIHelper {
 				JSONArray items = json_feeds.getJSONArray(feedID);
 				for (int i=0; i<items.length() && i<limit; i++) {
 					String hash = items.getString(i);
-					if (seenHashes == null || !seenHashes.SearchElement(hash))
+					if (seenHashes == null || !seenHashes.searchElement(hash))
 						hashes.add(hash);
 				}
 				limit -= items.length();
@@ -96,7 +96,7 @@ public class APIHelper {
 			JSONArray items = ac.Json.getJSONArray("starred_story_hashes");
 			for (int i=0; i<items.length() && i<limit; i++) {
 				String hash = items.getString(i);
-				if (seenHashes == null || !seenHashes.SearchElement(hash))
+				if (seenHashes == null || !seenHashes.searchElement(hash))
 					hashes.add(hash);
 			}
 			return hashes;
