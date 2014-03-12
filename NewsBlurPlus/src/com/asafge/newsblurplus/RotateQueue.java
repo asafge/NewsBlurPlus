@@ -27,7 +27,8 @@ public class  RotateQueue<E> {
 	
 	public synchronized void AddElement(E value) {
 		if (Capacity == Elements.size()) {
-            Elements = Elements.subList(100, Capacity);
+            int deleteFrom = (int)Math.ceil(Capacity * 0.05);
+            Elements = Elements.subList(deleteFrom, Capacity);
         }
 		if (!this.SearchElement(value)) {
 			Elements.add(value);
