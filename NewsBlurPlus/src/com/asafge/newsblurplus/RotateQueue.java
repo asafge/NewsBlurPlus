@@ -28,7 +28,7 @@ public class  RotateQueue<E> {
     // Add a new element to the queue, clean-up old elements if needed
 	public synchronized void AddElement(E value) {
 		if (Capacity == Elements.size()) {
-            int deleteUntil = (int)Math.floor(Capacity * FREE_SIZE);
+            int deleteUntil = (int)Math.ceil(Capacity * FREE_SIZE);
             Elements = Elements.subList(deleteUntil, Capacity);
         }
 		if (!this.SearchElement(value)) {
