@@ -37,7 +37,7 @@ public class APICall {
 	private String callbackUrl;
 	
 	// Constructor
-	public APICall(String url,  Context c) {
+	public APICall(String url, Context c) {
 		aquery = new AQuery(c);
 		createCallback(url, c);
 	}
@@ -127,7 +127,7 @@ public class APICall {
 		catch (JSONException e) {
 			Log.e("NewsBlur+ Debug", "JSON Object: " + Json.toString());
 			throw new ReaderException("Unknown API response");
-		}		
+        }
 	}
 	
 	// API constants
