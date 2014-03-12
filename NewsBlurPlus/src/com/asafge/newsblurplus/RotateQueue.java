@@ -36,6 +36,11 @@ public class  RotateQueue<E> {
         }
 	}
 
+    // Remove a list of elements from the queue
+    public synchronized void removeAll(ArrayList<E> elements) {
+        Elements.removeAll(elements);
+    }
+
     // Search an element by value
 	public synchronized boolean SearchElement(E value) {
 		return Elements.contains(value);

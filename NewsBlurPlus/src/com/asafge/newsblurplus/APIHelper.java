@@ -79,11 +79,11 @@ public class APIHelper {
         if (seenHashes == null) {
             return;
         }
-		List<String> remove = new ArrayList<String>();
+		ArrayList<String> remove = new ArrayList<String>();
 		for (String h : seenHashes.Elements)
 			if (h.startsWith(feedID))
 				remove.add(h);
-		seenHashes.Elements.removeAll(remove);
+		seenHashes.removeAll(remove);
 		Prefs.setHashesList(c, seenHashes.toString());
 	}
 	
