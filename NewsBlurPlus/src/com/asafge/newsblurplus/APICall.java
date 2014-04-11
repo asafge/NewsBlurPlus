@@ -131,7 +131,7 @@ public class APICall {
 	}
 	
 	// API constants
-	public static String API_URL_BASE = "http://www.newsblur.com/";
+	public static String API_URL_BASE = "https://www.newsblur.com/";
 	public static String API_URL_BASE_SECURE = "https://www.newsblur.com/";
 	public static String API_URL_LOGIN = API_URL_BASE_SECURE + "api/login/";
 	
