@@ -65,7 +65,7 @@ public class NewsBlurPlus extends ReaderExtension {
 			int limit = handler.limit();
 			String uid = handler.stream();
 			
-			if (uid.startsWith(ReaderExtension.STATE_STARRED))
+			if (uid.startsWith(ReaderExtension.STATE_STARRED) || uid.startsWith("STAR:Starred items"))
 				handler.items(APIHelper.getStarredHashes(c, limit, null));
 			else if (uid.startsWith(ReaderExtension.STATE_READING_LIST)) {
 				List<String> hashes = APIHelper.getUnreadHashes(c, limit, null, null);
@@ -103,7 +103,7 @@ public class NewsBlurPlus extends ReaderExtension {
                 this.seenHashes = new RotateQueue<String>(limit, Prefs.getHashesList(c));
             }
 
-			if (uid.startsWith(ReaderExtension.STATE_STARRED)) {
+			if (uid.startsWith(ReaderExtension.STATE_STARRED) || uid.startsWith("STAR:Starred items")) {
 				hashes = APIHelper.getStarredHashes(c, limit, seenHashes);
 				url = APICall.API_URL_STARRED_STORIES;
 			}
