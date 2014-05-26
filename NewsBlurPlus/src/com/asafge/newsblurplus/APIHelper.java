@@ -173,8 +173,19 @@ public class APIHelper {
 	public static String getFeedUrlFromFeedId(String feedID) {
 		if (feedID.contains(":"))
 			feedID = feedID.split(":")[0];
-		return "FEED:" + APICall.API_URL_RIVER + "?feeds=" + feedID;
+
+        return "FEED:" + APICall.API_URL_RIVER + "?feeds=" + feedID;
 	}
+
+    // Make sure the user is subscribed to this feed
+    public static boolean isSubscribedToFeed(Context c, String feedID) throws ReaderException {
+        for (ISubscription sub : SubsStruct.Instance(c).Subs) {
+            if (sub.uid.equals(feedID)) {
+                return true;
+            }
+        }
+        return false;
+    }
 	
 	// Get the feed ID from a given URL
 	public static String getFeedIdFromFeedUrl(String feedURL) {
