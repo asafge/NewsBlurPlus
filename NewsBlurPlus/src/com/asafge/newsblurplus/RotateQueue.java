@@ -17,7 +17,7 @@ public class  RotateQueue<E> {
 	public RotateQueue(int capacity, String serialized) {
 		Elements = new ArrayList<E>(capacity);
 		Capacity = capacity;
-		if (serialized.trim().length() != 0) {
+		if ((serialized != null) && (capacity > 0) && (serialized.trim().length() != 0)) {
 			String[] values = serialized.split(",", capacity);
 			for (String v : values)
 				if (v.trim().length() != 0)
